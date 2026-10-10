@@ -33,6 +33,16 @@
 
   --forest-dark: #062817;
 
+  /* Aliases for JavaScript and utility bindings */
+  --amber-primary: var(--yellow-solar);
+  --amber-bright: var(--yellow-solar);
+  --amber-glow: var(--yellow-glow);
+  --amber-surface: var(--yellow-surface);
+  --iris-primary: var(--emerald-primary);
+  --iris-bright: var(--emerald-bright);
+  --iris-glow: var(--emerald-glow);
+  --iris-surface: var(--emerald-surface);
+
   /* Typography Scales */
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;

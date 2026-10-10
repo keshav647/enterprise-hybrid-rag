@@ -129,7 +129,7 @@ function bindEventListeners() {
     if (state.lastSearchResponse) {
       navigator.clipboard.writeText(state.lastSearchResponse.answer);
       const btn = document.getElementById("btnCopyAnswer");
-      btn.style.color = "var(--amber-bright)";
+      btn.style.color = "var(--yellow-solar)";
       setTimeout(() => { btn.style.color = ""; }, 1200);
     }
   });
@@ -224,7 +224,7 @@ function renderDocumentContent(data) {
     header.style.fontSize = "0.72rem";
     header.style.color = "var(--text-muted)";
     header.style.marginBottom = "8px";
-    header.innerHTML = `<span><strong style="color: var(--amber-bright)">${chunk.section_title}</strong> &bull; Page ${chunk.page_number || 1}</span><span style="font-family: var(--font-mono)">${chunk.chunk_id}</span>`;
+    header.innerHTML = `<span><strong style="color: var(--yellow-solar)">${chunk.section_title}</strong> &bull; Page ${chunk.page_number || 1}</span><span style="font-family: var(--font-mono)">${chunk.chunk_id}</span>`;
 
     const body = document.createElement("div");
     body.innerHTML = formatMarkdown(chunk.metadata.raw_text || chunk.content);
@@ -400,15 +400,15 @@ function updateHUD(data) {
 
   if (data.cache_hit) {
     hudCacheStatus.textContent = "CACHE HIT";
-    hudCacheStatus.style.color = "var(--amber-bright)";
+    hudCacheStatus.style.color = "var(--yellow-solar)";
     indicatorCache.textContent = "<25ms";
-    indicatorCache.style.color = "var(--amber-bright)";
+    indicatorCache.style.color = "var(--yellow-solar)";
     hudCacheCost.textContent = `$${data.estimated_cost_saved_usd.toFixed(6)} saved`;
   } else {
     hudCacheStatus.textContent = "MISS (LIVE)";
-    hudCacheStatus.style.color = "var(--iris-bright)";
+    hudCacheStatus.style.color = "var(--emerald-bright)";
     indicatorCache.textContent = "STORED";
-    indicatorCache.style.color = "var(--iris-bright)";
+    indicatorCache.style.color = "var(--emerald-bright)";
     hudCacheCost.textContent = "Indexed in Redis";
   }
 
@@ -450,7 +450,7 @@ async function fetchPipelineDetails(query) {
       <div class="timing-chip">BM25 Sparse: <strong>${rawData.timings_ms.bm25}ms</strong></div>
       <div class="timing-chip">RRF Fusion (k=60): <strong>${rawData.timings_ms.rrf}ms</strong></div>
       <div class="timing-chip">Cross-Encoder Re-Rank: <strong>${rawData.timings_ms.rerank}ms</strong></div>
-      <div class="timing-chip" style="border-color: var(--amber-primary)">Total Pipeline: <strong>${rawData.timings_ms.total}ms</strong></div>
+      <div class="timing-chip" style="border-color: var(--yellow-solar)">Total Pipeline: <strong>${rawData.timings_ms.total}ms</strong></div>
     `;
 
     pipelineTables.innerHTML = `
@@ -470,12 +470,12 @@ async function fetchPipelineDetails(query) {
             .map(
               (item) => `
             <tr>
-              <td><code style="color: var(--amber-bright)">${item.chunk_id}</code></td>
+              <td><code style="color: var(--yellow-solar)">${item.chunk_id}</code></td>
               <td>${item.document_title}</td>
               <td>${item.dense_rank !== null ? `#${item.dense_rank}` : "&mdash;"}</td>
               <td>${item.bm25_rank !== null ? `#${item.bm25_rank}` : "&mdash;"}</td>
-              <td style="font-family: var(--font-mono); color: var(--iris-bright)">${item.rrf_score.toFixed(4)}</td>
-              <td style="font-family: var(--font-mono); color: var(--amber-bright)"><strong>${item.score.toFixed(4)}</strong></td>
+              <td style="font-family: var(--font-mono); color: var(--emerald-bright)">${item.rrf_score.toFixed(4)}</td>
+              <td style="font-family: var(--font-mono); color: var(--yellow-solar)"><strong>${item.score.toFixed(4)}</strong></td>
             </tr>
           `
             )
