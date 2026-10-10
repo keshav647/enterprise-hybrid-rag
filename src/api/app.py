@@ -8,7 +8,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from src.config import settings, DOCUMENTS_DIR, STATIC_DIR, UI_INDEX_PATH
+from src.config import (
+    settings,
+    DOCUMENTS_DIR,
+    STATIC_DIR,
+    UI_INDEX_PATH,
+    UI_DOCUMENTS_PATH,
+    UI_ANALYTICS_PATH,
+    UI_SETTINGS_PATH,
+)
 from src.schemas.models import DocumentMetadata
 from src.ingestion.chunker import ContextualChunker
 from src.ingestion.document_loader import DocumentLoader
@@ -109,18 +117,31 @@ def create_app() -> FastAPI:
     if STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-    # Serve UI at root and deep-linked page paths
+    # Distinct Multi-Page HTML File Endpoints
     @app.get("/", include_in_schema=False)
     @app.get("/search", include_in_schema=False)
-    @app.get("/documents", include_in_schema=False)
-    @app.get("/analytics", include_in_schema=False)
-    @app.get("/settings", include_in_schema=False)
-    async def serve_ui():
+    async def serve_search_page():
         if UI_INDEX_PATH.exists():
             return FileResponse(str(UI_INDEX_PATH))
-        return {
-            "message": "Enterprise Hybrid Search API is running. UI not built yet. Access /docs for API documentation."
-        }
+        return {"message": "Search UI not found"}
+
+    @app.get("/documents", include_in_schema=False)
+    async def serve_documents_page():
+        if UI_DOCUMENTS_PATH.exists():
+            return FileResponse(str(UI_DOCUMENTS_PATH))
+        return FileResponse(str(UI_INDEX_PATH))
+
+    @app.get("/analytics", include_in_schema=False)
+    async def serve_analytics_page():
+        if UI_ANALYTICS_PATH.exists():
+            return FileResponse(str(UI_ANALYTICS_PATH))
+        return FileResponse(str(UI_INDEX_PATH))
+
+    @app.get("/settings", include_in_schema=False)
+    async def serve_settings_page():
+        if UI_SETTINGS_PATH.exists():
+            return FileResponse(str(UI_SETTINGS_PATH))
+        return FileResponse(str(UI_INDEX_PATH))
 
     return app
 

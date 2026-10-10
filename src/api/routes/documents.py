@@ -37,6 +37,7 @@ async def get_document(doc_id: str) -> Dict[str, Any]:
 
 
 @router.post("/api/v1/ingest", response_model=DocumentMetadata)
+@router.post("/api/v1/documents/ingest", response_model=DocumentMetadata)
 async def ingest_document(req: IngestRequest):
     """Dynamically parses, chunks, and indexes a new document into both Dense and BM25 systems."""
     from src.api.app import app_state

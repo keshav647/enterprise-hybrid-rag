@@ -10,7 +10,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 DOCUMENTS_DIR = DATA_DIR / "documents"
 STATIC_DIR = BASE_DIR / "src" / "ui" / "static"
-UI_INDEX_PATH = BASE_DIR / "src" / "ui" / "index.html"
+UI_DIR = BASE_DIR / "src" / "ui"
+UI_INDEX_PATH = UI_DIR / "index.html"
+UI_DOCUMENTS_PATH = UI_DIR / "documents.html"
+UI_ANALYTICS_PATH = UI_DIR / "analytics.html"
+UI_SETTINGS_PATH = UI_DIR / "settings.html"
 
 
 class Settings(BaseModel):

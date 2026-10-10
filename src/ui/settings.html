@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synapse // AI Models & Keys</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <div class="mesh-background">
+    <div class="dot-grid"></div>
+    <div class="glow-orb orb-amber"></div>
+    <div class="glow-orb orb-iris"></div>
+    <div class="glow-orb orb-rose"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Top Bar Navigation -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-crest">
+          <div class="crest-inner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5"></path>
+              <path d="M2 12l10 5 10-5"></path>
+            </svg>
+          </div>
+          <div class="crest-glow"></div>
+        </div>
+        <div class="brand-typography">
+          <div class="brand-title">
+            <span>SYNAPSE</span>
+            <span class="edition-pill">SETTINGS</span>
+          </div>
+          <div class="brand-meta">Model Providers &bull; API Key Configuration &bull; Zero-Drain Fallback</div>
+        </div>
+      </div>
+
+      <nav class="header-nav">
+        <a href="/" class="nav-tab-btn">
+          <span>🔍</span>
+          <span>Search &amp; Answers</span>
+        </a>
+        <a href="/documents" class="nav-tab-btn">
+          <span>📚</span>
+          <span>Document Library</span>
+        </a>
+        <a href="/analytics" class="nav-tab-btn">
+          <span>📊</span>
+          <span>Accuracy &amp; Metrics</span>
+        </a>
+        <a href="/settings" class="nav-tab-btn active">
+          <span>⚙️</span>
+          <span>AI Models &amp; Keys</span>
+        </a>
+      </nav>
+
+      <div class="header-hud-pills">
+        <div class="hud-pill hud-pill-cache" id="cacheStatusBadge">
+          <div class="cache-spark">⚡</div>
+          <span class="pill-label">FAST CACHE</span>
+          <span class="pill-metric" id="cacheHitStat">Active</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Settings Content Stage -->
+    <main style="display: flex; justify-content: center; align-items: flex-start; padding: 20px 0;">
+      <section class="settings-view-card">
+        <div>
+          <h3 style="font-size: 1.35rem; color: var(--yellow-solar); font-family: var(--font-display);">
+            AI Models &amp; API Keys
+          </h3>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 6px; line-height: 1.6;">
+            The engine is 100% operational out of the box with the <strong>Free Built-In Offline Engine</strong> ($0.00 cost). You can also connect your own Anthropic Claude, Google Gemini, or OpenAI API key. Keys are kept strictly in your browser's encrypted localStorage.
+          </p>
+        </div>
+
+        <!-- Auto-Detection Status Card -->
+        <div class="auto-detect-box" style="padding: 16px 20px; background: rgba(16, 185, 129, 0.12); border: 1px solid var(--emerald-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <div>
+            <div style="font-size: 0.72rem; font-weight: 800; color: var(--yellow-solar); letter-spacing: 0.6px; text-transform: uppercase;">
+              Environment Auto-Detection
+            </div>
+            <div id="detectedStatusText" style="font-size: 0.88rem; color: var(--text-primary); margin-top: 4px;">
+              Scanning system keys...
+            </div>
+          </div>
+          <button type="button" class="action-btn btn-ghost" id="btnAutoDetectNow" style="padding: 8px 16px; font-size: 0.78rem; border-color: var(--emerald-bright);">
+            ⚡ Scan Keys Now
+          </button>
+        </div>
+
+        <div class="input-block">
+          <label>Anthropic Claude API Key (Optional)</label>
+          <input type="password" id="inputClaudeKey" class="text-input" placeholder="sk-ant-api03-...">
+        </div>
+
+        <div class="input-block">
+          <label>Google Gemini API Key (Optional)</label>
+          <input type="password" id="inputGeminiKey" class="text-input" placeholder="AIzaSy...">
+        </div>
+
+        <div class="input-block">
+          <label>OpenAI API Key (Optional)</label>
+          <input type="password" id="inputOpenAIKey" class="text-input" placeholder="sk-...">
+        </div>
+
+        <div class="input-block">
+          <label>Select Active AI Model</label>
+          <select id="selectModel" class="select-input">
+            <option value="auto">⚡ Auto-Detect (Auto-selects active key or free offline engine)</option>
+            <option value="claude-3-5-sonnet">Claude 3.5 Sonnet (Anthropic)</option>
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Google High-Speed)</option>
+            <option value="gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
+            <option value="offline">Offline Engine (100% Free, Built-In, No Key Needed)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
+          <button type="button" class="action-btn btn-ghost" id="btnClearKeys">Reset Keys</button>
+          <button type="button" class="action-btn btn-solid-amber" id="btnSaveSettings">Save &amp; Apply</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/static/js/settings.js"></script>
+</body>
+</html>
