@@ -9,9 +9,10 @@ const state = {
   activeDocumentData: null,
   lastSearchResponse: null,
   byok: {
+    claudeKey: localStorage.getItem("SYNAPSE_CLAUDE_KEY") || "",
     geminiKey: localStorage.getItem("SYNAPSE_GEMINI_KEY") || "",
     openAIKey: localStorage.getItem("SYNAPSE_OPENAI_KEY") || "",
-    model: localStorage.getItem("SYNAPSE_MODEL") || "gemini-2.5-flash",
+    model: localStorage.getItem("SYNAPSE_MODEL") || "auto",
   },
 };
 
@@ -20,6 +21,7 @@ const queryInput = document.getElementById("queryInput");
 const searchForm = document.getElementById("searchForm");
 const answerContainer = document.getElementById("answerContainer");
 const answerLoading = document.getElementById("answerLoading");
+const answerModelBadge = document.getElementById("answerModelBadge");
 const citationsSection = document.getElementById("citationsSection");
 const citationsList = document.getElementById("citationsList");
 const citationCountBadge = document.getElementById("citationCountBadge");
@@ -45,15 +47,19 @@ const indicatorFaith = document.getElementById("indicatorFaith");
 // Modals
 const settingsModal = document.getElementById("settingsModal");
 const evalsModal = document.getElementById("evalsModal");
+const inputClaudeKey = document.getElementById("inputClaudeKey");
 const inputGeminiKey = document.getElementById("inputGeminiKey");
 const inputOpenAIKey = document.getElementById("inputOpenAIKey");
 const selectModel = document.getElementById("selectModel");
+const detectedStatusText = document.getElementById("detectedStatusText");
+const btnAutoDetectNow = document.getElementById("btnAutoDetectNow");
 
 // Initialize application
 async function init() {
   bindEventListeners();
   init3DTilt();
   loadSettings();
+  detectActiveKeys();
   await loadDocuments();
   await updateCacheStats();
 }
@@ -110,6 +116,7 @@ function bindEventListeners() {
   // Modals
   document.getElementById("btnSettingsModal").addEventListener("click", () => {
     settingsModal.classList.remove("hidden");
+    detectActiveKeys();
     if (window.gsap) gsap.from(".modal-dialog", { scale: 0.9, opacity: 0, duration: 0.25 });
   });
   document.getElementById("btnCloseSettings").addEventListener("click", () => {
@@ -117,6 +124,9 @@ function bindEventListeners() {
   });
   document.getElementById("btnSaveSettings").addEventListener("click", saveSettings);
   document.getElementById("btnClearKeys").addEventListener("click", clearSettings);
+  if (btnAutoDetectNow) {
+    btnAutoDetectNow.addEventListener("click", detectActiveKeys);
+  }
 
   document.getElementById("btnEvalsModal").addEventListener("click", openEvalsModal);
   document.getElementById("btnCloseEvals").addEventListener("click", () => {
@@ -251,6 +261,33 @@ async function handleSearch(query, forceCache = null) {
   answerLoading.classList.remove("hidden");
   answerContainer.classList.add("hidden");
 
+  // Determine provider, model, and API key
+  let provider = "auto";
+  let model = "claude-3-5-sonnet-20241022";
+  let customApiKey = null;
+
+  if (state.byok.model === "claude-3-5-sonnet") {
+    provider = "anthropic";
+    model = "claude-3-5-sonnet-20241022";
+    customApiKey = state.byok.claudeKey || null;
+  } else if (state.byok.model === "gemini-2.5-flash" || state.byok.model === "gemini-1.5-flash") {
+    provider = "gemini";
+    model = state.byok.model;
+    customApiKey = state.byok.geminiKey || null;
+  } else if (state.byok.model === "gpt-4o-mini") {
+    provider = "openai";
+    model = "gpt-4o-mini";
+    customApiKey = state.byok.openAIKey || null;
+  } else if (state.byok.model === "offline") {
+    provider = "offline";
+    model = "offline-zero-drain";
+    customApiKey = null;
+  } else {
+    provider = "auto";
+    model = "auto";
+    customApiKey = state.byok.claudeKey || state.byok.geminiKey || state.byok.openAIKey || null;
+  }
+
   try {
     const res = await fetch("/api/v1/search", {
       method: "POST",
@@ -259,8 +296,9 @@ async function handleSearch(query, forceCache = null) {
         query: query,
         mode: mode,
         use_cache: useCache,
-        custom_api_key: state.byok.geminiKey || null,
-        provider: state.byok.geminiKey ? "gemini" : "offline",
+        custom_api_key: customApiKey,
+        provider: provider,
+        model: model,
         top_k: 5,
         rrf_k: 60,
         use_reranker: true,
@@ -288,7 +326,20 @@ async function handleSearch(query, forceCache = null) {
 function renderAnswer(data) {
   let formattedHtml = formatMarkdown(data.answer);
 
-  // Replace [1], [2] with high-contrast amber citation buttons
+  // Update model badge
+  if (answerModelBadge) {
+    if (data.provider === "anthropic") {
+      answerModelBadge.textContent = "Claude 3.5 Sonnet";
+    } else if (data.provider === "gemini") {
+      answerModelBadge.textContent = "Gemini 2.5 Flash";
+    } else if (data.provider === "openai") {
+      answerModelBadge.textContent = "GPT-4o Mini";
+    } else {
+      answerModelBadge.textContent = "⚡ Free Offline Engine ($0.00)";
+    }
+  }
+
+  // Replace [1], [2] with high-contrast citation buttons
   formattedHtml = formattedHtml.replace(/\[(\d+)\]/g, (match, num) => {
     return `<button class="citation-pill-ref" data-cit-num="${num}">[${num}]</button>`;
   });
@@ -395,25 +446,25 @@ function updateHUD(data) {
     hudLatency.textContent = data.latency_ms.toFixed(1);
   }
 
-  hudLatencySub.textContent = data.cache_hit ? "⚡ Sub-25ms Redis Cache" : "Dual Fusion + Re-Ranking";
-  indicatorLatency.textContent = data.cache_hit ? "CACHE" : "LIVE";
+  hudLatencySub.textContent = data.cache_hit ? "⚡ Instant Fast Cache (<25ms)" : "Live Dual Search (Meaning + Exact Words)";
+  indicatorLatency.textContent = data.cache_hit ? "FAST" : "LIVE";
 
   if (data.cache_hit) {
     hudCacheStatus.textContent = "CACHE HIT";
     hudCacheStatus.style.color = "var(--yellow-solar)";
     indicatorCache.textContent = "<25ms";
     indicatorCache.style.color = "var(--yellow-solar)";
-    hudCacheCost.textContent = `$${data.estimated_cost_saved_usd.toFixed(6)} saved`;
+    hudCacheCost.textContent = `$${data.estimated_cost_saved_usd.toFixed(6)} Saved ($0 Cost)`;
   } else {
-    hudCacheStatus.textContent = "MISS (LIVE)";
+    hudCacheStatus.textContent = "LIVE SEARCH";
     hudCacheStatus.style.color = "var(--emerald-bright)";
     indicatorCache.textContent = "STORED";
     indicatorCache.style.color = "var(--emerald-bright)";
-    hudCacheCost.textContent = "Indexed in Redis";
+    hudCacheCost.textContent = "Saved to Memory Cache";
   }
 
   hudFusion.textContent = data.retrieval_mode.toUpperCase();
-  hudCandidates.textContent = `${data.retrieved_chunks.length} Top Grounded Chunks`;
+  hudCandidates.textContent = `${data.retrieved_chunks.length} Relevant Sections`;
 
   const faithPct = Math.round(data.faithfulness_score * 100);
   if (window.gsap) {
@@ -428,7 +479,7 @@ function updateHUD(data) {
     hudFaithfulness.textContent = faithPct;
   }
   indicatorFaith.textContent = `${faithPct}%`;
-  hudFaithSub.textContent = `${data.citations.length} Grounded Citations`;
+  hudFaithSub.textContent = `${data.citations.length} Verified Sources Found`;
 }
 
 // Fetch multi-stage pipeline details
@@ -553,32 +604,65 @@ async function runLiveEvals() {
   }
 }
 
+// Auto-detect active keys from backend
+async function detectActiveKeys() {
+  if (!detectedStatusText) return;
+  detectedStatusText.textContent = "Scanning environment & system keys...";
+  try {
+    const res = await fetch("/api/v1/auth/detect");
+    if (!res.ok) throw new Error("Detection failed");
+    const info = await res.json();
+    detectedStatusText.innerHTML = `<strong>${info.label}</strong> &bull; <span style="color: var(--emerald-bright)">${info.status}</span>`;
+  } catch (err) {
+    detectedStatusText.innerHTML = `<strong>Offline High-Precision Engine</strong> &bull; <span style="color: var(--yellow-solar)">Ready ($0.00 Free)</span>`;
+  }
+}
+
 // Settings management
 function loadSettings() {
-  inputGeminiKey.value = state.byok.geminiKey;
-  inputOpenAIKey.value = state.byok.openAIKey;
-  selectModel.value = state.byok.model;
+  if (inputClaudeKey) inputClaudeKey.value = state.byok.claudeKey;
+  if (inputGeminiKey) inputGeminiKey.value = state.byok.geminiKey;
+  if (inputOpenAIKey) inputOpenAIKey.value = state.byok.openAIKey;
+  if (selectModel) selectModel.value = state.byok.model;
 }
 
 function saveSettings() {
-  state.byok.geminiKey = inputGeminiKey.value.trim();
-  state.byok.openAIKey = inputOpenAIKey.value.trim();
-  state.byok.model = selectModel.value;
+  if (inputClaudeKey) state.byok.claudeKey = inputClaudeKey.value.trim();
+  if (inputGeminiKey) state.byok.geminiKey = inputGeminiKey.value.trim();
+  if (inputOpenAIKey) state.byok.openAIKey = inputOpenAIKey.value.trim();
+  if (selectModel) state.byok.model = selectModel.value;
 
+  localStorage.setItem("SYNAPSE_CLAUDE_KEY", state.byok.claudeKey);
   localStorage.setItem("SYNAPSE_GEMINI_KEY", state.byok.geminiKey);
   localStorage.setItem("SYNAPSE_OPENAI_KEY", state.byok.openAIKey);
   localStorage.setItem("SYNAPSE_MODEL", state.byok.model);
+
+  // Update answerModelBadge immediately
+  if (answerModelBadge) {
+    if (state.byok.model === "claude-3-5-sonnet") answerModelBadge.textContent = "Claude 3.5 Sonnet";
+    else if (state.byok.model.includes("gemini")) answerModelBadge.textContent = "Gemini 2.5 Flash";
+    else if (state.byok.model.includes("gpt")) answerModelBadge.textContent = "GPT-4o Mini";
+    else if (state.byok.model === "offline") answerModelBadge.textContent = "⚡ Free Offline Engine";
+    else answerModelBadge.textContent = "⚡ Auto-Detect (Ready)";
+  }
 
   settingsModal.classList.add("hidden");
 }
 
 function clearSettings() {
+  localStorage.removeItem("SYNAPSE_CLAUDE_KEY");
   localStorage.removeItem("SYNAPSE_GEMINI_KEY");
   localStorage.removeItem("SYNAPSE_OPENAI_KEY");
-  inputGeminiKey.value = "";
-  inputOpenAIKey.value = "";
+  localStorage.removeItem("SYNAPSE_MODEL");
+  if (inputClaudeKey) inputClaudeKey.value = "";
+  if (inputGeminiKey) inputGeminiKey.value = "";
+  if (inputOpenAIKey) inputOpenAIKey.value = "";
+  if (selectModel) selectModel.value = "auto";
+  state.byok.claudeKey = "";
   state.byok.geminiKey = "";
   state.byok.openAIKey = "";
+  state.byok.model = "auto";
+  detectActiveKeys();
 }
 
 // Markdown formatter

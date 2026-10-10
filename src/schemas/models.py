@@ -92,7 +92,8 @@ class SearchRequest(BaseModel):
         0.95, ge=0.5, le=1.0, description="Cosine similarity threshold for semantic cache hit"
     )
     custom_api_key: Optional[str] = Field(None, description="BYOK user API key")
-    provider: Optional[str] = Field(None, description="Provider: gemini, openai, anthropic, groq, offline")
+    provider: Optional[str] = Field("auto", description="Provider: auto, anthropic, gemini, openai, offline")
+    model: Optional[str] = Field(None, description="Model identifier: claude-3-5-sonnet-20241022, gemini-2.5-flash, etc.")
 
 
 class IngestRequest(BaseModel):

@@ -41,24 +41,24 @@
         <div class="brand-typography">
           <div class="brand-title">
             <span>SYNAPSE</span>
-            <span class="edition-pill">HYBRID COGNITION</span>
+            <span class="edition-pill">SMART SEARCH</span>
           </div>
-          <div class="brand-meta">Dual Retrieval &bull; Reciprocal Rank Fusion &bull; Redis Semantic Cache</div>
+          <div class="brand-meta">Dual Search (Meaning + Exact Words) &bull; Instant Memory Cache &bull; Verified Fact Citations</div>
         </div>
       </div>
 
       <div class="header-hud-pills">
         <div class="hud-pill hud-pill-corpus" id="kbStatusBadge">
           <span class="pulsing-beacon"></span>
-          <span class="pill-label">CORPUS</span>
-          <span class="pill-metric" id="kbDocCount">3 Docs</span>
-          <span class="pill-sub" id="kbChunkCount">12 Chunks</span>
+          <span class="pill-label">DOCUMENTS</span>
+          <span class="pill-metric" id="kbDocCount">3 Loaded</span>
+          <span class="pill-sub" id="kbChunkCount">12 Sections</span>
         </div>
 
         <div class="hud-pill hud-pill-cache" id="cacheStatusBadge">
           <div class="cache-spark">⚡</div>
-          <span class="pill-label">SEMANTIC CACHE</span>
-          <span class="pill-metric" id="cacheHitStat">Active</span>
+          <span class="pill-label">FAST CACHE</span>
+          <span class="pill-metric" id="cacheHitStat">Active (Saves Time)</span>
         </div>
       </div>
 
@@ -70,7 +70,7 @@
             <path d="M13 17V5"></path>
             <path d="M8 17v-3"></path>
           </svg>
-          <span>Ragas Matrix</span>
+          <span>Accuracy Report</span>
         </button>
 
         <button class="action-btn btn-ghost" id="btnSettingsModal">
@@ -78,12 +78,12 @@
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
-          <span>BYOK</span>
+          <span>AI Models &amp; Keys</span>
         </button>
       </div>
     </header>
 
-    <!-- Search Console & 21st.dev Style Border Beam Command Box -->
+    <!-- Search Console & Command Box -->
     <section class="command-section">
       <form id="searchForm" class="command-form">
         <div class="border-beam-container">
@@ -100,37 +100,37 @@
               type="text"
               id="queryInput"
               class="command-input"
-              placeholder="Query enterprise knowledge base (e.g. CVE-2024-8192 memory offset, Q3 CAPEX and GPU breakdown...)"
+              placeholder="Ask any question (e.g., exact bug memory offset, Q3 financial revenue table, or Raft consensus rules)..."
               autocomplete="off"
               spellcheck="false"
             />
 
             <button type="submit" class="command-submit-btn" id="btnSubmitSearch">
-              <span class="btn-text">Execute Hybrid Query</span>
+              <span class="btn-text">Search Documents</span>
               <kbd class="shortcut-key">↵</kbd>
             </button>
           </div>
         </div>
 
-        <!-- Retrieval Architecture Switcher & Telemetry Toggles -->
+        <!-- Search Mode Switcher & Cache Toggle -->
         <div class="command-toggles-bar">
           <div class="mode-selector-group">
-            <span class="group-label">PIPELINE:</span>
+            <span class="group-label">SEARCH METHOD:</span>
             <div class="mode-segmented-control">
               <label class="segment-btn active" data-mode="hybrid">
                 <input type="radio" name="retrievalMode" value="hybrid" checked>
                 <span class="segment-icon">⚡</span>
-                <span class="segment-text">Hybrid (Dense + BM25 + Re-Rank)</span>
+                <span class="segment-text">Smart Dual Search (Best)</span>
               </label>
               <label class="segment-btn" data-mode="dense">
                 <input type="radio" name="retrievalMode" value="dense">
                 <span class="segment-icon">🧠</span>
-                <span class="segment-text">Dense Only</span>
+                <span class="segment-text">Meaning Only (Vector)</span>
               </label>
               <label class="segment-btn" data-mode="bm25">
                 <input type="radio" name="retrievalMode" value="bm25">
                 <span class="segment-icon">🔍</span>
-                <span class="segment-text">BM25 Sparse</span>
+                <span class="segment-text">Exact Words Only</span>
               </label>
             </div>
           </div>
@@ -141,45 +141,45 @@
               <span class="ios-slider"></span>
             </label>
             <div class="cache-desc">
-              <span class="cache-title">Redis Semantic Caching</span>
-              <span class="cache-threshold">Cosine &ge; 0.95</span>
+              <span class="cache-title">Instant Memory Cache</span>
+              <span class="cache-threshold">Instant answers in &lt;25ms ($0 cost)</span>
             </div>
           </div>
         </div>
 
-        <!-- 1-Click Scenario Benchmarks with Micro-Interactions -->
+        <!-- 1-Click Quick Questions -->
         <div class="scenarios-carousel">
-          <div class="scenarios-label">VERIFIED SCENARIOS</div>
+          <div class="scenarios-label">QUICK EXAMPLE QUESTIONS (CLICK TO TRY)</div>
           <div class="scenarios-track">
             <button type="button" class="scenario-card" data-query="What is the memory offset and vulnerable function in CVE-2024-8192?">
-              <div class="scenario-icon icon-rose">🛡️</div>
+              <div class="scenario-icon icon-rose">🐞</div>
               <div class="scenario-content">
-                <div class="scenario-title">CVE-2024-8192 Kernel Offset</div>
-                <div class="scenario-desc">Exact hex address 0x7fff90a4 &amp; patch hash</div>
+                <div class="scenario-title">Find Exact Bug Code</div>
+                <div class="scenario-desc">Hex memory 0x7fff90a4 &amp; patch commit</div>
               </div>
             </button>
 
             <button type="button" class="scenario-card" data-query="What was total consolidated revenue, AI Cloud growth, and Q3 CAPEX?">
-              <div class="scenario-icon icon-amber">📈</div>
+              <div class="scenario-icon icon-amber">📊</div>
               <div class="scenario-content">
-                <div class="scenario-title">Q3 Financials &amp; GPU CAPEX</div>
-                <div class="scenario-desc">Multi-page financial tables &amp; 48k H100s</div>
+                <div class="scenario-title">Read Financial Tables</div>
+                <div class="scenario-desc">Q3 Revenue, $3.41B CAPEX &amp; 48k GPUs</div>
               </div>
             </button>
 
             <button type="button" class="scenario-card" data-query="What is the heartbeat interval and follower election timeout in Raft?">
-              <div class="scenario-icon icon-iris">🌐</div>
+              <div class="scenario-icon icon-iris">⚙️</div>
               <div class="scenario-content">
-                <div class="scenario-title">Raft Consensus Protocol</div>
-                <div class="scenario-desc">Heartbeat timers &amp; election timeout invariants</div>
+                <div class="scenario-title">Read System Rules</div>
+                <div class="scenario-desc">50ms heartbeats &amp; election timeout rules</div>
               </div>
             </button>
 
             <button type="button" class="scenario-card scenario-cache-demo" id="btnTestCacheHit">
               <div class="scenario-icon icon-gold">⚡</div>
               <div class="scenario-content">
-                <div class="scenario-title">Semantic Cache Hit Proof</div>
-                <div class="scenario-desc">Sub-25ms response with $0.00 token cost</div>
+                <div class="scenario-title">Test Instant Cache</div>
+                <div class="scenario-desc">Repeated queries run in &lt;25ms at $0 cost</div>
               </div>
             </button>
           </div>
@@ -192,51 +192,51 @@
       <div class="deck-card tilt-card" id="cardLatency">
         <div class="card-glow-edge"></div>
         <div class="deck-header">
-          <span class="deck-tag">LATENCY OVERHEAD</span>
+          <span class="deck-tag">RESPONSE TIME</span>
           <span class="deck-indicator" id="indicatorLatency">READY</span>
         </div>
         <div class="deck-metric">
           <span class="metric-num" id="hudLatency">0</span>
           <span class="metric-unit">ms</span>
         </div>
-        <div class="deck-subtext" id="hudLatencySub">Awaiting search execution</div>
+        <div class="deck-subtext" id="hudLatencySub">Ready to search</div>
       </div>
 
       <div class="deck-card tilt-card" id="cardCache">
         <div class="card-glow-edge"></div>
         <div class="deck-header">
-          <span class="deck-tag">CACHE INFERENCE</span>
+          <span class="deck-tag">FAST MEMORY CACHE</span>
           <span class="deck-indicator indicator-cache" id="indicatorCache">STANDBY</span>
         </div>
         <div class="deck-metric">
           <span class="metric-state" id="hudCacheStatus">STANDBY</span>
         </div>
-        <div class="deck-subtext" id="hudCacheCost">$0.00 saved</div>
+        <div class="deck-subtext" id="hudCacheCost">0 Instant Hits ($0 Saved)</div>
       </div>
 
       <div class="deck-card tilt-card" id="cardFusion">
         <div class="card-glow-edge"></div>
         <div class="deck-header">
-          <span class="deck-tag">RANK FUSION</span>
-          <span class="deck-indicator">RRF k=60</span>
+          <span class="deck-tag">SEARCH METHOD</span>
+          <span class="deck-indicator">DUAL HYBRID</span>
         </div>
         <div class="deck-metric">
           <span class="metric-state" id="hudFusion">HYBRID</span>
         </div>
-        <div class="deck-subtext" id="hudCandidates">Dual Dense (ANN) + BM25</div>
+        <div class="deck-subtext" id="hudCandidates">Meaning + Exact Words</div>
       </div>
 
       <div class="deck-card tilt-card" id="cardFaithfulness">
         <div class="card-glow-edge"></div>
         <div class="deck-header">
-          <span class="deck-tag">GROUNDED FAITHFULNESS</span>
+          <span class="deck-tag">FACT ACCURACY</span>
           <span class="deck-indicator indicator-faith" id="indicatorFaith">100%</span>
         </div>
         <div class="deck-metric">
           <span class="metric-num" id="hudFaithfulness">100</span>
           <span class="metric-unit">%</span>
         </div>
-        <div class="deck-subtext" id="hudFaithSub">Pydantic Verifiable Citations</div>
+        <div class="deck-subtext" id="hudFaithSub">100% Verified by Source Documents</div>
       </div>
     </section>
 
@@ -256,10 +256,10 @@
                   <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
               </div>
-              <span class="card-heading">Synthesized Grounded Answer</span>
+              <span class="card-heading">AI Answer with Verified Sources</span>
             </div>
             <div class="card-meta-actions">
-              <span class="model-badge" id="answerModelBadge">Gemini 2.5 Flash</span>
+              <span class="model-badge" id="answerModelBadge">⚡ Auto-Detect (Offline Ready)</span>
               <button class="icon-action-btn" id="btnCopyAnswer" title="Copy answer text">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -270,14 +270,14 @@
           </div>
 
           <div class="card-body">
-            <!-- GSAP Loading State -->
+            <!-- Loading State -->
             <div class="kinetic-loader hidden" id="answerLoading">
               <div class="loader-orbit">
                 <div class="orbit-particle"></div>
               </div>
               <div class="loader-copy">
-                <span class="loader-headline">Fusing Dense &amp; Sparse Candidates</span>
-                <span class="loader-sub">Cross-Encoder Re-Ranking in progress...</span>
+                <span class="loader-headline">Searching Documents</span>
+                <span class="loader-sub">Comparing meaning and exact words...</span>
               </div>
             </div>
 
@@ -285,15 +285,15 @@
             <div class="answer-output-wrapper" id="answerContainer">
               <div class="empty-state-studio">
                 <div class="studio-monogram">⚡</div>
-                <h3>Enterprise Document Intelligence Ready</h3>
-                <p>Choose an enterprise scenario above or type a query to test high-precision hybrid retrieval with verbatim citation grounding.</p>
+                <h3>Document Search Engine Ready</h3>
+                <p>Click any example question above or type your own question to see how the engine finds exact answers and cites proof.</p>
               </div>
             </div>
 
-            <!-- Citation Drawer with Amber High-Contrast Ribbons -->
+            <!-- Citation Drawer -->
             <div class="citations-deck hidden" id="citationsSection">
               <div class="citations-header">
-                <span class="deck-tag">VERIFIED SOURCE CITATIONS</span>
+                <span class="deck-tag">VERIFIED PROOF FROM DOCUMENTS (CLICK TO HIGHLIGHT)</span>
                 <span class="citation-counter" id="citationCountBadge">0 Citations</span>
               </div>
               <div class="citations-grid" id="citationsList"></div>
@@ -301,12 +301,12 @@
           </div>
         </div>
 
-        <!-- Telemetry Accordion: Dual RRF & Re-Rank Inspector -->
+        <!-- Telemetry Accordion: Inspector -->
         <div class="spatial-card inspector-card">
           <div class="inspector-header" id="pipelineToggle">
             <div class="inspector-title">
               <span class="inspector-icon">🔬</span>
-              <span>Multi-Stage Telemetry Inspector (Dense &bull; BM25 &bull; RRF &bull; Re-Rank)</span>
+              <span>How This Search Worked Behind the Scenes (Click to expand)</span>
             </div>
             <div class="inspector-chevron">▼</div>
           </div>
@@ -328,7 +328,7 @@
                   <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
                 </svg>
               </div>
-              <span class="card-heading">Document Source Preview</span>
+              <span class="card-heading">Original Document Proof (Click [1] to Jump Here)</span>
             </div>
             <div class="doc-tab-ribbon" id="docTabs">
               <!-- Dynamically populated document tabs -->
@@ -346,7 +346,7 @@
             </div>
 
             <div class="reader-scroll-canvas" id="docContentContainer">
-              <!-- Rendered document chunks with amber highlight targeting -->
+              <!-- Rendered document chunks -->
             </div>
           </div>
         </div>
@@ -357,26 +357,44 @@
     <div class="modal-backdrop hidden" id="settingsModal">
       <div class="modal-dialog">
         <div class="modal-top">
-          <h3>Bring Your Own Key (BYOK)</h3>
+          <h3>AI Models &amp; API Keys</h3>
           <button class="modal-close-btn" id="btnCloseSettings">&times;</button>
         </div>
         <div class="modal-content">
-          <p class="modal-explainer">API keys are kept strictly in your browser's encrypted <code>localStorage</code>. They never hit disk or persistent databases.</p>
+          <p class="modal-explainer">The system works 100% out of the box for <strong>FREE</strong> with the built-in Offline Engine. You can also connect your own Anthropic Claude, Google Gemini, or OpenAI key if desired.</p>
+
+          <!-- Auto Detect Banner -->
+          <div class="auto-detect-box" style="margin-bottom: 16px; padding: 12px 16px; background: rgba(16, 185, 129, 0.12); border: 1px solid var(--emerald-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div>
+              <div style="font-size: 0.72rem; font-weight: 800; color: var(--yellow-solar); letter-spacing: 0.6px; text-transform: uppercase;">System Auto-Detection</div>
+              <div id="detectedStatusText" style="font-size: 0.8rem; color: var(--text-primary); margin-top: 2px;">Checking system keys...</div>
+            </div>
+            <button type="button" class="action-btn btn-ghost" id="btnAutoDetectNow" style="padding: 6px 12px; font-size: 0.74rem; border-color: var(--emerald-bright);">⚡ Re-Detect</button>
+          </div>
+
           <div class="input-block">
-            <label>Google Gemini API Key</label>
+            <label>Anthropic Claude API Key (Optional)</label>
+            <input type="password" id="inputClaudeKey" class="text-input" placeholder="sk-ant-api03-...">
+          </div>
+
+          <div class="input-block">
+            <label>Google Gemini API Key (Optional)</label>
             <input type="password" id="inputGeminiKey" class="text-input" placeholder="AIzaSy...">
           </div>
+
           <div class="input-block">
             <label>OpenAI API Key (Optional)</label>
             <input type="password" id="inputOpenAIKey" class="text-input" placeholder="sk-...">
           </div>
+
           <div class="input-block">
-            <label>Inference Engine</label>
+            <label>Select AI Model / Engine</label>
             <select id="selectModel" class="select-input">
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Sub-Second Recommended)</option>
-              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-              <option value="gpt-4o-mini">GPT-4o Mini</option>
-              <option value="offline">Zero-Drain Offline High-Precision Engine ($0.00)</option>
+              <option value="auto">⚡ Auto-Detect (Auto-selects active key or free offline engine)</option>
+              <option value="claude-3-5-sonnet">Claude 3.5 Sonnet (Anthropic)</option>
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Google High-Speed)</option>
+              <option value="gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
+              <option value="offline">Offline Engine (100% Free, Built-In, No API Key Needed)</option>
             </select>
           </div>
         </div>
@@ -391,20 +409,20 @@
     <div class="modal-backdrop hidden" id="evalsModal">
       <div class="modal-dialog modal-dialog-lg">
         <div class="modal-top">
-          <h3>Ragas Evaluation &amp; Empirical Precision Matrix</h3>
+          <h3>Search Accuracy &amp; Benchmark Report</h3>
           <button class="modal-close-btn" id="btnCloseEvals">&times;</button>
         </div>
         <div class="modal-content">
-          <p class="modal-explainer">Empirical comparison across 10 enterprise queries evaluating Context Precision, Context Recall, and Faithfulness.</p>
+          <p class="modal-explainer">Empirical accuracy test comparing our <strong>Smart Dual Search</strong> against old-school Vector-only search across 10 technical questions.</p>
           <div class="table-responsive">
             <table class="benchmark-table">
               <thead>
                 <tr>
-                  <th>RETRIEVAL ARCHITECTURE</th>
-                  <th>CONTEXT PRECISION</th>
-                  <th>CONTEXT RECALL</th>
-                  <th>FAITHFULNESS</th>
-                  <th>ANSWER RELEVANCE</th>
+                  <th>SEARCH METHOD</th>
+                  <th>PRECISION (NO NOISE)</th>
+                  <th>RECALL (FOUND EVERYTHING)</th>
+                  <th>FACT ACCURACY</th>
+                  <th>RELEVANCE</th>
                 </tr>
               </thead>
               <tbody id="matrixTableBody">
@@ -414,7 +432,7 @@
           </div>
         </div>
         <div class="modal-actions">
-          <button class="action-btn btn-solid-iris" id="btnRunLiveEvals">Re-Run 10-Query Live Benchmark</button>
+          <button class="action-btn btn-solid-iris" id="btnRunLiveEvals">Re-Run Accuracy Test (10 Queries)</button>
         </div>
       </div>
     </div>

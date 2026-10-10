@@ -16,8 +16,8 @@ class GroundedSynthesizer:
         self,
         query: str,
         retrieved_chunks: List[SearchResultItem],
-        provider: str = "gemini",
-        model: str = "gemini-2.5-flash",
+        provider: str = "auto",
+        model: str = "claude-3-5-sonnet-20241022",
         custom_api_key: Optional[str] = None,
         retrieval_mode: str = "hybrid",
     ) -> GroundedResponse:

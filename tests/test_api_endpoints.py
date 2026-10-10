@@ -94,3 +94,13 @@ def test_benchmarks_endpoint(client):
     matrix = data["performance_matrix"]
     assert "hybrid_reranked" in matrix
     assert matrix["hybrid_reranked"]["avg_context_recall"] > 0.8
+
+
+def test_auth_detect_endpoint(client):
+    res = client.get("/api/v1/auth/detect")
+    assert res.status_code == 200
+    data = res.json()
+    assert "provider" in data
+    assert "model" in data
+    assert "label" in data
+    assert "status" in data

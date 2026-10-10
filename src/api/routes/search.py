@@ -45,16 +45,16 @@ async def execute_search(req: SearchRequest):
             retrieved_chunks=[],
             tokens_used=0,
             estimated_cost_saved_usd=0.0,
-            provider=req.provider or settings.default_provider,
-            model=settings.default_llm_model,
+            provider=req.provider or "auto",
+            model=req.model or "auto-detected",
         )
 
     # 3. Grounded Synthesis with strict Pydantic Citations
     response = app_state.synthesizer.synthesize(
         query=req.query,
         retrieved_chunks=retrieved_chunks,
-        provider=req.provider or settings.default_provider,
-        model=settings.default_llm_model,
+        provider=req.provider or "auto",
+        model=req.model or "claude-3-5-sonnet-20241022",
         custom_api_key=req.custom_api_key,
         retrieval_mode=req.mode,
     )
@@ -64,6 +64,13 @@ async def execute_search(req: SearchRequest):
         app_state.cache.store(req.query, response)
 
     return response
+
+
+@router.get("/api/v1/auth/detect")
+async def detect_auth_status() -> Dict[str, Any]:
+    """Auto-detects active API keys from environment or system config."""
+    from src.generation.llm_gateway import LLMGateway
+    return LLMGateway.detect_available_provider()
 
 
 @router.post("/api/v1/search/raw")

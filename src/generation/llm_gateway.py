@@ -13,16 +13,75 @@ class LLMGateway:
     def __init__(self, default_api_key: Optional[str] = None):
         self.default_api_key = default_api_key
 
+    @staticmethod
+    def detect_available_provider() -> Dict[str, Any]:
+        """Auto-detects active API keys from environment or system config."""
+        import os
+        anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+        gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()
+        openai_key = os.environ.get("OPENAI_API_KEY", "").strip()
+
+        if anthropic_key:
+            return {
+                "provider": "anthropic",
+                "model": "claude-3-5-sonnet-20241022",
+                "label": "Anthropic Claude 3.5 Sonnet",
+                "has_key": True,
+                "status": "Active (Environment: ANTHROPIC_API_KEY)",
+            }
+        if gemini_key:
+            return {
+                "provider": "gemini",
+                "model": "gemini-2.5-flash",
+                "label": "Google Gemini 2.5 Flash",
+                "has_key": True,
+                "status": "Active (Environment: GEMINI_API_KEY)",
+            }
+        if openai_key:
+            return {
+                "provider": "openai",
+                "model": "gpt-4o-mini",
+                "label": "OpenAI GPT-4o Mini",
+                "has_key": True,
+                "status": "Active (Environment: OPENAI_API_KEY)",
+            }
+
+        return {
+            "provider": "offline",
+            "model": "offline-zero-drain",
+            "label": "Zero-Drain Offline High-Precision Engine ($0.00)",
+            "has_key": False,
+            "status": "Ready (Built-In Local Engine, 100% Free & Unlimited)",
+        }
+
     def generate_synthesis(
         self,
         query: str,
         retrieved_chunks: List[SearchResultItem],
-        provider: str = "gemini",
-        model: str = "gemini-2.5-flash",
+        provider: str = "auto",
+        model: str = "claude-3-5-sonnet-20241022",
         custom_api_key: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Synthesizes grounded answer using selected model provider or offline fallback."""
+        import os
         api_key = custom_api_key or self.default_api_key
+
+        if provider == "auto":
+            detected = self.detect_available_provider()
+            provider = detected["provider"]
+            model = detected["model"]
+            if provider == "anthropic" and not api_key:
+                api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+            elif provider == "gemini" and not api_key:
+                api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+            elif provider == "openai" and not api_key:
+                api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+
+        if provider in ("anthropic", "claude") and api_key:
+            try:
+                return self._call_anthropic(query, retrieved_chunks, api_key, model)
+            except Exception:
+                return self._call_offline_engine(query, retrieved_chunks)
 
         if provider == "gemini" and api_key:
             try:
@@ -104,6 +163,55 @@ class LLMGateway:
             data = resp.json()
             content = data["choices"][0]["message"]["content"]
             return json.loads(content)
+
+    def _call_anthropic(
+        self,
+        query: str,
+        retrieved_chunks: List[SearchResultItem],
+        api_key: str,
+        model: str = "claude-3-5-sonnet-20241022",
+    ) -> Dict[str, Any]:
+        """Calls Anthropic Claude Messages API and parses grounded response."""
+        import httpx
+        from src.generation.prompts import GROUNDED_SYNTHESIS_SYSTEM_PROMPT, GROUNDED_SYNTHESIS_USER_TEMPLATE
+
+        formatted_chunks = self._format_chunks_for_prompt(retrieved_chunks)
+        user_prompt = (
+            GROUNDED_SYNTHESIS_USER_TEMPLATE.format(
+                query=query,
+                formatted_chunks=formatted_chunks,
+            )
+            + "\n\nCRITICAL: Respond ONLY with a valid JSON object matching the requested schema. No surrounding markdown backticks or commentary."
+        )
+
+        headers = {
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+        }
+        payload = {
+            "model": model,
+            "max_tokens": 1500,
+            "system": GROUNDED_SYNTHESIS_SYSTEM_PROMPT,
+            "messages": [
+                {"role": "user", "content": user_prompt}
+            ],
+            "temperature": 0.1,
+        }
+
+        with httpx.Client(timeout=30.0) as client:
+            resp = client.post("https://api.anthropic.com/v1/messages", headers=headers, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+            content_blocks = data.get("content", [])
+            text_response = "".join(b.get("text", "") for b in content_blocks if b.get("type") == "text").strip()
+            
+            if "```json" in text_response:
+                text_response = text_response.split("```json")[1].split("```")[0].strip()
+            elif "```" in text_response:
+                text_response = text_response.split("```")[1].split("```")[0].strip()
+                
+            return json.loads(text_response)
 
     def _call_offline_engine(
         self,
