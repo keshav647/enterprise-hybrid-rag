@@ -1,9 +1,8 @@
 /**
  * Synapse // Enterprise Hybrid Search & Document Intelligence Engine
- * Modern ES Modules Frontend Controller
+ * Modern ES Modules Frontend Controller with GSAP Transitions & 3D Spatial Physics
  */
 
-// Application state
 const state = {
   documents: [],
   activeDocId: null,
@@ -16,7 +15,7 @@ const state = {
   },
 };
 
-// DOM Elements
+// DOM References
 const queryInput = document.getElementById("queryInput");
 const searchForm = document.getElementById("searchForm");
 const answerContainer = document.getElementById("answerContainer");
@@ -30,7 +29,7 @@ const docMetaTitle = document.getElementById("docMetaTitle");
 const docPageBadge = document.getElementById("docPageBadge");
 const cacheToggle = document.getElementById("cacheToggle");
 
-// HUD elements
+// HUD Elements
 const hudLatency = document.getElementById("hudLatency");
 const hudLatencySub = document.getElementById("hudLatencySub");
 const hudCacheStatus = document.getElementById("hudCacheStatus");
@@ -39,6 +38,9 @@ const hudFusion = document.getElementById("hudFusion");
 const hudCandidates = document.getElementById("hudCandidates");
 const hudFaithfulness = document.getElementById("hudFaithfulness");
 const hudFaithSub = document.getElementById("hudFaithSub");
+const indicatorLatency = document.getElementById("indicatorLatency");
+const indicatorCache = document.getElementById("indicatorCache");
+const indicatorFaith = document.getElementById("indicatorFaith");
 
 // Modals
 const settingsModal = document.getElementById("settingsModal");
@@ -50,20 +52,24 @@ const selectModel = document.getElementById("selectModel");
 // Initialize application
 async function init() {
   bindEventListeners();
+  init3DTilt();
   loadSettings();
   await loadDocuments();
   await updateCacheStats();
 }
 
-// Bind UI events
+// Bind UI event listeners
 function bindEventListeners() {
   searchForm.addEventListener("submit", handleSearchSubmit);
 
-  // Scenario chips
-  document.querySelectorAll(".chip[data-query]").forEach((chip) => {
-    chip.addEventListener("click", () => {
-      queryInput.value = chip.dataset.query;
-      handleSearch(chip.dataset.query);
+  // Scenario chips with GSAP micro-interaction
+  document.querySelectorAll(".scenario-card[data-query]").forEach((card) => {
+    card.addEventListener("click", () => {
+      queryInput.value = card.dataset.query;
+      if (window.gsap) {
+        gsap.fromTo(card, { scale: 0.96 }, { scale: 1, duration: 0.3, ease: "back.out(2)" });
+      }
+      handleSearch(card.dataset.query);
     });
   });
 
@@ -73,20 +79,18 @@ function bindEventListeners() {
     btnTestCacheHit.addEventListener("click", async () => {
       const q = "What is the memory offset and vulnerable function in CVE-2024-8192?";
       queryInput.value = q;
-      // First ensure it is cached
       await handleSearch(q, true);
-      // Wait 150ms and query again to demonstrate instant <25ms cache hit
       setTimeout(async () => {
         await handleSearch(q, true);
-      }, 150);
+      }, 160);
     });
   }
 
-  // Retrieval mode toggles
-  document.querySelectorAll(".toggle-pill").forEach((pill) => {
-    pill.addEventListener("click", () => {
-      document.querySelectorAll(".toggle-pill").forEach((p) => p.classList.remove("active"));
-      pill.classList.add("active");
+  // Segmented control mode selector
+  document.querySelectorAll(".segment-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".segment-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
     });
   });
 
@@ -95,14 +99,18 @@ function bindEventListeners() {
   const pipelineContent = document.getElementById("pipelineContent");
   if (pipelineToggle && pipelineContent) {
     pipelineToggle.addEventListener("click", () => {
-      pipelineToggle.classList.toggle("open");
+      const isOpen = pipelineToggle.classList.toggle("open");
       pipelineContent.classList.toggle("hidden");
+      if (isOpen && window.gsap) {
+        gsap.from("#pipelineContent", { opacity: 0, y: -10, duration: 0.3 });
+      }
     });
   }
 
   // Modals
   document.getElementById("btnSettingsModal").addEventListener("click", () => {
     settingsModal.classList.remove("hidden");
+    if (window.gsap) gsap.from(".modal-dialog", { scale: 0.9, opacity: 0, duration: 0.25 });
   });
   document.getElementById("btnCloseSettings").addEventListener("click", () => {
     settingsModal.classList.add("hidden");
@@ -120,25 +128,44 @@ function bindEventListeners() {
   document.getElementById("btnCopyAnswer").addEventListener("click", () => {
     if (state.lastSearchResponse) {
       navigator.clipboard.writeText(state.lastSearchResponse.answer);
-      alert("Answer copied to clipboard!");
+      const btn = document.getElementById("btnCopyAnswer");
+      btn.style.color = "var(--amber-bright)";
+      setTimeout(() => { btn.style.color = ""; }, 1200);
     }
   });
 }
 
-// Load documents list
+// 3D Tilt physics for cards (ThreeUI pattern)
+function init3DTilt() {
+  const cards = document.querySelectorAll(".tilt-card");
+  cards.forEach((card) => {
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      const rotateX = -(y / rect.height) * 10;
+      const rotateY = (x / rect.width) * 10;
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
+    });
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)";
+    });
+  });
+}
+
+// Load document catalog
 async function loadDocuments() {
   try {
     const res = await fetch("/api/v1/documents");
     if (!res.ok) return;
     state.documents = await res.json();
 
-    document.getElementById("kbDocCount").textContent = `${state.documents.length} Documents`;
+    document.getElementById("kbDocCount").textContent = `${state.documents.length} Docs`;
 
-    // Render tabs
     docTabs.innerHTML = "";
     state.documents.forEach((doc, idx) => {
       const tab = document.createElement("button");
-      tab.className = `doc-tab ${idx === 0 ? "active" : ""}`;
+      tab.className = `doc-tab-pill ${idx === 0 ? "active" : ""}`;
       tab.textContent = doc.title;
       tab.dataset.docId = doc.document_id;
       tab.addEventListener("click", () => selectDocumentTab(doc.document_id));
@@ -153,10 +180,10 @@ async function loadDocuments() {
   }
 }
 
-// Select and render a document tab
+// Select active document tab
 async function selectDocumentTab(docId) {
   state.activeDocId = docId;
-  document.querySelectorAll(".doc-tab").forEach((tab) => {
+  document.querySelectorAll(".doc-tab-pill").forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.docId === docId);
   });
 
@@ -181,22 +208,23 @@ function renderDocumentContent(data) {
 
   data.chunks.forEach((chunk) => {
     const chunkDiv = document.createElement("div");
-    chunkDiv.className = "doc-chunk-block";
+    chunkDiv.className = "reader-chunk-item";
     chunkDiv.id = `chunk_${chunk.chunk_id}`;
     chunkDiv.dataset.chunkId = chunk.chunk_id;
     chunkDiv.style.marginBottom = "14px";
-    chunkDiv.style.padding = "10px 14px";
-    chunkDiv.style.borderRadius = "6px";
+    chunkDiv.style.padding = "12px 16px";
+    chunkDiv.style.borderRadius = "8px";
     chunkDiv.style.border = "1px solid rgba(255,255,255,0.06)";
-    chunkDiv.style.background = "rgba(0,0,0,0.2)";
+    chunkDiv.style.background = "rgba(10, 13, 22, 0.45)";
+    chunkDiv.style.transition = "all 0.3s ease";
 
     const header = document.createElement("div");
     header.style.display = "flex";
     header.style.justifyContent = "space-between";
     header.style.fontSize = "0.72rem";
     header.style.color = "var(--text-muted)";
-    header.style.marginBottom = "6px";
-    header.innerHTML = `<span><strong>${chunk.section_title}</strong> &bull; Page ${chunk.page_number || 1}</span><span style="font-family: var(--font-mono)">${chunk.chunk_id}</span>`;
+    header.style.marginBottom = "8px";
+    header.innerHTML = `<span><strong style="color: var(--amber-bright)">${chunk.section_title}</strong> &bull; Page ${chunk.page_number || 1}</span><span style="font-family: var(--font-mono)">${chunk.chunk_id}</span>`;
 
     const body = document.createElement("div");
     body.innerHTML = formatMarkdown(chunk.metadata.raw_text || chunk.content);
@@ -211,15 +239,13 @@ function renderDocumentContent(data) {
 function handleSearchSubmit(e) {
   e.preventDefault();
   const query = queryInput.value.trim();
-  if (query) {
-    handleSearch(query);
-  }
+  if (query) handleSearch(query);
 }
 
-// Execute search
+// Execute hybrid search
 async function handleSearch(query, forceCache = null) {
-  const activeModePill = document.querySelector(".toggle-pill.active");
-  const mode = activeModePill ? activeModePill.dataset.mode : "hybrid";
+  const activeModeBtn = document.querySelector(".segment-btn.active");
+  const mode = activeModeBtn ? activeModeBtn.dataset.mode : "hybrid";
   const useCache = forceCache !== null ? forceCache : cacheToggle.checked;
 
   answerLoading.classList.remove("hidden");
@@ -251,24 +277,34 @@ async function handleSearch(query, forceCache = null) {
     updateCacheStats();
   } catch (err) {
     console.error("Search error:", err);
-    answerContainer.innerHTML = `<p style="color: var(--accent-crimson)">Error executing search: ${err.message}</p>`;
+    answerContainer.innerHTML = `<p style="color: var(--rose-primary)">Error executing search: ${err.message}</p>`;
   } finally {
     answerLoading.classList.add("hidden");
     answerContainer.classList.remove("hidden");
   }
 }
 
-// Render synthesized answer and citations
+// Render answer & citations with GSAP cascade
 function renderAnswer(data) {
-  // Format markdown with interactive citation pill replacements
   let formattedHtml = formatMarkdown(data.answer);
 
-  // Replace [1], [2] with clickable buttons
+  // Replace [1], [2] with high-contrast amber citation buttons
   formattedHtml = formattedHtml.replace(/\[(\d+)\]/g, (match, num) => {
     return `<button class="citation-pill-ref" data-cit-num="${num}">[${num}]</button>`;
   });
 
   answerContainer.innerHTML = formattedHtml;
+
+  // Animate answer paragraphs with GSAP
+  if (window.gsap) {
+    gsap.from("#answerContainer > *", {
+      opacity: 0,
+      y: 12,
+      stagger: 0.06,
+      duration: 0.4,
+      ease: "power2.out",
+    });
+  }
 
   // Render citations list
   if (data.citations && data.citations.length > 0) {
@@ -278,24 +314,35 @@ function renderAnswer(data) {
 
     data.citations.forEach((cit) => {
       const card = document.createElement("div");
-      card.className = "citation-card";
+      card.className = "citation-ribbon-card";
       card.dataset.chunkId = cit.chunk_id;
       card.dataset.citNum = cit.citation_id;
 
       card.innerHTML = `
-        <div class="citation-card-header">
-          <span class="citation-card-title">${cit.document_title}</span>
-          <span class="citation-badge-pill">[${cit.citation_id}] Page ${cit.page_number || 1}</span>
+        <div class="citation-ribbon-top">
+          <span class="citation-doc-title">${cit.document_title}</span>
+          <span class="citation-pill-tag">[${cit.citation_id}] Page ${cit.page_number || 1}</span>
         </div>
         <div style="font-size: 0.74rem; color: var(--text-muted); font-family: var(--font-mono)">${cit.section_title} &bull; ${cit.chunk_id}</div>
-        <div class="citation-quote">"${cit.exact_quote}"</div>
+        <div class="citation-quote-box">"${cit.exact_quote}"</div>
       `;
 
       card.addEventListener("click", () => activateCitation(cit));
       citationsList.appendChild(card);
     });
 
-    // Bind inline citation pill clicks
+    // GSAP cascade on citations deck
+    if (window.gsap) {
+      gsap.from(".citation-ribbon-card", {
+        opacity: 0,
+        x: -16,
+        stagger: 0.08,
+        duration: 0.45,
+        ease: "power2.out",
+      });
+    }
+
+    // Bind inline citation badges
     document.querySelectorAll(".citation-pill-ref").forEach((pill) => {
       pill.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -309,54 +356,82 @@ function renderAnswer(data) {
   }
 }
 
-// Highlight citation and jump in viewer
+// Activate citation in viewer
 async function activateCitation(cit) {
-  // Find which document this chunk belongs to
   const docId = cit.chunk_id.split("_c")[0];
 
   if (state.activeDocId !== docId) {
     await selectDocumentTab(docId);
   }
 
-  // Highlight card in left drawer
-  document.querySelectorAll(".citation-card").forEach((c) => {
+  document.querySelectorAll(".citation-ribbon-card").forEach((c) => {
     c.classList.toggle("active", c.dataset.citNum === String(cit.citation_id));
   });
 
-  // Scroll to and highlight chunk in document viewer
   const targetElement = document.getElementById(`chunk_${cit.chunk_id}`);
   if (targetElement) {
     document.querySelectorAll(".highlight-chunk").forEach((el) => el.classList.remove("highlight-chunk"));
     targetElement.classList.add("highlight-chunk");
     targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    if (window.gsap) {
+      gsap.fromTo(targetElement, { scale: 0.98 }, { scale: 1, duration: 0.35, ease: "back.out(2)" });
+    }
   }
 }
 
-// Update HUD cards
+// Update HUD cards with GSAP number tweening
 function updateHUD(data) {
-  hudLatency.textContent = `${data.latency_ms} ms`;
-  hudLatencySub.textContent = data.cache_hit ? "⚡ Instant Redis Cache" : "Live Hybrid Execution";
+  // GSAP tween for latency counter
+  if (window.gsap) {
+    const latencyObj = { val: 0 };
+    gsap.to(latencyObj, {
+      val: data.latency_ms,
+      duration: 0.5,
+      ease: "power2.out",
+      onUpdate: () => { hudLatency.textContent = latencyObj.val.toFixed(1); },
+    });
+  } else {
+    hudLatency.textContent = data.latency_ms.toFixed(1);
+  }
+
+  hudLatencySub.textContent = data.cache_hit ? "⚡ Sub-25ms Redis Cache" : "Dual Fusion + Re-Ranking";
+  indicatorLatency.textContent = data.cache_hit ? "CACHE" : "LIVE";
 
   if (data.cache_hit) {
-    hudCacheStatus.textContent = "⚡ CACHE HIT";
-    hudCacheStatus.style.color = "var(--accent-emerald)";
+    hudCacheStatus.textContent = "CACHE HIT";
+    hudCacheStatus.style.color = "var(--amber-bright)";
+    indicatorCache.textContent = "<25ms";
+    indicatorCache.style.color = "var(--amber-bright)";
     hudCacheCost.textContent = `$${data.estimated_cost_saved_usd.toFixed(6)} saved`;
   } else {
     hudCacheStatus.textContent = "MISS (LIVE)";
-    hudCacheStatus.style.color = "var(--accent-cyan)";
-    hudCacheCost.textContent = "Stored in Redis";
+    hudCacheStatus.style.color = "var(--iris-bright)";
+    indicatorCache.textContent = "STORED";
+    indicatorCache.style.color = "var(--iris-bright)";
+    hudCacheCost.textContent = "Indexed in Redis";
   }
 
   hudFusion.textContent = data.retrieval_mode.toUpperCase();
-  hudCandidates.textContent = `${data.retrieved_chunks.length} Top Chunks Grounded`;
+  hudCandidates.textContent = `${data.retrieved_chunks.length} Top Grounded Chunks`;
 
   const faithPct = Math.round(data.faithfulness_score * 100);
-  hudFaithfulness.textContent = `${faithPct}%`;
-  hudFaithfulness.style.color = faithPct >= 90 ? "var(--accent-emerald)" : "var(--accent-amber)";
+  if (window.gsap) {
+    const faithObj = { val: 0 };
+    gsap.to(faithObj, {
+      val: faithPct,
+      duration: 0.5,
+      ease: "power2.out",
+      onUpdate: () => { hudFaithfulness.textContent = Math.round(faithObj.val); },
+    });
+  } else {
+    hudFaithfulness.textContent = faithPct;
+  }
+  indicatorFaith.textContent = `${faithPct}%`;
   hudFaithSub.textContent = `${data.citations.length} Grounded Citations`;
 }
 
-// Fetch multi-stage retrieval internals
+// Fetch multi-stage pipeline details
 async function fetchPipelineDetails(query) {
   try {
     const res = await fetch("/api/v1/search/raw", {
@@ -371,19 +446,19 @@ async function fetchPipelineDetails(query) {
     const pipelineTables = document.getElementById("pipelineTables");
 
     pipelineTimings.innerHTML = `
-      <div class="timing-badge">Dense: <strong>${rawData.timings_ms.dense}ms</strong></div>
-      <div class="timing-badge">BM25: <strong>${rawData.timings_ms.bm25}ms</strong></div>
-      <div class="timing-badge">RRF: <strong>${rawData.timings_ms.rrf}ms</strong></div>
-      <div class="timing-badge">Re-Rank: <strong>${rawData.timings_ms.rerank}ms</strong></div>
-      <div class="timing-badge">Total Pipeline: <strong>${rawData.timings_ms.total}ms</strong></div>
+      <div class="timing-chip">Dense ANN: <strong>${rawData.timings_ms.dense}ms</strong></div>
+      <div class="timing-chip">BM25 Sparse: <strong>${rawData.timings_ms.bm25}ms</strong></div>
+      <div class="timing-chip">RRF Fusion (k=60): <strong>${rawData.timings_ms.rrf}ms</strong></div>
+      <div class="timing-chip">Cross-Encoder Re-Rank: <strong>${rawData.timings_ms.rerank}ms</strong></div>
+      <div class="timing-chip" style="border-color: var(--amber-primary)">Total Pipeline: <strong>${rawData.timings_ms.total}ms</strong></div>
     `;
 
     pipelineTables.innerHTML = `
-      <table class="matrix-table" style="font-size: 0.74rem">
+      <table class="benchmark-table" style="font-size: 0.74rem">
         <thead>
           <tr>
             <th>CHUNK ID</th>
-            <th>DOCUMENT</th>
+            <th>SOURCE DOCUMENT</th>
             <th>DENSE RANK</th>
             <th>BM25 RANK</th>
             <th>RRF SCORE</th>
@@ -395,12 +470,12 @@ async function fetchPipelineDetails(query) {
             .map(
               (item) => `
             <tr>
-              <td><code>${item.chunk_id}</code></td>
+              <td><code style="color: var(--amber-bright)">${item.chunk_id}</code></td>
               <td>${item.document_title}</td>
               <td>${item.dense_rank !== null ? `#${item.dense_rank}` : "&mdash;"}</td>
               <td>${item.bm25_rank !== null ? `#${item.bm25_rank}` : "&mdash;"}</td>
-              <td style="font-family: var(--font-mono); color: var(--accent-cyan)">${item.rrf_score.toFixed(4)}</td>
-              <td style="font-family: var(--font-mono); color: var(--accent-emerald)"><strong>${item.score.toFixed(4)}</strong></td>
+              <td style="font-family: var(--font-mono); color: var(--iris-bright)">${item.rrf_score.toFixed(4)}</td>
+              <td style="font-family: var(--font-mono); color: var(--amber-bright)"><strong>${item.score.toFixed(4)}</strong></td>
             </tr>
           `
             )
@@ -413,19 +488,16 @@ async function fetchPipelineDetails(query) {
   }
 }
 
-// Update cache statistics
+// Update cache stats
 async function updateCacheStats() {
   try {
     const res = await fetch("/api/v1/cache/stats");
     if (!res.ok) return;
     const stats = await res.json();
 
-    const badge = document.getElementById("cacheStatusBadge");
-    if (badge) {
-      badge.innerHTML = `
-        <span class="redis-icon">⚡</span>
-        <span>Redis Cache: ${stats.cache_hits} Hits &bull; $${stats.estimated_cost_saved_usd.toFixed(4)} Saved</span>
-      `;
+    const hitStat = document.getElementById("cacheHitStat");
+    if (hitStat) {
+      hitStat.textContent = `${stats.cache_hits} Hits ($${stats.estimated_cost_saved_usd.toFixed(4)})`;
     }
   } catch (err) {
     console.error("Failed to load cache stats:", err);
@@ -436,7 +508,7 @@ async function updateCacheStats() {
 async function openEvalsModal() {
   evalsModal.classList.remove("hidden");
   const tbody = document.getElementById("matrixTableBody");
-  tbody.innerHTML = `<tr><td colspan="5" style="text-align: center">Loading Ragas benchmark metrics...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted)">Querying Ragas empirical benchmark matrix...</td></tr>`;
 
   try {
     const res = await fetch("/api/v1/benchmarks");
@@ -449,18 +521,18 @@ async function openEvalsModal() {
         const item = matrix[key];
         const isBest = key === "hybrid_reranked";
         return `
-          <tr style="${isBest ? "background: rgba(63, 185, 80, 0.08)" : ""}">
-            <td><strong>${item.name}</strong> ${isBest ? "⭐ (Production)" : ""}</td>
-            <td class="${isBest ? "matrix-highlight" : ""}">${(item.avg_context_precision * 100).toFixed(1)}%</td>
-            <td class="${isBest ? "matrix-highlight" : ""}">${(item.avg_context_recall * 100).toFixed(1)}%</td>
-            <td class="${isBest ? "matrix-highlight" : ""}">${(item.avg_faithfulness * 100).toFixed(1)}%</td>
-            <td class="${isBest ? "matrix-highlight" : ""}">${(item.avg_answer_relevance * 100).toFixed(1)}%</td>
+          <tr class="${isBest ? "highlight-row" : ""}">
+            <td><strong>${item.name}</strong> ${isBest ? "⭐ (Synapse Standard)" : ""}</td>
+            <td class="${isBest ? "highlight-metric" : ""}">${(item.avg_context_precision * 100).toFixed(1)}%</td>
+            <td class="${isBest ? "highlight-metric" : ""}">${(item.avg_context_recall * 100).toFixed(1)}%</td>
+            <td class="${isBest ? "highlight-metric" : ""}">${(item.avg_faithfulness * 100).toFixed(1)}%</td>
+            <td class="${isBest ? "highlight-metric" : ""}">${(item.avg_answer_relevance * 100).toFixed(1)}%</td>
           </tr>
         `;
       })
       .join("");
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="5" style="color: var(--accent-crimson)">Failed to load benchmarks.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="color: var(--rose-primary)">Failed to load benchmarks.</td></tr>`;
   }
 }
 
@@ -476,7 +548,7 @@ async function runLiveEvals() {
   } catch (err) {
     console.error("Live evals error:", err);
   } finally {
-    btn.textContent = "Re-run Live Benchmark";
+    btn.textContent = "Re-Run 10-Query Live Benchmark";
     btn.disabled = false;
   }
 }
@@ -498,7 +570,6 @@ function saveSettings() {
   localStorage.setItem("SYNAPSE_MODEL", state.byok.model);
 
   settingsModal.classList.add("hidden");
-  alert("API settings successfully saved to client localStorage!");
 }
 
 function clearSettings() {
@@ -508,10 +579,9 @@ function clearSettings() {
   inputOpenAIKey.value = "";
   state.byok.geminiKey = "";
   state.byok.openAIKey = "";
-  alert("Client API keys cleared.");
 }
 
-// Markdown formatter helper
+// Markdown formatter
 function formatMarkdown(text) {
   if (!text) return "";
   let html = text
@@ -524,7 +594,6 @@ function formatMarkdown(text) {
     .replace(/^\- (.*$)/gim, "<li>$1</li>")
     .replace(/\n\n/gim, "<p></p>");
 
-  // Wrap lists
   if (html.includes("<li>")) {
     html = html.replace(/(<li>.*<\/li>)/gms, "<ul>$1</ul>");
   }
