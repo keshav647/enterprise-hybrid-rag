@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # PostgreSQL with pgvector extension
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: synapse_pgvector_db
+    environment:
+      POSTGRES_DB: aidb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql/init_pgvector.sql:/docker-entrypoint-initdb.d/init_pgvector.sql
+    restart: unless-stopped
+
+  # Redis for semantic caching
+  redis:
+    image: redis:7-alpine
+    container_name: synapse_redis_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+
+  # Synapse Hybrid RAG API & Web UI
+  synapse-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: synapse_rag_engine
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8000
+      DATABASE_URL: postgresql://postgres:postgrespassword@db:5432/aidb
+      REDIS_URL: redis://redis:6379/0
+      ENABLE_PGVECTOR: "true"
+      ENABLE_REDIS: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:

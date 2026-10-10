@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synapse // Enterprise Hybrid Search & Document Intelligence Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-cyan"></div>
+  <div class="ambient-glow glow-violet"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-mark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <div class="brand-title">SYNAPSE <span class="badge-sub">HYBRID RAG</span></div>
+          <div class="brand-subtitle">Dense + BM25 + Cross-Encoder Re-Ranking + Redis Cache</div>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="status-pill status-healthy" id="kbStatusBadge">
+          <span class="status-dot"></span>
+          <span id="kbDocCount">3 Documents</span> &bull; <span id="kbChunkCount">12 Chunks</span>
+        </div>
+        <div class="status-pill status-redis" id="cacheStatusBadge">
+          <span class="redis-icon">⚡</span>
+          <span>Redis Semantic Cache Active</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button class="btn btn-secondary" id="btnEvalsModal">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Ragas Benchmarks</span>
+        </button>
+        <button class="btn btn-secondary" id="btnSettingsModal">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>BYOK Settings</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Search Section -->
+    <section class="search-section">
+      <form id="searchForm" class="search-form">
+        <div class="search-input-wrapper">
+          <div class="search-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <input
+            type="text"
+            id="queryInput"
+            class="search-input"
+            placeholder="Search enterprise documents with hybrid retrieval (e.g., CVE-2024-8192 memory offset, Q3 CAPEX...)"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div class="input-actions">
+            <button type="submit" class="btn btn-primary" id="btnSubmitSearch">
+              <span>Execute Search</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <!-- Mode Selectors -->
+          <div class="mode-toggles">
+            <span class="control-label">RETRIEVAL MODE:</span>
+            <label class="toggle-pill active" data-mode="hybrid">
+              <input type="radio" name="retrievalMode" value="hybrid" checked>
+              <span>⚡ Hybrid (Dense + BM25 + Re-rank)</span>
+            </label>
+            <label class="toggle-pill" data-mode="dense">
+              <input type="radio" name="retrievalMode" value="dense">
+              <span>🧠 Dense Vector Only</span>
+            </label>
+            <label class="toggle-pill" data-mode="bm25">
+              <input type="radio" name="retrievalMode" value="bm25">
+              <span>🔍 BM25 Keyword Only</span>
+            </label>
+          </div>
+
+          <!-- Semantic Cache Toggle -->
+          <div class="cache-toggle-wrapper">
+            <label class="switch">
+              <input type="checkbox" id="cacheToggle" checked>
+              <span class="slider round"></span>
+            </label>
+            <span class="cache-label">Redis Semantic Cache</span>
+          </div>
+        </div>
+
+        <!-- 1-Click Scenario Chips -->
+        <div class="scenario-chips">
+          <span class="chips-label">SCENARIO BENCHMARKS:</span>
+          <button type="button" class="chip" data-query="What is the memory offset and vulnerable function in CVE-2024-8192?">
+            <span class="chip-icon">🛡️</span>
+            <span>CVE-2024-8192 Exact Memory Offset</span>
+          </button>
+          <button type="button" class="chip" data-query="What was total consolidated revenue, AI Cloud growth, and Q3 CAPEX?">
+            <span class="chip-icon">📈</span>
+            <span>Q3 Financials & GPU Table</span>
+          </button>
+          <button type="button" class="chip" data-query="What is the heartbeat interval and follower election timeout in Raft?">
+            <span class="chip-icon">🌐</span>
+            <span>Raft Consensus Timing Specs</span>
+          </button>
+          <button type="button" class="chip chip-cache" id="btnTestCacheHit">
+            <span class="chip-icon">⚡</span>
+            <span>Trigger Cache Hit (&lt;25ms)</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Telemetry HUD -->
+    <section class="telemetry-hud" id="telemetryHud">
+      <div class="hud-card">
+        <div class="hud-label">LATENCY</div>
+        <div class="hud-value" id="hudLatency">-- ms</div>
+        <div class="hud-sub" id="hudLatencySub">Awaiting query</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-label">CACHE STATUS</div>
+        <div class="hud-value" id="hudCacheStatus">STANDBY</div>
+        <div class="hud-sub" id="hudCacheCost">$0.00 saved</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-label">RETRIEVAL FUSION</div>
+        <div class="hud-value" id="hudFusion">RRF (k=60)</div>
+        <div class="hud-sub" id="hudCandidates">Top 30 Candidates</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-label">FAITHFULNESS</div>
+        <div class="hud-value" id="hudFaithfulness">--%</div>
+        <div class="hud-sub" id="hudFaithSub">Pydantic Citations</div>
+      </div>
+    </section>
+
+    <!-- Main Content Workspace (Two Columns) -->
+    <main class="main-workspace">
+      <!-- Left Column: Synthesized Grounded Answer & Citations -->
+      <div class="workspace-column left-column">
+        <div class="panel-card answer-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>Grounded Answer Synthesis</span>
+            </div>
+            <div class="panel-actions">
+              <span class="tag-model" id="answerModelBadge">Gemini 2.5 Flash</span>
+              <button class="btn-icon" id="btnCopyAnswer" title="Copy answer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="panel-body">
+            <!-- Loading indicator -->
+            <div class="loading-state hidden" id="answerLoading">
+              <div class="pulse-ring"></div>
+              <div class="loading-text">Executing Dual Retrieval & Re-ranking...</div>
+            </div>
+
+            <!-- Answer text container -->
+            <div class="answer-content" id="answerContainer">
+              <div class="placeholder-state">
+                <div class="placeholder-icon">🔍</div>
+                <h3>Enterprise Document Intelligence Engine Ready</h3>
+                <p>Select one of the scenario benchmark buttons above or enter an exact technical query to evaluate hybrid search with citation grounding.</p>
+              </div>
+            </div>
+
+            <!-- Citations Drawer -->
+            <div class="citations-section hidden" id="citationsSection">
+              <div class="section-title-sm">
+                <span>VERIFIABLE SOURCE CITATIONS</span>
+                <span class="citation-count" id="citationCountBadge">0 Citations</span>
+              </div>
+              <div class="citations-list" id="citationsList"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Retrieval Pipeline Inspector (Accordion) -->
+        <div class="panel-card pipeline-inspector">
+          <div class="panel-header accordion-toggle" id="pipelineToggle">
+            <div class="panel-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              <span>Multi-Stage Retrieval Telemetry (Dense vs BM25 vs RRF vs Re-Rank)</span>
+            </div>
+            <div class="accordion-arrow">▼</div>
+          </div>
+          <div class="panel-body accordion-content hidden" id="pipelineContent">
+            <div class="pipeline-timings" id="pipelineTimings"></div>
+            <div class="pipeline-tables" id="pipelineTables"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Document Source Viewer & Dynamic Citation Highlighting -->
+      <div class="workspace-column right-column">
+        <div class="panel-card document-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span>Source Document Viewer</span>
+            </div>
+            <div class="doc-tabs" id="docTabs">
+              <!-- Tab items populated dynamically -->
+            </div>
+          </div>
+
+          <div class="panel-body doc-viewer-body" id="docViewerBody">
+            <div class="doc-metadata-bar" id="docMetadataBar">
+              <span id="docMetaTitle">Select a document tab</span>
+              <span class="doc-page-badge" id="docPageBadge">Page 1</span>
+            </div>
+            <div class="doc-content-container" id="docContentContainer">
+              <!-- Full rendered markdown document with highlighted citation targets -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- 1. BYOK Settings Modal -->
+    <div class="modal-overlay hidden" id="settingsModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Bring Your Own Key (BYOK) Gateway</h3>
+          <button class="btn-close" id="btnCloseSettings">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">Keys are stored securely in client <code>localStorage</code> only and never persisted on the server.</p>
+          <div class="form-group">
+            <label>Google Gemini API Key</label>
+            <input type="password" id="inputGeminiKey" class="form-input" placeholder="AIzaSy...">
+          </div>
+          <div class="form-group">
+            <label>OpenAI API Key (Optional)</label>
+            <input type="password" id="inputOpenAIKey" class="form-input" placeholder="sk-...">
+          </div>
+          <div class="form-group">
+            <label>LLM Synthesis Model</label>
+            <select id="selectModel" class="form-select">
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended - Sub-second)</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+              <option value="gpt-4o-mini">GPT-4o Mini</option>
+              <option value="offline">Zero-Drain Offline High-Precision Engine ($0.00)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnClearKeys">Clear Keys</button>
+          <button class="btn btn-primary" id="btnSaveSettings">Save & Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Ragas Evals Matrix Modal -->
+    <div class="modal-overlay hidden" id="evalsModal">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <h3>Ragas Evaluation & Retrieval Comparison Matrix</h3>
+          <button class="btn-close" id="btnCloseEvals">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">Empirical benchmarks comparing 10 enterprise queries across Dense-only, BM25-only, and Hybrid (RRF + Re-ranking).</p>
+          <div class="matrix-table-container">
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th>RETRIEVAL ARCHITECTURE</th>
+                  <th>CONTEXT PRECISION</th>
+                  <th>CONTEXT RECALL</th>
+                  <th>FAITHFULNESS</th>
+                  <th>ANSWER RELEVANCE</th>
+                </tr>
+              </thead>
+              <tbody id="matrixTableBody">
+                <!-- Populated via API -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="btnRunLiveEvals">Re-run Live Benchmark</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>
