@@ -93,6 +93,6 @@ class GroundedSynthesizer:
             retrieved_chunks=retrieved_chunks,
             tokens_used=est_tokens,
             estimated_cost_saved_usd=0.0,
-            provider=provider,
-            model=model,
+            provider=raw_output.get("provider", provider),
+            model=raw_output.get("model", model),
         )

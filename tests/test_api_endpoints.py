@@ -104,3 +104,15 @@ def test_auth_detect_endpoint(client):
     assert "model" in data
     assert "label" in data
     assert "status" in data
+
+
+def test_test_key_endpoint(client):
+    # Empty key test
+    res = client.post("/api/v1/auth/test_key", json={"provider": "gemini", "api_key": ""})
+    assert res.status_code == 200
+    assert res.json()["success"] is False
+
+    # Unsupported provider
+    res2 = client.post("/api/v1/auth/test_key", json={"provider": "unknown_ai", "api_key": "dummy"})
+    assert res2.status_code == 200
+    assert res2.json()["success"] is False

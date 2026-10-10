@@ -98,18 +98,36 @@
         </div>
 
         <div class="input-block">
-          <label>Anthropic Claude API Key (Optional)</label>
-          <input type="password" id="inputClaudeKey" class="text-input" placeholder="sk-ant-api03-...">
-        </div>
-
-        <div class="input-block">
-          <label>Google Gemini API Key (Optional)</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label style="margin-bottom: 0;">Google Gemini API Key (Recommended)</label>
+            <button type="button" class="action-btn btn-ghost" id="btnTestGeminiKey" style="padding: 3px 10px; font-size: 0.72rem; border-color: var(--emerald-primary);">
+              ⚡ Test Connection
+            </button>
+          </div>
           <input type="password" id="inputGeminiKey" class="text-input" placeholder="AIzaSy...">
+          <div id="geminiKeyStatus" style="font-size: 0.74rem; margin-top: 4px; font-family: var(--font-mono); color: var(--text-muted);"></div>
         </div>
 
         <div class="input-block">
-          <label>OpenAI API Key (Optional)</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label style="margin-bottom: 0;">Anthropic Claude API Key (Optional)</label>
+            <button type="button" class="action-btn btn-ghost" id="btnTestClaudeKey" style="padding: 3px 10px; font-size: 0.72rem;">
+              ⚡ Test Connection
+            </button>
+          </div>
+          <input type="password" id="inputClaudeKey" class="text-input" placeholder="sk-ant-api03-...">
+          <div id="claudeKeyStatus" style="font-size: 0.74rem; margin-top: 4px; font-family: var(--font-mono); color: var(--text-muted);"></div>
+        </div>
+
+        <div class="input-block">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label style="margin-bottom: 0;">OpenAI API Key (Optional)</label>
+            <button type="button" class="action-btn btn-ghost" id="btnTestOpenAIKey" style="padding: 3px 10px; font-size: 0.72rem;">
+              ⚡ Test Connection
+            </button>
+          </div>
           <input type="password" id="inputOpenAIKey" class="text-input" placeholder="sk-...">
+          <div id="openAIKeyStatus" style="font-size: 0.74rem; margin-top: 4px; font-family: var(--font-mono); color: var(--text-muted);"></div>
         </div>
 
         <div class="input-block">

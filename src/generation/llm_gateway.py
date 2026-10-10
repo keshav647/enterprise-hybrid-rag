@@ -66,6 +66,22 @@ class LLMGateway:
         import os
         api_key = custom_api_key or self.default_api_key
 
+        # If custom key was passed and provider is auto, detect provider from key prefix
+        if provider == "auto" and custom_api_key:
+            k = custom_api_key.strip()
+            if k.startswith("AIza"):
+                provider = "gemini"
+                model = "gemini-2.5-flash"
+                api_key = k
+            elif k.startswith("sk-ant"):
+                provider = "anthropic"
+                model = "claude-3-5-sonnet-20241022"
+                api_key = k
+            elif k.startswith("sk-"):
+                provider = "openai"
+                model = "gpt-4o-mini"
+                api_key = k
+
         if provider == "auto":
             detected = self.detect_available_provider()
             provider = detected["provider"]
@@ -79,20 +95,32 @@ class LLMGateway:
 
         if provider in ("anthropic", "claude") and api_key:
             try:
-                return self._call_anthropic(query, retrieved_chunks, api_key, model)
-            except Exception:
+                res = self._call_anthropic(query, retrieved_chunks, api_key, model)
+                res["provider"] = "anthropic"
+                res["model"] = model
+                return res
+            except Exception as e:
+                print(f"[LLMGateway] Anthropic call failed: {e}")
                 return self._call_offline_engine(query, retrieved_chunks)
 
         if provider == "gemini" and api_key:
             try:
-                return self._call_gemini(query, retrieved_chunks, api_key, model)
-            except Exception:
+                res = self._call_gemini(query, retrieved_chunks, api_key, model)
+                res["provider"] = "gemini"
+                res["model"] = model
+                return res
+            except Exception as e:
+                print(f"[LLMGateway] Gemini call failed: {e}")
                 return self._call_offline_engine(query, retrieved_chunks)
 
         if provider == "openai" and api_key:
             try:
-                return self._call_openai(query, retrieved_chunks, api_key, model)
-            except Exception:
+                res = self._call_openai(query, retrieved_chunks, api_key, model)
+                res["provider"] = "openai"
+                res["model"] = model
+                return res
+            except Exception as e:
+                print(f"[LLMGateway] OpenAI call failed: {e}")
                 return self._call_offline_engine(query, retrieved_chunks)
 
         # Default fallback to high-fidelity deterministic offline engine
@@ -103,8 +131,9 @@ class LLMGateway:
         query: str,
         retrieved_chunks: List[SearchResultItem],
         api_key: str,
-        model: str,
+        model: str = "gemini-2.5-flash",
     ) -> Dict[str, Any]:
+        """Calls Google Gemini API using google-genai SDK with multi-model fallback."""
         from google import genai
         from src.generation.prompts import GROUNDED_SYNTHESIS_SYSTEM_PROMPT, GROUNDED_SYNTHESIS_USER_TEMPLATE
 
@@ -115,17 +144,35 @@ class LLMGateway:
         )
 
         client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(
-            model=model,
-            contents=[GROUNDED_SYNTHESIS_SYSTEM_PROMPT, user_prompt],
-            config={
-                "response_mime_type": "application/json",
-                "temperature": 0.1,
-            },
-        )
 
-        text = response.text
-        return json.loads(text)
+        models_to_try = [model]
+        for fallback in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
+            if fallback not in models_to_try:
+                models_to_try.append(fallback)
+
+        last_err = None
+        for m in models_to_try:
+            try:
+                response = client.models.generate_content(
+                    model=m,
+                    contents=[GROUNDED_SYNTHESIS_SYSTEM_PROMPT, user_prompt],
+                    config={
+                        "response_mime_type": "application/json",
+                        "temperature": 0.1,
+                    },
+                )
+                text = (response.text or "").strip()
+                if "```json" in text:
+                    text = text.split("```json")[1].split("```")[0].strip()
+                elif "```" in text:
+                    text = text.split("```")[1].split("```")[0].strip()
+                data = json.loads(text)
+                return data
+            except Exception as e:
+                last_err = e
+                continue
+
+        raise last_err or RuntimeError("Gemini content generation failed across all models")
 
     def _call_openai(
         self,

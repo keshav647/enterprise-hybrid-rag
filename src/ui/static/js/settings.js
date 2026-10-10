@@ -20,6 +20,53 @@ function bindEvents() {
   if (btnAutoDetectNow) btnAutoDetectNow.addEventListener("click", detectActiveKeys);
   if (btnSaveSettings) btnSaveSettings.addEventListener("click", saveSettings);
   if (btnClearKeys) btnClearKeys.addEventListener("click", clearSettings);
+
+  const btnTestGemini = document.getElementById("btnTestGeminiKey");
+  if (btnTestGemini) {
+    btnTestGemini.addEventListener("click", () => testKey("gemini", inputGeminiKey.value.trim(), "geminiKeyStatus", btnTestGemini));
+  }
+
+  const btnTestClaude = document.getElementById("btnTestClaudeKey");
+  if (btnTestClaude) {
+    btnTestClaude.addEventListener("click", () => testKey("anthropic", inputClaudeKey.value.trim(), "claudeKeyStatus", btnTestClaude));
+  }
+
+  const btnTestOpenAI = document.getElementById("btnTestOpenAIKey");
+  if (btnTestOpenAI) {
+    btnTestOpenAI.addEventListener("click", () => testKey("openai", inputOpenAIKey.value.trim(), "openAIKeyStatus", btnTestOpenAI));
+  }
+}
+
+async function testKey(provider, key, statusElementId, buttonElement) {
+  const statusEl = document.getElementById(statusElementId);
+  if (!key) {
+    if (statusEl) statusEl.innerHTML = `<span style="color: var(--yellow-solar)">Please enter a key first.</span>`;
+    return;
+  }
+
+  const origText = buttonElement.textContent;
+  buttonElement.disabled = true;
+  buttonElement.textContent = "Testing...";
+  if (statusEl) statusEl.innerHTML = `<span style="color: var(--text-muted)">Connecting to ${provider}...</span>`;
+
+  try {
+    const res = await fetch("/api/v1/auth/test_key", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider: provider, api_key: key }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (statusEl) statusEl.innerHTML = `<span style="color: var(--emerald-bright)">✓ ${data.message}</span>`;
+    } else {
+      if (statusEl) statusEl.innerHTML = `<span style="color: #f87171">✗ ${data.message}</span>`;
+    }
+  } catch (err) {
+    if (statusEl) statusEl.innerHTML = `<span style="color: #f87171">✗ Network error: ${err.message}</span>`;
+  } finally {
+    buttonElement.disabled = false;
+    buttonElement.textContent = origText;
+  }
 }
 
 function loadSavedSettings() {

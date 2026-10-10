@@ -3,6 +3,7 @@
 import time
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
+from pydantic import BaseModel
 from src.schemas.models import SearchRequest, GroundedResponse
 from src.config import settings
 
@@ -66,6 +67,58 @@ async def execute_search(req: SearchRequest):
     return response
 
 
+class KeyTestRequest(BaseModel):
+    provider: str
+    api_key: str
+
+
+@router.post("/api/v1/auth/test_key")
+async def test_key_connection(req: KeyTestRequest) -> Dict[str, Any]:
+    """Tests if a provided API key is valid with a live minimal ping."""
+    key = req.api_key.strip()
+    if not key:
+        return {"success": False, "message": "API key cannot be empty"}
+
+    try:
+        if req.provider == "gemini":
+            from google import genai
+            client = genai.Client(api_key=key)
+            models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+            last_err = None
+            for m in models_to_try:
+                try:
+                    resp = client.models.generate_content(
+                        model=m,
+                        contents="Respond with the word 'OK'",
+                    )
+                    return {"success": True, "provider": "gemini", "model": m, "message": f"Gemini API key is active and connected ({m})!"}
+                except Exception as e:
+                    last_err = e
+            return {"success": False, "message": f"Gemini error: {str(last_err)}"}
+
+        elif req.provider in ("anthropic", "claude"):
+            import httpx
+            headers = {"x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json"}
+            payload = {"model": "claude-3-5-sonnet-20241022", "max_tokens": 10, "messages": [{"role": "user", "content": "Hi"}]}
+            with httpx.Client(timeout=10.0) as client:
+                res = client.post("https://api.anthropic.com/v1/messages", headers=headers, json=payload)
+                res.raise_for_status()
+            return {"success": True, "provider": "anthropic", "message": "Anthropic Claude API key is active and connected!"}
+
+        elif req.provider == "openai":
+            import httpx
+            headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+            payload = {"model": "gpt-4o-mini", "max_tokens": 10, "messages": [{"role": "user", "content": "Hi"}]}
+            with httpx.Client(timeout=10.0) as client:
+                res = client.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+                res.raise_for_status()
+            return {"success": True, "provider": "openai", "message": "OpenAI API key is active and connected!"}
+
+        return {"success": False, "message": f"Unsupported provider: {req.provider}"}
+    except Exception as e:
+        return {"success": False, "message": f"Verification error: {str(e)}"}
+
+
 @router.get("/api/v1/auth/detect")
 async def detect_auth_status() -> Dict[str, Any]:
     """Auto-detects active API keys from environment or system config."""
@@ -83,3 +136,4 @@ async def execute_raw_search(req: SearchRequest) -> Dict[str, Any]:
         top_k=req.top_k,
     )
     return pipeline_info
+
