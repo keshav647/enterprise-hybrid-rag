@@ -1661,3 +1661,87 @@ input:checked + .ios-slider:before {
     background: rgba(16, 185, 129, 0.24);
   }
 }
+
+/* ==========================================================================
+   IN-APP TOAST NOTIFICATION SYSTEM (Obsidian Glass + Neon Borders)
+   ========================================================================== */
+.toast-container {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast-message {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  min-width: 280px;
+  max-width: 440px;
+  background: rgba(10, 16, 12, 0.94);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--emerald-primary);
+  border-radius: var(--radius-md);
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.7),
+    0 0 20px rgba(16, 185, 129, 0.25);
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  font-weight: 600;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-message.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast-message.toast-success {
+  border-color: var(--emerald-primary);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 24px var(--emerald-glow);
+}
+
+.toast-message.toast-error {
+  border-color: #ef4444;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 24px rgba(239, 68, 68, 0.35);
+}
+
+.toast-message.toast-info {
+  border-color: var(--yellow-solar);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 24px var(--yellow-glow);
+}
+
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.toast-success .toast-icon {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--emerald-bright);
+}
+
+.toast-error .toast-icon {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.toast-info .toast-icon {
+  background: rgba(250, 204, 21, 0.2);
+  color: var(--yellow-solar);
+}

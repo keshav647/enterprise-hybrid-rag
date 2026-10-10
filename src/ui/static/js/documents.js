@@ -1,4 +1,4 @@
-import { updateHeaderCacheBadge, formatMarkdown } from "/static/js/shared.js";
+import { updateHeaderCacheBadge, formatMarkdown, showToast } from "/static/js/shared.js";
 
 const state = {
   documents: [],
@@ -146,7 +146,7 @@ async function handleIngest() {
   const content = ingestContent.value.trim();
 
   if (!title || !content) {
-    alert("Please enter title and content.");
+    showToast("Please enter both title and content.", "error");
     return;
   }
 
@@ -173,9 +173,9 @@ async function handleIngest() {
 
     await loadDocuments();
     await selectDocument(result.document_id);
-    alert(`Successfully added "${title}"!`);
+    showToast(`Successfully added "${title}" to knowledge base!`, "success");
   } catch (err) {
-    alert(`Error: ${err.message}`);
+    showToast(`Error: ${err.message}`, "error");
   } finally {
     btnSubmitIngest.disabled = false;
     btnSubmitIngest.textContent = "Ingest & Index";

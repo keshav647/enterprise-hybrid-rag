@@ -1,4 +1,4 @@
-import { updateHeaderCacheBadge } from "/static/js/shared.js";
+import { updateHeaderCacheBadge, showToast } from "/static/js/shared.js";
 
 async function initAnalyticsPage() {
   updateHeaderCacheBadge();
@@ -83,8 +83,9 @@ async function runLiveBenchmark() {
   try {
     await fetch("/api/v1/benchmarks/run", { method: "POST" });
     await loadBenchmarkMatrix();
+    showToast("Live benchmark completed successfully across 10 queries!", "success");
   } catch (err) {
-    alert("Live benchmark error: " + err.message);
+    showToast("Live benchmark error: " + err.message, "error");
   } finally {
     btn.textContent = "Re-Run Accuracy Test (10 Queries)";
     btn.disabled = false;

@@ -78,7 +78,7 @@
             AI Models &amp; API Keys
           </h3>
           <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 6px; line-height: 1.6;">
-            The engine is 100% operational out of the box with the <strong>Free Built-In Offline Engine</strong> ($0.00 cost). You can also connect your own Anthropic Claude, Google Gemini, or OpenAI API key. Keys are kept strictly in your browser's encrypted localStorage.
+            Configure your API keys or use auto-detected system credentials. Keys are saved securely in your browser's local storage.
           </p>
         </div>
 
@@ -99,7 +99,7 @@
 
         <div class="input-block">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label style="margin-bottom: 0;">Google Gemini API Key (Recommended)</label>
+            <label style="margin-bottom: 0;">Google Gemini API Key</label>
             <button type="button" class="action-btn btn-ghost" id="btnTestGeminiKey" style="padding: 3px 10px; font-size: 0.72rem; border-color: var(--emerald-primary);">
               ⚡ Test Connection
             </button>
@@ -110,7 +110,7 @@
 
         <div class="input-block">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label style="margin-bottom: 0;">Anthropic Claude API Key (Optional)</label>
+            <label style="margin-bottom: 0;">Anthropic Claude API Key</label>
             <button type="button" class="action-btn btn-ghost" id="btnTestClaudeKey" style="padding: 3px 10px; font-size: 0.72rem;">
               ⚡ Test Connection
             </button>
@@ -121,7 +121,7 @@
 
         <div class="input-block">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label style="margin-bottom: 0;">OpenAI API Key (Optional)</label>
+            <label style="margin-bottom: 0;">OpenAI API Key</label>
             <button type="button" class="action-btn btn-ghost" id="btnTestOpenAIKey" style="padding: 3px 10px; font-size: 0.72rem;">
               ⚡ Test Connection
             </button>
@@ -134,16 +134,19 @@
           <label>Select Active AI Model</label>
           <select id="selectModel" class="select-input">
             <option value="auto">⚡ Auto-Detect (Auto-selects active key or free offline engine)</option>
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Google)</option>
             <option value="claude-3-5-sonnet">Claude 3.5 Sonnet (Anthropic)</option>
-            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Google High-Speed)</option>
             <option value="gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
             <option value="offline">Offline Engine (100% Free, Built-In, No Key Needed)</option>
           </select>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
-          <button type="button" class="action-btn btn-ghost" id="btnClearKeys">Reset Keys</button>
-          <button type="button" class="action-btn btn-solid-amber" id="btnSaveSettings">Save &amp; Apply</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px;">
+          <a href="/" class="action-btn btn-ghost">← Return to Search</a>
+          <div style="display: flex; gap: 12px;">
+            <button type="button" class="action-btn btn-ghost" id="btnClearKeys">Reset Keys</button>
+            <button type="button" class="action-btn btn-solid-amber" id="btnSaveSettings">Save &amp; Return to Search</button>
+          </div>
         </div>
       </section>
     </main>

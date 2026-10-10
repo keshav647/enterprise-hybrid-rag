@@ -32,3 +32,38 @@ export function formatMarkdown(text) {
   }
   return html;
 }
+
+export function showToast(message, type = "success", duration = 3200) {
+  let container = document.getElementById("toastContainer");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toastContainer";
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `toast-message toast-${type}`;
+
+  let icon = "✓";
+  if (type === "error") icon = "✕";
+  else if (type === "info") icon = "⚡";
+
+  toast.innerHTML = `
+    <div class="toast-icon">${icon}</div>
+    <div class="toast-text">${message}</div>
+  `;
+
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add("show");
+  });
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, duration);
+}

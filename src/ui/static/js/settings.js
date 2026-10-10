@@ -1,4 +1,4 @@
-import { updateHeaderCacheBadge } from "/static/js/shared.js";
+import { updateHeaderCacheBadge, showToast } from "/static/js/shared.js";
 
 const inputClaudeKey = document.getElementById("inputClaudeKey");
 const inputGeminiKey = document.getElementById("inputGeminiKey");
@@ -100,7 +100,10 @@ function saveSettings() {
   localStorage.setItem("SYNAPSE_OPENAI_KEY", openAIKey);
   localStorage.setItem("SYNAPSE_MODEL", model);
 
-  alert("Settings saved successfully!");
+  showToast("Settings saved successfully! Returning to Search...", "success", 2000);
+  setTimeout(() => {
+    window.location.href = "/";
+  }, 750);
 }
 
 function clearSettings() {
@@ -115,7 +118,7 @@ function clearSettings() {
   selectModel.value = "auto";
 
   detectActiveKeys();
-  alert("Settings reset to defaults.");
+  showToast("Settings reset to defaults.", "info");
 }
 
 document.addEventListener("DOMContentLoaded", initSettingsPage);
