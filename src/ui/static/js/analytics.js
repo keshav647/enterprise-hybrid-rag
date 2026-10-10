@@ -61,7 +61,7 @@ async function loadBenchmarkMatrix() {
         const isBest = key === "hybrid_reranked";
         return `
           <tr class="${isBest ? "highlight-row" : ""}">
-            <td><strong>${item.name}</strong> ${isBest ? "⭐ (Synapse Standard)" : ""}</td>
+            <td><strong>${item.name}</strong> ${isBest ? `<span class="standard-pill"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 3px;"><polyline points="20 6 9 17 4 12"></polyline></svg>STANDARD</span>` : ""}</td>
             <td class="${isBest ? "highlight-metric" : ""}">${(item.avg_context_precision * 100).toFixed(1)}%</td>
             <td class="${isBest ? "highlight-metric" : ""}">${(item.avg_context_recall * 100).toFixed(1)}%</td>
             <td class="${isBest ? "highlight-metric" : ""}">${(item.avg_faithfulness * 100).toFixed(1)}%</td>

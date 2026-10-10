@@ -302,7 +302,7 @@ function renderAnswer(data) {
     } else if (data.provider === "openai") {
       answerModelBadge.textContent = "GPT-4o Mini";
     } else {
-      answerModelBadge.textContent = "⚡ Free Built-In Engine ($0.00)";
+      answerModelBadge.textContent = "Free Built-In Engine ($0.00)";
     }
   }
 
@@ -340,7 +340,7 @@ function renderAnswer(data) {
         <div class="citation-focus-top">
           <span class="citation-focus-badge">[${cit.citation_id}] ${cit.document_title}</span>
           <button type="button" class="citation-jump-link" data-chunk-id="${cit.chunk_id}">
-            📖 Read in Document Library &rarr;
+            Read in Document Library &rarr;
           </button>
         </div>
         <div style="font-size: 0.74rem; color: var(--text-muted); font-family: var(--font-mono)">
@@ -376,8 +376,8 @@ function renderAnswer(data) {
   // Update Status Footer
   if (statusFooterSpeed) {
     statusFooterSpeed.textContent = data.cache_hit
-      ? `⚡ Response: ${data.latency_ms.toFixed(1)}ms (Fast Cache Hit: $0.00 Cost)`
-      : `⚡ Response: ${data.latency_ms.toFixed(1)}ms (Live Dual Search)`;
+      ? `Response: ${data.latency_ms.toFixed(1)}ms (Fast Cache Hit: $0.00 Cost)`
+      : `Response: ${data.latency_ms.toFixed(1)}ms (Live Dual Search)`;
   }
 }
 
@@ -566,7 +566,7 @@ function updateHUD(data) {
 
   if (hudLatencySub) {
     hudLatencySub.textContent = data.cache_hit
-      ? "⚡ Instant Fast Cache (<25ms)"
+      ? "Instant Fast Cache (<25ms)"
       : "Live Dual Search (Meaning + Exact Words)";
   }
   if (indicatorLatency) indicatorLatency.textContent = data.cache_hit ? "FAST" : "LIVE";
@@ -708,7 +708,7 @@ async function loadBenchmarks() {
         const isBest = key === "hybrid_reranked";
         return `
           <tr class="${isBest ? "highlight-row" : ""}">
-            <td><strong>${item.name}</strong> ${isBest ? "⭐ (Synapse Standard)" : ""}</td>
+            <td><strong>${item.name}</strong> ${isBest ? "(Synapse Standard)" : ""}</td>
             <td class="${isBest ? "highlight-metric" : ""}">${(item.avg_context_precision * 100).toFixed(1)}%</td>
             <td class="${isBest ? "highlight-metric" : ""}">${(item.avg_context_recall * 100).toFixed(1)}%</td>
             <td class="${isBest ? "highlight-metric" : ""}">${(item.avg_faithfulness * 100).toFixed(1)}%</td>
@@ -777,8 +777,8 @@ function saveSettings() {
     if (state.byok.model === "claude-3-5-sonnet") answerModelBadge.textContent = "Claude 3.5 Sonnet";
     else if (state.byok.model.includes("gemini")) answerModelBadge.textContent = "Gemini 2.5 Flash";
     else if (state.byok.model.includes("gpt")) answerModelBadge.textContent = "GPT-4o Mini";
-    else if (state.byok.model === "offline") answerModelBadge.textContent = "⚡ Free Built-In Engine ($0.00)";
-    else answerModelBadge.textContent = "⚡ Auto-Detect (Ready)";
+    else if (state.byok.model === "offline") answerModelBadge.textContent = "Free Built-In Engine ($0.00)";
+    else answerModelBadge.textContent = "Auto-Detect (Ready)";
   }
 
   alert("Settings saved successfully!");

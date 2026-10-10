@@ -46,19 +46,33 @@
       <!-- Navigation Tabs -->
       <nav class="header-nav">
         <a href="/" class="nav-tab-btn active">
-          <span>🔍</span>
+          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
           <span>Search &amp; Answers</span>
         </a>
         <a href="/documents" class="nav-tab-btn">
-          <span>📚</span>
+          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
           <span>Document Library</span>
         </a>
         <a href="/analytics" class="nav-tab-btn">
-          <span>📊</span>
+          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"></path>
+            <path d="M18 17V9"></path>
+            <path d="M13 17V5"></path>
+            <path d="M8 17v-3"></path>
+          </svg>
           <span>Accuracy &amp; Metrics</span>
         </a>
         <a href="/settings" class="nav-tab-btn">
-          <span>⚙️</span>
+          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
           <span>AI Models &amp; Keys</span>
         </a>
       </nav>
@@ -66,7 +80,9 @@
       <!-- Fast Cache Pill -->
       <div class="header-hud-pills">
         <div class="hud-pill hud-pill-cache" id="cacheStatusBadge">
-          <div class="cache-spark">⚡</div>
+          <svg class="cache-spark" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
           <span class="pill-label">FAST CACHE</span>
           <span class="pill-metric" id="cacheHitStat">Active</span>
         </div>
@@ -110,17 +126,34 @@
               <div class="mode-segmented-control">
                 <label class="segment-btn active" data-mode="hybrid">
                   <input type="radio" name="retrievalMode" value="hybrid" checked>
-                  <span class="segment-icon">⚡</span>
+                  <span class="segment-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                  </span>
                   <span class="segment-text">Smart Dual Search (Best)</span>
                 </label>
                 <label class="segment-btn" data-mode="dense">
                   <input type="radio" name="retrievalMode" value="dense">
-                  <span class="segment-icon">🧠</span>
+                  <span class="segment-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <path d="M12 2a10 10 0 0 0-7.07 17.07l1.41-1.41A8 8 0 1 1 12 4z"></path>
+                      <path d="m4.93 4.93 1.41 1.41"></path>
+                      <path d="m19.07 19.07-1.41-1.41"></path>
+                    </svg>
+                  </span>
                   <span class="segment-text">Meaning Only</span>
                 </label>
                 <label class="segment-btn" data-mode="bm25">
                   <input type="radio" name="retrievalMode" value="bm25">
-                  <span class="segment-icon">🔍</span>
+                  <span class="segment-icon">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                      <line x1="9" y1="20" x2="15" y2="20"></line>
+                      <line x1="12" y1="4" x2="12" y2="20"></line>
+                    </svg>
+                  </span>
                   <span class="segment-text">Exact Words Only</span>
                 </label>
               </div>
@@ -143,7 +176,21 @@
             <div class="scenarios-label">QUICK TEST QUESTIONS (CLICK TO RUN)</div>
             <div class="scenarios-track">
               <button type="button" class="scenario-card" data-query="What is the memory offset and vulnerable function in CVE-2024-8192?">
-                <div class="scenario-icon icon-rose">🐞</div>
+                <div class="scenario-icon icon-rose">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m8 2 1.88 1.88"></path>
+                    <path d="M14.12 3.88 16 2"></path>
+                    <path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"></path>
+                    <path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"></path>
+                    <path d="M12 20v-9"></path>
+                    <path d="M6.53 9C4.6 8.8 3 7.1 3 5"></path>
+                    <path d="M6 13H2"></path>
+                    <path d="M3 21c0-2.1 1.7-3.9 3.8-4"></path>
+                    <path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"></path>
+                    <path d="M22 13h-4"></path>
+                    <path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"></path>
+                  </svg>
+                </div>
                 <div class="scenario-content">
                   <div class="scenario-title">Find Exact Bug Code</div>
                   <div class="scenario-desc">Hex offset 0x7fff90a4 &amp; patch commit</div>
@@ -151,7 +198,12 @@
               </button>
 
               <button type="button" class="scenario-card" data-query="What was total consolidated revenue, AI Cloud growth, and Q3 CAPEX?">
-                <div class="scenario-icon icon-amber">📊</div>
+                <div class="scenario-icon icon-amber">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                </div>
                 <div class="scenario-content">
                   <div class="scenario-title">Read Financial Tables</div>
                   <div class="scenario-desc">Q3 Revenue, $3.41B CAPEX &amp; 48k GPUs</div>
@@ -159,7 +211,13 @@
               </button>
 
               <button type="button" class="scenario-card" data-query="What is the heartbeat interval and follower election timeout in Raft?">
-                <div class="scenario-icon icon-iris">⚙️</div>
+                <div class="scenario-icon icon-iris">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                  </svg>
+                </div>
                 <div class="scenario-content">
                   <div class="scenario-title">Read System Rules</div>
                   <div class="scenario-desc">50ms heartbeats &amp; election timeout rules</div>
@@ -167,7 +225,11 @@
               </button>
 
               <button type="button" class="scenario-card scenario-cache-demo" id="btnTestCacheHit">
-                <div class="scenario-icon icon-gold">⚡</div>
+                <div class="scenario-icon icon-gold">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                </div>
                 <div class="scenario-content">
                   <div class="scenario-title">Test Instant Cache</div>
                   <div class="scenario-desc">Repeated queries run in &lt;25ms at $0 cost</div>
@@ -194,7 +256,7 @@
             <span class="card-heading">AI Answer with Verified Sources</span>
           </div>
           <div class="card-meta-actions">
-            <span class="model-badge" id="answerModelBadge">⚡ Auto-Detect (Offline Ready)</span>
+            <span class="model-badge" id="answerModelBadge">Auto-Detect (Offline Ready)</span>
             <button class="icon-action-btn" id="btnCopyAnswer" title="Copy answer text">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -217,7 +279,13 @@
 
           <div class="answer-output-wrapper" id="answerContainer">
             <div class="empty-state-studio">
-              <div class="studio-monogram">⚡</div>
+              <div class="studio-monogram">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-bright)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+              </div>
               <h3>Enterprise Document Search Ready</h3>
               <p>Type any question above or click one of the quick test questions to inspect answers with verifiable citations.</p>
             </div>
@@ -234,8 +302,17 @@
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(6, 10, 8, 0.6); border-top: 1px solid var(--border-subtle); font-size: 0.76rem; color: var(--text-muted); font-family: var(--font-mono);">
-          <div><span style="color: var(--emerald-bright);">●</span> <span id="statusFooterSpeed">Ready to search</span></div>
-          <div><span style="color: var(--yellow-solar);">★</span> 100% Fact-Checked Against Source Documents</div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="pulsing-beacon" style="display: inline-block;"></span>
+            <span id="statusFooterSpeed">Ready to search</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--yellow-solar)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <path d="m9 12 2 2 4-4"></path>
+            </svg>
+            <span>100% Fact-Checked Against Source Documents</span>
+          </div>
         </div>
       </section>
     </main>

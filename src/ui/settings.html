@@ -44,26 +44,42 @@
 
       <nav class="header-nav">
         <a href="/" class="nav-tab-btn">
-          <span>🔍</span>
+          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
           <span>Search &amp; Answers</span>
         </a>
         <a href="/documents" class="nav-tab-btn">
-          <span>📚</span>
+          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
           <span>Document Library</span>
         </a>
         <a href="/analytics" class="nav-tab-btn">
-          <span>📊</span>
+          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"></path>
+            <path d="M18 17V9"></path>
+            <path d="M13 17V5"></path>
+            <path d="M8 17v-3"></path>
+          </svg>
           <span>Accuracy &amp; Metrics</span>
         </a>
         <a href="/settings" class="nav-tab-btn active">
-          <span>⚙️</span>
+          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
           <span>AI Models &amp; Keys</span>
         </a>
       </nav>
 
       <div class="header-hud-pills">
         <div class="hud-pill hud-pill-cache" id="cacheStatusBadge">
-          <div class="cache-spark">⚡</div>
+          <svg class="cache-spark" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
           <span class="pill-label">FAST CACHE</span>
           <span class="pill-metric" id="cacheHitStat">Active</span>
         </div>
@@ -92,16 +108,25 @@
               Scanning system keys...
             </div>
           </div>
-          <button type="button" class="action-btn btn-ghost" id="btnAutoDetectNow" style="padding: 8px 16px; font-size: 0.78rem; border-color: var(--emerald-bright);">
-            ⚡ Scan Keys Now
+          <button type="button" class="action-btn btn-ghost" id="btnAutoDetectNow" style="padding: 8px 16px; font-size: 0.78rem; border-color: var(--emerald-bright); display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+              <path d="M16 21h5v-5"></path>
+            </svg>
+            <span>Scan Keys Now</span>
           </button>
         </div>
 
         <div class="input-block">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <label style="margin-bottom: 0;">Google Gemini API Key</label>
-            <button type="button" class="action-btn btn-ghost" id="btnTestGeminiKey" style="padding: 3px 10px; font-size: 0.72rem; border-color: var(--emerald-primary);">
-              ⚡ Test Connection
+            <button type="button" class="action-btn btn-ghost" id="btnTestGeminiKey" style="padding: 3px 10px; font-size: 0.72rem; border-color: var(--emerald-primary); display: inline-flex; align-items: center; gap: 5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span>Test Connection</span>
             </button>
           </div>
           <input type="password" id="inputGeminiKey" class="text-input" placeholder="AIzaSy...">
@@ -111,8 +136,11 @@
         <div class="input-block">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <label style="margin-bottom: 0;">Anthropic Claude API Key</label>
-            <button type="button" class="action-btn btn-ghost" id="btnTestClaudeKey" style="padding: 3px 10px; font-size: 0.72rem;">
-              ⚡ Test Connection
+            <button type="button" class="action-btn btn-ghost" id="btnTestClaudeKey" style="padding: 3px 10px; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span>Test Connection</span>
             </button>
           </div>
           <input type="password" id="inputClaudeKey" class="text-input" placeholder="sk-ant-api03-...">
@@ -122,8 +150,11 @@
         <div class="input-block">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <label style="margin-bottom: 0;">OpenAI API Key</label>
-            <button type="button" class="action-btn btn-ghost" id="btnTestOpenAIKey" style="padding: 3px 10px; font-size: 0.72rem;">
-              ⚡ Test Connection
+            <button type="button" class="action-btn btn-ghost" id="btnTestOpenAIKey" style="padding: 3px 10px; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span>Test Connection</span>
             </button>
           </div>
           <input type="password" id="inputOpenAIKey" class="text-input" placeholder="sk-...">
@@ -133,7 +164,7 @@
         <div class="input-block">
           <label>Select Active AI Model</label>
           <select id="selectModel" class="select-input">
-            <option value="auto">⚡ Auto-Detect (Auto-selects active key or free offline engine)</option>
+            <option value="auto">Auto-Detect (Active credentials or local offline engine)</option>
             <option value="gemini-2.5-flash">Gemini 2.5 Flash (Google)</option>
             <option value="claude-3-5-sonnet">Claude 3.5 Sonnet (Anthropic)</option>
             <option value="gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
@@ -142,7 +173,13 @@
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px;">
-          <a href="/" class="action-btn btn-ghost">← Return to Search</a>
+          <a href="/" class="action-btn btn-ghost" style="display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Return to Search</span>
+          </a>
           <div style="display: flex; gap: 12px;">
             <button type="button" class="action-btn btn-ghost" id="btnClearKeys">Reset Keys</button>
             <button type="button" class="action-btn btn-solid-amber" id="btnSaveSettings">Save &amp; Return to Search</button>

@@ -150,7 +150,7 @@ function renderAnswer(data) {
     if (data.provider === "anthropic") answerModelBadge.textContent = "Claude 3.5 Sonnet";
     else if (data.provider === "gemini") answerModelBadge.textContent = "Gemini 2.5 Flash";
     else if (data.provider === "openai") answerModelBadge.textContent = "GPT-4o Mini";
-    else answerModelBadge.textContent = "⚡ Free Built-In Engine ($0.00)";
+    else answerModelBadge.textContent = "Built-In Local Engine ($0.00)";
   }
 
   // Replace [1], [2] with high-contrast clickable citation pills
@@ -186,7 +186,11 @@ function renderAnswer(data) {
         <div class="citation-focus-top">
           <span class="citation-focus-badge">[${cit.citation_id}] ${cit.document_title}</span>
           <a href="/documents?doc=${docId}&chunk=${cit.chunk_id}" class="citation-jump-link">
-            📖 Read full document &rarr;
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 4px;">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+            <span>Read Full Document &rarr;</span>
           </a>
         </div>
         <div style="font-size: 0.74rem; color: var(--text-muted); font-family: var(--font-mono)">
@@ -218,8 +222,8 @@ function renderAnswer(data) {
   // Update Status Footer
   if (statusFooterSpeed) {
     statusFooterSpeed.textContent = data.cache_hit
-      ? `⚡ Response: ${data.latency_ms.toFixed(1)}ms (Fast Cache Hit: $0.00 Cost)`
-      : `⚡ Response: ${data.latency_ms.toFixed(1)}ms (Live Dual Search)`;
+      ? `Response: ${data.latency_ms.toFixed(1)}ms (Fast Cache Hit: $0.00 Cost)`
+      : `Response: ${data.latency_ms.toFixed(1)}ms (Live Dual Search)`;
   }
 }
 
