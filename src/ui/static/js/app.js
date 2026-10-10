@@ -1,9 +1,10 @@
 /**
- * Synapse // Enterprise Hybrid Search & Document Intelligence Engine
- * Modern ES Modules Frontend Controller with GSAP Transitions & 3D Spatial Physics
+ * Synapse // Enterprise Document Intelligence Engine
+ * Modular Multi-Page Controller with GSAP Physics & Instant Citation Jump
  */
 
 const state = {
+  activeTab: "search",
   documents: [],
   activeDocId: null,
   activeDocumentData: null,
@@ -25,13 +26,19 @@ const answerModelBadge = document.getElementById("answerModelBadge");
 const citationsSection = document.getElementById("citationsSection");
 const citationsList = document.getElementById("citationsList");
 const citationCountBadge = document.getElementById("citationCountBadge");
+const cacheToggle = document.getElementById("cacheToggle");
+const statusFooterSpeed = document.getElementById("statusFooterSpeed");
+const statusFooterAccuracy = document.getElementById("statusFooterAccuracy");
+
+// Document Library Elements
 const docTabs = document.getElementById("docTabs");
+const docLibraryList = document.getElementById("docLibraryList");
 const docContentContainer = document.getElementById("docContentContainer");
 const docMetaTitle = document.getElementById("docMetaTitle");
 const docPageBadge = document.getElementById("docPageBadge");
-const cacheToggle = document.getElementById("cacheToggle");
+const docChunkCountBadge = document.getElementById("docChunkCountBadge");
 
-// HUD Elements
+// Telemetry & Analytics Elements
 const hudLatency = document.getElementById("hudLatency");
 const hudLatencySub = document.getElementById("hudLatencySub");
 const hudCacheStatus = document.getElementById("hudCacheStatus");
@@ -44,9 +51,7 @@ const indicatorLatency = document.getElementById("indicatorLatency");
 const indicatorCache = document.getElementById("indicatorCache");
 const indicatorFaith = document.getElementById("indicatorFaith");
 
-// Modals
-const settingsModal = document.getElementById("settingsModal");
-const evalsModal = document.getElementById("evalsModal");
+// Settings Elements
 const inputClaudeKey = document.getElementById("inputClaudeKey");
 const inputGeminiKey = document.getElementById("inputGeminiKey");
 const inputOpenAIKey = document.getElementById("inputOpenAIKey");
@@ -54,21 +59,80 @@ const selectModel = document.getElementById("selectModel");
 const detectedStatusText = document.getElementById("detectedStatusText");
 const btnAutoDetectNow = document.getElementById("btnAutoDetectNow");
 
+// Ingest Modal Elements
+const ingestModal = document.getElementById("ingestModal");
+const btnOpenIngestModal = document.getElementById("btnOpenIngestModal");
+const btnCloseIngestModal = document.getElementById("btnCloseIngestModal");
+const btnCancelIngest = document.getElementById("btnCancelIngest");
+const btnSubmitIngest = document.getElementById("btnSubmitIngest");
+const ingestTitle = document.getElementById("ingestTitle");
+const ingestContent = document.getElementById("ingestContent");
+
 // Initialize application
 async function init() {
   bindEventListeners();
-  init3DTilt();
+  initRouting();
   loadSettings();
   detectActiveKeys();
   await loadDocuments();
   await updateCacheStats();
 }
 
+// Multi-Page Tab Routing
+function initRouting() {
+  const hash = window.location.hash.replace("#", "") || "search";
+  const path = window.location.pathname.replace("/", "") || "search";
+  const initialTab = ["search", "documents", "analytics", "settings"].includes(hash)
+    ? hash
+    : ["search", "documents", "analytics", "settings"].includes(path)
+    ? path
+    : "search";
+
+  switchTab(initialTab);
+
+  window.addEventListener("hashchange", () => {
+    const newHash = window.location.hash.replace("#", "");
+    if (newHash) switchTab(newHash);
+  });
+}
+
+function switchTab(tabName) {
+  state.activeTab = tabName;
+
+  // Update nav buttons
+  document.querySelectorAll(".nav-tab-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.tab === tabName);
+  });
+
+  // Toggle page views
+  document.querySelectorAll(".page-view").forEach((view) => {
+    const isTarget = view.id === `view${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`;
+    view.classList.toggle("active", isTarget);
+  });
+
+  if (window.location.hash !== `#${tabName}`) {
+    history.replaceState(null, "", `#${tabName}`);
+  }
+
+  // Trigger page-specific data refresh
+  if (tabName === "analytics") {
+    loadBenchmarks();
+  } else if (tabName === "settings") {
+    detectActiveKeys();
+  }
+}
+
 // Bind UI event listeners
 function bindEventListeners() {
+  // Nav Tab clicks
+  document.querySelectorAll(".nav-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  });
+
+  // Search submission
   searchForm.addEventListener("submit", handleSearchSubmit);
 
-  // Scenario chips with GSAP micro-interaction
+  // Scenario chips
   document.querySelectorAll(".scenario-card[data-query]").forEach((card) => {
     card.addEventListener("click", () => {
       queryInput.value = card.dataset.query;
@@ -100,7 +164,7 @@ function bindEventListeners() {
     });
   });
 
-  // Accordion toggle
+  // Accordion toggle in Analytics
   const pipelineToggle = document.getElementById("pipelineToggle");
   const pipelineContent = document.getElementById("pipelineContent");
   if (pipelineToggle && pipelineContent) {
@@ -113,28 +177,17 @@ function bindEventListeners() {
     });
   }
 
-  // Modals
-  document.getElementById("btnSettingsModal").addEventListener("click", () => {
-    settingsModal.classList.remove("hidden");
-    detectActiveKeys();
-    if (window.gsap) gsap.from(".modal-dialog", { scale: 0.9, opacity: 0, duration: 0.25 });
-  });
-  document.getElementById("btnCloseSettings").addEventListener("click", () => {
-    settingsModal.classList.add("hidden");
-  });
+  // Settings Actions
   document.getElementById("btnSaveSettings").addEventListener("click", saveSettings);
   document.getElementById("btnClearKeys").addEventListener("click", clearSettings);
   if (btnAutoDetectNow) {
     btnAutoDetectNow.addEventListener("click", detectActiveKeys);
   }
 
-  document.getElementById("btnEvalsModal").addEventListener("click", openEvalsModal);
-  document.getElementById("btnCloseEvals").addEventListener("click", () => {
-    evalsModal.classList.add("hidden");
-  });
+  // Evals live rerun in Analytics
   document.getElementById("btnRunLiveEvals").addEventListener("click", runLiveEvals);
 
-  // Copy answer
+  // Copy answer button
   document.getElementById("btnCopyAnswer").addEventListener("click", () => {
     if (state.lastSearchResponse) {
       navigator.clipboard.writeText(state.lastSearchResponse.answer);
@@ -143,106 +196,20 @@ function bindEventListeners() {
       setTimeout(() => { btn.style.color = ""; }, 1200);
     }
   });
-}
 
-// 3D Tilt physics for cards (ThreeUI pattern)
-function init3DTilt() {
-  const cards = document.querySelectorAll(".tilt-card");
-  cards.forEach((card) => {
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      const rotateX = -(y / rect.height) * 10;
-      const rotateY = (x / rect.width) * 10;
-      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
-    });
-    card.addEventListener("mouseleave", () => {
-      card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)";
-    });
-  });
-}
-
-// Load document catalog
-async function loadDocuments() {
-  try {
-    const res = await fetch("/api/v1/documents");
-    if (!res.ok) return;
-    state.documents = await res.json();
-
-    document.getElementById("kbDocCount").textContent = `${state.documents.length} Docs`;
-
-    docTabs.innerHTML = "";
-    state.documents.forEach((doc, idx) => {
-      const tab = document.createElement("button");
-      tab.className = `doc-tab-pill ${idx === 0 ? "active" : ""}`;
-      tab.textContent = doc.title;
-      tab.dataset.docId = doc.document_id;
-      tab.addEventListener("click", () => selectDocumentTab(doc.document_id));
-      docTabs.appendChild(tab);
-    });
-
-    if (state.documents.length > 0) {
-      await selectDocumentTab(state.documents[0].document_id);
-    }
-  } catch (err) {
-    console.error("Failed to load documents:", err);
+  // Ingest Document Modal
+  if (btnOpenIngestModal) {
+    btnOpenIngestModal.addEventListener("click", () => ingestModal.classList.remove("hidden"));
   }
-}
-
-// Select active document tab
-async function selectDocumentTab(docId) {
-  state.activeDocId = docId;
-  document.querySelectorAll(".doc-tab-pill").forEach((tab) => {
-    tab.classList.toggle("active", tab.dataset.docId === docId);
-  });
-
-  try {
-    const res = await fetch(`/api/v1/documents/${docId}`);
-    if (!res.ok) return;
-    const data = await res.json();
-    state.activeDocumentData = data;
-
-    docMetaTitle.textContent = data.metadata.title;
-    docPageBadge.textContent = `${data.metadata.total_pages} Pages`;
-
-    renderDocumentContent(data);
-  } catch (err) {
-    console.error("Failed to fetch document detail:", err);
+  if (btnCloseIngestModal) {
+    btnCloseIngestModal.addEventListener("click", () => ingestModal.classList.add("hidden"));
   }
-}
-
-// Render document chunks in viewer
-function renderDocumentContent(data) {
-  docContentContainer.innerHTML = "";
-
-  data.chunks.forEach((chunk) => {
-    const chunkDiv = document.createElement("div");
-    chunkDiv.className = "reader-chunk-item";
-    chunkDiv.id = `chunk_${chunk.chunk_id}`;
-    chunkDiv.dataset.chunkId = chunk.chunk_id;
-    chunkDiv.style.marginBottom = "14px";
-    chunkDiv.style.padding = "12px 16px";
-    chunkDiv.style.borderRadius = "8px";
-    chunkDiv.style.border = "1px solid rgba(255,255,255,0.06)";
-    chunkDiv.style.background = "rgba(10, 13, 22, 0.45)";
-    chunkDiv.style.transition = "all 0.3s ease";
-
-    const header = document.createElement("div");
-    header.style.display = "flex";
-    header.style.justifyContent = "space-between";
-    header.style.fontSize = "0.72rem";
-    header.style.color = "var(--text-muted)";
-    header.style.marginBottom = "8px";
-    header.innerHTML = `<span><strong style="color: var(--yellow-solar)">${chunk.section_title}</strong> &bull; Page ${chunk.page_number || 1}</span><span style="font-family: var(--font-mono)">${chunk.chunk_id}</span>`;
-
-    const body = document.createElement("div");
-    body.innerHTML = formatMarkdown(chunk.metadata.raw_text || chunk.content);
-
-    chunkDiv.appendChild(header);
-    chunkDiv.appendChild(body);
-    docContentContainer.appendChild(chunkDiv);
-  });
+  if (btnCancelIngest) {
+    btnCancelIngest.addEventListener("click", () => ingestModal.classList.add("hidden"));
+  }
+  if (btnSubmitIngest) {
+    btnSubmitIngest.addEventListener("click", handleIngestDocument);
+  }
 }
 
 // Handle search submission
@@ -322,7 +289,7 @@ async function handleSearch(query, forceCache = null) {
   }
 }
 
-// Render answer & citations with GSAP cascade
+// Render answer & citations with Prominent Highlight Cards
 function renderAnswer(data) {
   let formattedHtml = formatMarkdown(data.answer);
 
@@ -335,18 +302,18 @@ function renderAnswer(data) {
     } else if (data.provider === "openai") {
       answerModelBadge.textContent = "GPT-4o Mini";
     } else {
-      answerModelBadge.textContent = "⚡ Free Offline Engine ($0.00)";
+      answerModelBadge.textContent = "⚡ Free Built-In Engine ($0.00)";
     }
   }
 
-  // Replace [1], [2] with high-contrast citation buttons
+  // Replace [1], [2] with high-contrast clickable citation pills
   formattedHtml = formattedHtml.replace(/\[(\d+)\]/g, (match, num) => {
     return `<button class="citation-pill-ref" data-cit-num="${num}">[${num}]</button>`;
   });
 
   answerContainer.innerHTML = formattedHtml;
 
-  // Animate answer paragraphs with GSAP
+  // Animate answer paragraphs
   if (window.gsap) {
     gsap.from("#answerContainer > *", {
       opacity: 0,
@@ -357,132 +324,295 @@ function renderAnswer(data) {
     });
   }
 
-  // Render citations list
+  // Render citations into the dedicated breakdown list
   if (data.citations && data.citations.length > 0) {
     citationsSection.classList.remove("hidden");
-    citationCountBadge.textContent = `${data.citations.length} Verified Sources`;
+    citationCountBadge.textContent = `${data.citations.length} Verified Sources Found`;
     citationsList.innerHTML = "";
 
     data.citations.forEach((cit) => {
       const card = document.createElement("div");
-      card.className = "citation-ribbon-card";
+      card.className = "citation-focus-card";
       card.dataset.chunkId = cit.chunk_id;
       card.dataset.citNum = cit.citation_id;
 
       card.innerHTML = `
-        <div class="citation-ribbon-top">
-          <span class="citation-doc-title">${cit.document_title}</span>
-          <span class="citation-pill-tag">[${cit.citation_id}] Page ${cit.page_number || 1}</span>
+        <div class="citation-focus-top">
+          <span class="citation-focus-badge">[${cit.citation_id}] ${cit.document_title}</span>
+          <button type="button" class="citation-jump-link" data-chunk-id="${cit.chunk_id}">
+            📖 Read in Document Library &rarr;
+          </button>
         </div>
-        <div style="font-size: 0.74rem; color: var(--text-muted); font-family: var(--font-mono)">${cit.section_title} &bull; ${cit.chunk_id}</div>
-        <div class="citation-quote-box">"${cit.exact_quote}"</div>
+        <div style="font-size: 0.74rem; color: var(--text-muted); font-family: var(--font-mono)">
+          Section: <strong>${cit.section_title}</strong> &bull; Page ${cit.page_number || 1}
+        </div>
+        <div class="citation-focus-quote">
+          "${cit.exact_quote}"
+        </div>
       `;
 
-      card.addEventListener("click", () => activateCitation(cit));
+      // Jump to Document Library on button click
+      const jumpBtn = card.querySelector(".citation-jump-link");
+      if (jumpBtn) {
+        jumpBtn.addEventListener("click", () => jumpToCitationInLibrary(cit));
+      }
+
       citationsList.appendChild(card);
     });
 
-    // GSAP cascade on citations deck
-    if (window.gsap) {
-      gsap.from(".citation-ribbon-card", {
-        opacity: 0,
-        x: -16,
-        stagger: 0.08,
-        duration: 0.45,
-        ease: "power2.out",
-      });
-    }
-
-    // Bind inline citation badges
+    // Also wire up inline pills in the answer text [1], [2]
     document.querySelectorAll(".citation-pill-ref").forEach((pill) => {
       pill.addEventListener("click", (e) => {
         e.stopPropagation();
         const citNum = parseInt(pill.dataset.citNum, 10);
         const targetCit = data.citations.find((c) => c.citation_id === citNum);
-        if (targetCit) activateCitation(targetCit);
+        if (targetCit) jumpToCitationInLibrary(targetCit);
       });
     });
   } else {
     citationsSection.classList.add("hidden");
   }
+
+  // Update Status Footer
+  if (statusFooterSpeed) {
+    statusFooterSpeed.textContent = data.cache_hit
+      ? `⚡ Response: ${data.latency_ms.toFixed(1)}ms (Fast Cache Hit: $0.00 Cost)`
+      : `⚡ Response: ${data.latency_ms.toFixed(1)}ms (Live Dual Search)`;
+  }
 }
 
-// Activate citation in viewer
-async function activateCitation(cit) {
+// Seamless Jump from Citation directly to Document Library with glowing pulse
+async function jumpToCitationInLibrary(cit) {
+  // 1. Switch tab to Document Library
+  switchTab("documents");
+
   const docId = cit.chunk_id.split("_c")[0];
 
+  // 2. Select document in library
   if (state.activeDocId !== docId) {
     await selectDocumentTab(docId);
   }
 
-  document.querySelectorAll(".citation-ribbon-card").forEach((c) => {
-    c.classList.toggle("active", c.dataset.citNum === String(cit.citation_id));
+  // 3. Locate target chunk in DOM and scroll with high-visibility highlight
+  setTimeout(() => {
+    const targetEl = document.getElementById(`chunk_${cit.chunk_id}`);
+    if (targetEl) {
+      document.querySelectorAll(".highlight-chunk").forEach((el) => el.classList.remove("highlight-chunk"));
+      targetEl.classList.add("highlight-chunk");
+      targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      if (window.gsap) {
+        gsap.fromTo(targetEl, { scale: 0.97 }, { scale: 1, duration: 0.4, ease: "back.out(2)" });
+      }
+    }
+  }, 100);
+}
+
+// Load Documents for Document Library
+async function loadDocuments() {
+  try {
+    const res = await fetch("/api/v1/documents");
+    if (!res.ok) throw new Error("Failed to load documents");
+    state.documents = await res.json();
+
+    renderDocLibraryList();
+    renderDocTabs();
+
+    if (state.documents.length > 0 && !state.activeDocId) {
+      await selectDocumentTab(state.documents[0].document_id);
+    }
+  } catch (err) {
+    console.error("Document loader error:", err);
+  }
+}
+
+// Render sidebar document items in Document Library
+function renderDocLibraryList() {
+  if (!docLibraryList) return;
+  docLibraryList.innerHTML = "";
+
+  state.documents.forEach((doc) => {
+    const item = document.createElement("div");
+    item.className = `doc-list-item ${doc.document_id === state.activeDocId ? "active" : ""}`;
+    item.innerHTML = `
+      <div class="doc-item-title">${doc.title}</div>
+      <div class="doc-item-meta">${doc.total_chunks} Chunks &bull; ${doc.document_id}</div>
+    `;
+    item.addEventListener("click", () => selectDocumentTab(doc.document_id));
+    docLibraryList.appendChild(item);
   });
+}
 
-  const targetElement = document.getElementById(`chunk_${cit.chunk_id}`);
-  if (targetElement) {
-    document.querySelectorAll(".highlight-chunk").forEach((el) => el.classList.remove("highlight-chunk"));
-    targetElement.classList.add("highlight-chunk");
-    targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+// Render document tabs in Reader
+function renderDocTabs() {
+  if (!docTabs) return;
+  docTabs.innerHTML = "";
 
+  state.documents.forEach((doc) => {
+    const tab = document.createElement("button");
+    tab.className = `doc-tab-pill ${doc.document_id === state.activeDocId ? "active" : ""}`;
+    tab.textContent = doc.title;
+    tab.addEventListener("click", () => selectDocumentTab(doc.document_id));
+    docTabs.appendChild(tab);
+  });
+}
+
+// Select and render a document in the reader
+async function selectDocumentTab(docId) {
+  state.activeDocId = docId;
+
+  // Update tabs & sidebar active states
+  renderDocTabs();
+  renderDocLibraryList();
+
+  try {
+    const res = await fetch(`/api/v1/documents/${docId}`);
+    if (!res.ok) throw new Error("Failed to fetch document content");
+    const docData = await res.json();
+    state.activeDocumentData = docData;
+
+    if (docMetaTitle) docMetaTitle.textContent = docData.metadata.title;
+    if (docChunkCountBadge) docChunkCountBadge.textContent = `${docData.chunks.length} Sections`;
+    renderDocumentChunks(docData.chunks);
+  } catch (err) {
+    console.error("Document fetch error:", err);
+  }
+}
+
+// Render document chunks in reader
+function renderDocumentChunks(chunks) {
+  if (!docContentContainer) return;
+  docContentContainer.innerHTML = "";
+
+  chunks.forEach((chunk) => {
+    const chunkDiv = document.createElement("div");
+    chunkDiv.className = "reader-chunk-card";
+    chunkDiv.id = `chunk_${chunk.chunk_id}`;
+
+    const header = document.createElement("div");
+    header.style.display = "flex";
+    header.style.justifyContent = "space-between";
+    header.style.fontSize = "0.72rem";
+    header.style.color = "var(--text-muted)";
+    header.style.marginBottom = "8px";
+    header.innerHTML = `<span><strong style="color: var(--yellow-solar)">${chunk.section_title}</strong> &bull; Page ${chunk.page_number || 1}</span><span style="font-family: var(--font-mono)">${chunk.chunk_id}</span>`;
+
+    const body = document.createElement("div");
+    body.innerHTML = formatMarkdown(chunk.metadata.raw_text || chunk.content);
+
+    chunkDiv.appendChild(header);
+    chunkDiv.appendChild(body);
+    docContentContainer.appendChild(chunkDiv);
+  });
+}
+
+// Handle Ingest Document Submission
+async function handleIngestDocument() {
+  const title = ingestTitle.value.trim();
+  const content = ingestContent.value.trim();
+
+  if (!title || !content) {
+    alert("Please enter both a title and document content.");
+    return;
+  }
+
+  btnSubmitIngest.disabled = true;
+  btnSubmitIngest.textContent = "Ingesting & Indexing...";
+
+  try {
+    const res = await fetch("/api/v1/documents/ingest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: title,
+        content: content,
+        document_type: "markdown",
+      }),
+    });
+
+    if (!res.ok) throw new Error("Ingestion failed");
+    const result = await res.json();
+
+    ingestModal.classList.add("hidden");
+    ingestTitle.value = "";
+    ingestContent.value = "";
+
+    await loadDocuments();
+    await selectDocumentTab(result.document_id);
+    alert(`Successfully ingested "${title}" into knowledge base!`);
+  } catch (err) {
+    alert(`Failed to ingest document: ${err.message}`);
+  } finally {
+    btnSubmitIngest.disabled = false;
+    btnSubmitIngest.textContent = "Ingest & Index";
+  }
+}
+
+// Update HUD cards in Analytics View
+function updateHUD(data) {
+  if (hudLatency) {
     if (window.gsap) {
-      gsap.fromTo(targetElement, { scale: 0.98 }, { scale: 1, duration: 0.35, ease: "back.out(2)" });
+      const latencyObj = { val: 0 };
+      gsap.to(latencyObj, {
+        val: data.latency_ms,
+        duration: 0.5,
+        ease: "power2.out",
+        onUpdate: () => { hudLatency.textContent = latencyObj.val.toFixed(1); },
+      });
+    } else {
+      hudLatency.textContent = data.latency_ms.toFixed(1);
     }
   }
-}
 
-// Update HUD cards with GSAP number tweening
-function updateHUD(data) {
-  // GSAP tween for latency counter
-  if (window.gsap) {
-    const latencyObj = { val: 0 };
-    gsap.to(latencyObj, {
-      val: data.latency_ms,
-      duration: 0.5,
-      ease: "power2.out",
-      onUpdate: () => { hudLatency.textContent = latencyObj.val.toFixed(1); },
-    });
-  } else {
-    hudLatency.textContent = data.latency_ms.toFixed(1);
+  if (hudLatencySub) {
+    hudLatencySub.textContent = data.cache_hit
+      ? "⚡ Instant Fast Cache (<25ms)"
+      : "Live Dual Search (Meaning + Exact Words)";
+  }
+  if (indicatorLatency) indicatorLatency.textContent = data.cache_hit ? "FAST" : "LIVE";
+
+  if (hudCacheStatus) {
+    if (data.cache_hit) {
+      hudCacheStatus.textContent = "CACHE HIT";
+      hudCacheStatus.style.color = "var(--yellow-solar)";
+      if (indicatorCache) {
+        indicatorCache.textContent = "<25ms";
+        indicatorCache.style.color = "var(--yellow-solar)";
+      }
+      if (hudCacheCost) hudCacheCost.textContent = `$${data.estimated_cost_saved_usd.toFixed(6)} Saved ($0 Cost)`;
+    } else {
+      hudCacheStatus.textContent = "LIVE SEARCH";
+      hudCacheStatus.style.color = "var(--emerald-bright)";
+      if (indicatorCache) {
+        indicatorCache.textContent = "STORED";
+        indicatorCache.style.color = "var(--emerald-bright)";
+      }
+      if (hudCacheCost) hudCacheCost.textContent = "Saved to Memory Cache";
+    }
   }
 
-  hudLatencySub.textContent = data.cache_hit ? "⚡ Instant Fast Cache (<25ms)" : "Live Dual Search (Meaning + Exact Words)";
-  indicatorLatency.textContent = data.cache_hit ? "FAST" : "LIVE";
-
-  if (data.cache_hit) {
-    hudCacheStatus.textContent = "CACHE HIT";
-    hudCacheStatus.style.color = "var(--yellow-solar)";
-    indicatorCache.textContent = "<25ms";
-    indicatorCache.style.color = "var(--yellow-solar)";
-    hudCacheCost.textContent = `$${data.estimated_cost_saved_usd.toFixed(6)} Saved ($0 Cost)`;
-  } else {
-    hudCacheStatus.textContent = "LIVE SEARCH";
-    hudCacheStatus.style.color = "var(--emerald-bright)";
-    indicatorCache.textContent = "STORED";
-    indicatorCache.style.color = "var(--emerald-bright)";
-    hudCacheCost.textContent = "Saved to Memory Cache";
-  }
-
-  hudFusion.textContent = data.retrieval_mode.toUpperCase();
-  hudCandidates.textContent = `${data.retrieved_chunks.length} Relevant Sections`;
+  if (hudFusion) hudFusion.textContent = data.retrieval_mode.toUpperCase();
+  if (hudCandidates) hudCandidates.textContent = `${data.retrieved_chunks.length} Relevant Sections`;
 
   const faithPct = Math.round(data.faithfulness_score * 100);
-  if (window.gsap) {
-    const faithObj = { val: 0 };
-    gsap.to(faithObj, {
-      val: faithPct,
-      duration: 0.5,
-      ease: "power2.out",
-      onUpdate: () => { hudFaithfulness.textContent = Math.round(faithObj.val); },
-    });
-  } else {
-    hudFaithfulness.textContent = faithPct;
+  if (hudFaithfulness) {
+    if (window.gsap) {
+      const faithObj = { val: 0 };
+      gsap.to(faithObj, {
+        val: faithPct,
+        duration: 0.5,
+        ease: "power2.out",
+        onUpdate: () => { hudFaithfulness.textContent = Math.round(faithObj.val); },
+      });
+    } else {
+      hudFaithfulness.textContent = faithPct;
+    }
   }
-  indicatorFaith.textContent = `${faithPct}%`;
-  hudFaithSub.textContent = `${data.citations.length} Verified Sources Found`;
+  if (indicatorFaith) indicatorFaith.textContent = `${faithPct}%`;
+  if (hudFaithSub) hudFaithSub.textContent = `${data.citations.length} Verified Sources Found`;
 }
 
-// Fetch multi-stage pipeline details
+// Fetch multi-stage pipeline details in Analytics
 async function fetchPipelineDetails(query) {
   try {
     const res = await fetch("/api/v1/search/raw", {
@@ -496,50 +626,54 @@ async function fetchPipelineDetails(query) {
     const pipelineTimings = document.getElementById("pipelineTimings");
     const pipelineTables = document.getElementById("pipelineTables");
 
-    pipelineTimings.innerHTML = `
-      <div class="timing-chip">Dense ANN: <strong>${rawData.timings_ms.dense}ms</strong></div>
-      <div class="timing-chip">BM25 Sparse: <strong>${rawData.timings_ms.bm25}ms</strong></div>
-      <div class="timing-chip">RRF Fusion (k=60): <strong>${rawData.timings_ms.rrf}ms</strong></div>
-      <div class="timing-chip">Cross-Encoder Re-Rank: <strong>${rawData.timings_ms.rerank}ms</strong></div>
-      <div class="timing-chip" style="border-color: var(--yellow-solar)">Total Pipeline: <strong>${rawData.timings_ms.total}ms</strong></div>
-    `;
+    if (pipelineTimings) {
+      pipelineTimings.innerHTML = `
+        <div class="timing-chip">Dense ANN: <strong>${rawData.timings_ms.dense}ms</strong></div>
+        <div class="timing-chip">BM25 Sparse: <strong>${rawData.timings_ms.bm25}ms</strong></div>
+        <div class="timing-chip">RRF Fusion (k=60): <strong>${rawData.timings_ms.rrf}ms</strong></div>
+        <div class="timing-chip">Cross-Encoder Re-Rank: <strong>${rawData.timings_ms.rerank}ms</strong></div>
+        <div class="timing-chip" style="border-color: var(--yellow-solar)">Total Pipeline: <strong>${rawData.timings_ms.total}ms</strong></div>
+      `;
+    }
 
-    pipelineTables.innerHTML = `
-      <table class="benchmark-table" style="font-size: 0.74rem">
-        <thead>
-          <tr>
-            <th>CHUNK ID</th>
-            <th>SOURCE DOCUMENT</th>
-            <th>DENSE RANK</th>
-            <th>BM25 RANK</th>
-            <th>RRF SCORE</th>
-            <th>RE-RANK SCORE</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rawData.final_reranked
-            .map(
-              (item) => `
+    if (pipelineTables) {
+      pipelineTables.innerHTML = `
+        <table class="benchmark-table" style="font-size: 0.74rem">
+          <thead>
             <tr>
-              <td><code style="color: var(--yellow-solar)">${item.chunk_id}</code></td>
-              <td>${item.document_title}</td>
-              <td>${item.dense_rank !== null ? `#${item.dense_rank}` : "&mdash;"}</td>
-              <td>${item.bm25_rank !== null ? `#${item.bm25_rank}` : "&mdash;"}</td>
-              <td style="font-family: var(--font-mono); color: var(--emerald-bright)">${item.rrf_score.toFixed(4)}</td>
-              <td style="font-family: var(--font-mono); color: var(--yellow-solar)"><strong>${item.score.toFixed(4)}</strong></td>
+              <th>CHUNK ID</th>
+              <th>SOURCE DOCUMENT</th>
+              <th>DENSE RANK</th>
+              <th>BM25 RANK</th>
+              <th>RRF SCORE</th>
+              <th>RE-RANK SCORE</th>
             </tr>
-          `
-            )
-            .join("")}
-        </tbody>
-      </table>
-    `;
+          </thead>
+          <tbody>
+            ${rawData.final_reranked
+              .map(
+                (item) => `
+              <tr>
+                <td><code style="color: var(--yellow-solar)">${item.chunk_id}</code></td>
+                <td>${item.document_title}</td>
+                <td>${item.dense_rank !== null ? `#${item.dense_rank}` : "&mdash;"}</td>
+                <td>${item.bm25_rank !== null ? `#${item.bm25_rank}` : "&mdash;"}</td>
+                <td style="font-family: var(--font-mono); color: var(--emerald-bright)">${item.rrf_score.toFixed(4)}</td>
+                <td style="font-family: var(--font-mono); color: var(--yellow-solar)"><strong>${item.score.toFixed(4)}</strong></td>
+              </tr>
+            `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      `;
+    }
   } catch (err) {
     console.error("Failed to fetch pipeline inspection:", err);
   }
 }
 
-// Update cache stats
+// Update cache stats in header
 async function updateCacheStats() {
   try {
     const res = await fetch("/api/v1/cache/stats");
@@ -555,11 +689,12 @@ async function updateCacheStats() {
   }
 }
 
-// Open Evals Modal
-async function openEvalsModal() {
-  evalsModal.classList.remove("hidden");
+// Load Benchmarks for Analytics View
+async function loadBenchmarks() {
   const tbody = document.getElementById("matrixTableBody");
-  tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted)">Querying Ragas empirical benchmark matrix...</td></tr>`;
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted)">Loading accuracy benchmark matrix...</td></tr>`;
 
   try {
     const res = await fetch("/api/v1/benchmarks");
@@ -587,7 +722,7 @@ async function openEvalsModal() {
   }
 }
 
-// Run live evals
+// Run live evals in Analytics View
 async function runLiveEvals() {
   const btn = document.getElementById("btnRunLiveEvals");
   btn.textContent = "Executing 10 Benchmark Queries...";
@@ -595,11 +730,11 @@ async function runLiveEvals() {
 
   try {
     await fetch("/api/v1/benchmarks/run", { method: "POST" });
-    await openEvalsModal();
+    await loadBenchmarks();
   } catch (err) {
     console.error("Live evals error:", err);
   } finally {
-    btn.textContent = "Re-Run 10-Query Live Benchmark";
+    btn.textContent = "Re-Run Accuracy Test (10 Queries)";
     btn.disabled = false;
   }
 }
@@ -642,11 +777,11 @@ function saveSettings() {
     if (state.byok.model === "claude-3-5-sonnet") answerModelBadge.textContent = "Claude 3.5 Sonnet";
     else if (state.byok.model.includes("gemini")) answerModelBadge.textContent = "Gemini 2.5 Flash";
     else if (state.byok.model.includes("gpt")) answerModelBadge.textContent = "GPT-4o Mini";
-    else if (state.byok.model === "offline") answerModelBadge.textContent = "⚡ Free Offline Engine";
+    else if (state.byok.model === "offline") answerModelBadge.textContent = "⚡ Free Built-In Engine ($0.00)";
     else answerModelBadge.textContent = "⚡ Auto-Detect (Ready)";
   }
 
-  settingsModal.classList.add("hidden");
+  alert("Settings saved successfully!");
 }
 
 function clearSettings() {
@@ -663,6 +798,7 @@ function clearSettings() {
   state.byok.openAIKey = "";
   state.byok.model = "auto";
   detectActiveKeys();
+  alert("Settings reset to defaults.");
 }
 
 // Markdown formatter

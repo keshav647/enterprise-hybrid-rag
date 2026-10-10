@@ -109,8 +109,12 @@ def create_app() -> FastAPI:
     if STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-    # Serve index.html at root
+    # Serve UI at root and deep-linked page paths
     @app.get("/", include_in_schema=False)
+    @app.get("/search", include_in_schema=False)
+    @app.get("/documents", include_in_schema=False)
+    @app.get("/analytics", include_in_schema=False)
+    @app.get("/settings", include_in_schema=False)
     async def serve_ui():
         if UI_INDEX_PATH.exists():
             return FileResponse(str(UI_INDEX_PATH))
