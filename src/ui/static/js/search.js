@@ -15,6 +15,8 @@ const citationsList = document.getElementById("citationsList");
 const citationCountBadge = document.getElementById("citationCountBadge");
 const cacheToggle = document.getElementById("cacheToggle");
 const statusFooterSpeed = document.getElementById("statusFooterSpeed");
+const pipelineTraceSection = document.getElementById("pipelineTraceSection");
+const pipelineTraceBody = document.getElementById("pipelineTraceBody");
 
 function initSearchPage() {
   updateHeaderCacheBadge();
@@ -77,6 +79,8 @@ async function executeSearch(query, forceCache = null) {
 
   answerLoading.classList.remove("hidden");
   answerContainer.classList.add("hidden");
+  if (citationsSection) citationsSection.classList.add("hidden");
+  if (pipelineTraceSection) pipelineTraceSection.classList.add("hidden");
 
   // Read configured settings from localStorage
   const savedModel = localStorage.getItem("SYNAPSE_MODEL") || "auto";
@@ -217,6 +221,39 @@ function renderAnswer(data) {
     });
   } else {
     citationsSection.classList.add("hidden");
+  }
+
+  // Render Candidate Pipeline Trace Drawer
+  if (data.retrieved_chunks && data.retrieved_chunks.length > 0 && pipelineTraceSection && pipelineTraceBody) {
+    pipelineTraceSection.classList.remove("hidden");
+    pipelineTraceBody.innerHTML = "";
+
+    const citedChunkIds = new Set((data.citations || []).map((c) => c.chunk_id));
+
+    data.retrieved_chunks.forEach((chunk) => {
+      const isCited = citedChunkIds.has(chunk.chunk_id);
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td style="color: var(--yellow-solar); font-weight: 700;">${chunk.chunk_id}</td>
+        <td>${chunk.document_title} &bull; <span style="color: var(--text-muted);">${chunk.section_title}</span></td>
+        <td>${chunk.dense_rank !== null && chunk.dense_rank !== undefined ? '#' + chunk.dense_rank : '<span style="color: var(--text-muted);">Unranked</span>'}</td>
+        <td>${chunk.bm25_rank !== null && chunk.bm25_rank !== undefined ? '#' + chunk.bm25_rank : '<span style="color: var(--text-muted);">Unranked</span>'}</td>
+        <td style="color: var(--emerald-bright);">${chunk.rrf_score !== null && chunk.rrf_score !== undefined ? chunk.rrf_score.toFixed(4) : '-'}</td>
+        <td style="color: var(--emerald-mint); font-weight: 700;">${chunk.rerank_score !== null && chunk.rerank_score !== undefined ? chunk.rerank_score.toFixed(4) : chunk.score.toFixed(4)}</td>
+        <td>
+          <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-pill); font-size: 0.68rem; font-weight: 700; ${
+            isCited
+              ? 'background: rgba(16, 185, 129, 0.2); color: var(--emerald-bright); border: 1px solid var(--emerald-primary);'
+              : 'background: rgba(100, 116, 139, 0.15); color: var(--text-muted); border: 1px solid rgba(100, 116, 139, 0.3);'
+          }">
+            ${isCited ? 'Verified Citation' : 'Evaluated Candidate'}
+          </span>
+        </td>
+      `;
+      pipelineTraceBody.appendChild(row);
+    });
+  } else if (pipelineTraceSection) {
+    pipelineTraceSection.classList.add("hidden");
   }
 
   // Update Status Footer
