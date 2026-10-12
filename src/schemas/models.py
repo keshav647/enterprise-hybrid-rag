@@ -15,6 +15,8 @@ class DocumentMetadata(BaseModel):
     total_pages: int = Field(1, description="Total page count")
     total_chunks: int = Field(0, description="Number of parsed chunks")
     created_at: str = Field(..., description="ISO timestamp")
+    domain: str = Field("enterprise", description="Enterprise use-case domain identifier")
+    suggested_queries: List[str] = Field(default_factory=list, description="Tailored questions for this document")
 
 
 class DocumentChunk(BaseModel):
@@ -71,12 +73,14 @@ class GroundedResponse(BaseModel):
     faithfulness_score: float = Field(1.0, description="Factuality grounding score against chunks")
     latency_ms: float = Field(..., description="End-to-end execution latency in milliseconds")
     cache_hit: bool = Field(False, description="Whether query was served from Redis Semantic Cache")
+    cache_similarity: Optional[float] = Field(None, description="Cosine similarity of semantic cache hit")
     retrieval_mode: str = Field("hybrid", description="Retrieval mode: hybrid, dense, bm25")
     retrieved_chunks: List[SearchResultItem] = Field(default_factory=list)
     tokens_used: int = Field(0, description="Total tokens consumed")
     estimated_cost_saved_usd: float = Field(0.0, description="Cost saved via cache or zero-drain tier")
     provider: str = Field("gemini", description="LLM provider name")
     model: str = Field("gemini-2.5-flash", description="Model identifier")
+    timings_ms: Dict[str, float] = Field(default_factory=dict, description="Stage-by-stage pipeline latency breakdown")
 
 
 class SearchRequest(BaseModel):
@@ -89,8 +93,9 @@ class SearchRequest(BaseModel):
     use_reranker: bool = Field(True, description="Whether to apply cross-encoder re-ranking")
     use_cache: bool = Field(True, description="Whether to check semantic cache first")
     similarity_threshold: float = Field(
-        0.95, ge=0.5, le=1.0, description="Cosine similarity threshold for semantic cache hit"
+        0.92, ge=0.5, le=1.0, description="Cosine similarity threshold for semantic cache hit"
     )
+    document_id: Optional[str] = Field(None, description="Optional document_id filter to scope retrieval")
     custom_api_key: Optional[str] = Field(None, description="BYOK user API key")
     provider: Optional[str] = Field("auto", description="Provider: auto, anthropic, gemini, openai, offline")
     model: Optional[str] = Field(None, description="Model identifier: claude-3-5-sonnet-20241022, gemini-2.5-flash, etc.")
@@ -102,6 +107,7 @@ class IngestRequest(BaseModel):
     title: str = Field(..., description="Document title")
     content: str = Field(..., description="Markdown or plaintext body")
     document_type: str = Field("markdown", description="Document type")
+    domain: str = Field("custom", description="Domain classification tag")
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 

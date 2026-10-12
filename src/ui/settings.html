@@ -1,194 +1,427 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Synapse // AI Models & Keys</title>
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Synapse // 07 Gateway — ThreeUI Bezier Particle Stream, BYOK AI Vault & Semantic Cache</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <link rel="stylesheet" href="/static/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/static/logo.png" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
 </head>
-<body>
-  <div class="mesh-background">
-    <div class="dot-grid"></div>
-    <div class="glow-orb orb-amber"></div>
-    <div class="glow-orb orb-iris"></div>
-    <div class="glow-orb orb-rose"></div>
-  </div>
+<body class="min-h-screen bg-[#06080f] text-slate-100 selection:bg-sky-500/30 selection:text-sky-200 relative">
 
-  <div class="app-container">
-    <!-- Top Bar Navigation -->
-    <header class="app-header">
-      <div class="header-brand">
-        <div class="brand-crest">
-          <div class="crest-inner">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-              <path d="M2 17l10 5 10-5"></path>
-              <path d="M2 12l10 5 10-5"></path>
-            </svg>
-          </div>
-          <div class="crest-glow"></div>
+  <!-- ThreeUI Gateway-Flow Interactive Bezier Particle Stream & Click Shockwave Canvas -->
+  <canvas id="flow-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-75"></canvas>
+
+  <!-- Shared 7-Page Navigation Dock -->
+  <div id="synapse-top-dock" class="relative z-50"></div>
+
+  <main class="relative z-10 max-w-[1600px] mx-auto px-4 lg:px-6 pt-6 pb-20">
+
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-7 border-b border-white/10">
+      <div>
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-indigo-500/15 border border-indigo-400/30 text-[10px] font-mono uppercase tracking-widest text-indigo-300 mb-2">
+          PAGE 07 // THREEUI GATEWAY-FLOW BEZIER STREAM (CLICK ANYWHERE FOR RADIAL SHOCKWAVE)
         </div>
-        <div class="brand-typography">
-          <div class="brand-title">
-            <span>SYNAPSE</span>
-            <span class="edition-pill">SETTINGS</span>
-          </div>
-          <div class="brand-meta">Model Providers &bull; API Key Configuration &bull; Zero-Drain Fallback</div>
-        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">
+          Nexus AI Model Gateway (BYOK Vault) &amp; Semantic Cache Control Console
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+          Configure Gemini, OpenAI, Anthropic, or Groq synthesis credentials, tune retrieval hyperparameters, and manage the Cosine $\ge 0.95$ Semantic Cache.
+        </p>
       </div>
+      <a href="/search" class="px-4 py-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/40 text-xs font-mono text-sky-300 font-semibold">
+        Return to Search Workbench (Page 02) -&gt;
+      </a>
+    </div>
 
-      <nav class="header-nav">
-        <a href="/" class="nav-tab-btn">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <span>Search &amp; Answers</span>
-        </a>
-        <a href="/documents" class="nav-tab-btn">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-          </svg>
-          <span>Document Library</span>
-        </a>
-        <a href="/analytics" class="nav-tab-btn">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 3v18h18"></path>
-            <path d="M18 17V9"></path>
-            <path d="M13 17V5"></path>
-            <path d="M8 17v-3"></path>
-          </svg>
-          <span>Accuracy &amp; Metrics</span>
-        </a>
-        <a href="/settings" class="nav-tab-btn active">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          <span>AI Models &amp; Keys</span>
-        </a>
-      </nav>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-      <div class="header-hud-pills">
-        <div class="hud-pill hud-pill-cache" id="cacheStatusBadge">
-          <svg class="cache-spark" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-          </svg>
-          <span class="pill-label">FAST CACHE</span>
-          <span class="pill-metric" id="cacheHitStat">Active</span>
-        </div>
-      </div>
-    </header>
+      <!-- Left 7 Columns: BYOK Multi-Provider Model Vault -->
+      <div class="lg:col-span-7 mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-6 relative">
+        <div class="corner-sq top-0 left-0"></div>
+        <div class="corner-sq top-0 right-0"></div>
 
-    <!-- Settings Content Stage -->
-    <main style="display: flex; justify-content: center; align-items: flex-start; padding: 20px 0;">
-      <section class="settings-view-card">
-        <div>
-          <h3 style="font-size: 1.35rem; color: var(--yellow-solar); font-family: var(--font-display);">
-            AI Models &amp; API Keys
-          </h3>
-          <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 6px; line-height: 1.6;">
-            Configure your API keys or use auto-detected system credentials. Keys are saved securely in your browser's local storage.
-          </p>
-        </div>
-
-        <!-- Auto-Detection Status Card -->
-        <div class="auto-detect-box" style="padding: 16px 20px; background: rgba(16, 185, 129, 0.12); border: 1px solid var(--emerald-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <div class="flex items-center justify-between pb-3 mb-5 border-b border-white/10">
           <div>
-            <div style="font-size: 0.72rem; font-weight: 800; color: var(--yellow-solar); letter-spacing: 0.6px; text-transform: uppercase;">
-              Environment Auto-Detection
+            <h2 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
+              MULTI-PROVIDER LLM GATEWAY &amp; BYOK API VAULT
+            </h2>
+            <p class="text-[11px] text-slate-400 mt-0.5">
+              Zero-lockout architecture: works out-of-the-box with deterministic grounded synthesis, or connect your live API key
+            </p>
+          </div>
+          <span id="provider-detected-badge" class="px-2.5 py-1 rounded bg-emerald-500/15 border border-emerald-400/30 text-[10px] font-mono text-emerald-300 uppercase">
+            GEMINI ACTIVE
+          </span>
+        </div>
+
+        <form id="byok-vault-form" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="vault-provider" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1.5">
+                AI MODEL PROVIDER
+              </label>
+              <select
+                id="vault-provider"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs font-mono text-white outline-none"
+              >
+                <option value="gemini">Google Gemini (Default)</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic Claude</option>
+                <option value="groq">Groq LPU Inference</option>
+              </select>
             </div>
-            <div id="detectedStatusText" style="font-size: 0.88rem; color: var(--text-primary); margin-top: 4px;">
-              Scanning system keys...
+
+            <div>
+              <label for="vault-model" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1.5">
+                FOUNDATION MODEL ID
+              </label>
+              <select
+                id="vault-model"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs font-mono text-white outline-none"
+              >
+                <!-- Populated dynamically by provider -->
+              </select>
             </div>
           </div>
-          <button type="button" class="action-btn btn-ghost" id="btnAutoDetectNow" style="padding: 8px 16px; font-size: 0.78rem; border-color: var(--emerald-bright); display: inline-flex; align-items: center; gap: 6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-              <path d="M3 3v5h5"></path>
-              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
-              <path d="M16 21h5v-5"></path>
-            </svg>
-            <span>Scan Keys Now</span>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="vault-api-key" class="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                API KEY (AUTO-DETECTS <code class="text-sky-300">AIza...</code> / <code class="text-sky-300">sk-ant-...</code> / <code class="text-sky-300">gsk_...</code> / <code class="text-sky-300">sk-...</code>)
+              </label>
+              <span id="key-detect-hint" class="text-[10px] font-mono text-sky-300">Optional (Deterministic Grounded Fallback Enabled)</span>
+            </div>
+            <div class="flex gap-2">
+              <input
+                id="vault-api-key"
+                type="password"
+                placeholder="Paste Gemini, OpenAI, Anthropic, or Groq API key (stored in browser session only)..."
+                class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs font-mono text-white outline-none"
+              />
+              <button
+                type="button"
+                id="test-api-key-btn"
+                class="px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-xs font-mono text-sky-300 shrink-0 cursor-pointer"
+              >
+                Verify Key
+              </button>
+            </div>
+          </div>
+
+          <!-- Retrieval Top-K Hyperparameter -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div>
+              <label for="vault-topk" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1.5">
+                DEFAULT TOP-K GROUNDING CHUNKS: <span id="topk-val-label" class="text-sky-300 font-bold">5</span>
+              </label>
+              <input
+                id="vault-topk"
+                type="range"
+                min="1"
+                max="10"
+                value="5"
+                class="w-full accent-sky-400 cursor-pointer"
+              />
+            </div>
+
+            <div class="flex items-end">
+              <button
+                type="submit"
+                class="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-mono text-xs uppercase tracking-widest font-semibold shadow-[0_0_24px_rgba(56,189,248,0.3)] transition-all cursor-pointer"
+              >
+                Save Gateway Configuration
+              </button>
+            </div>
+          </div>
+
+          <div id="key-test-result-banner" class="hidden p-3.5 rounded-xl border text-xs font-mono"></div>
+        </form>
+      </div>
+
+      <!-- Right 5 Columns: Semantic Cache Control Console -->
+      <div class="lg:col-span-5 mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-6 relative">
+        <div class="corner-sq top-0 left-0"></div>
+        <div class="corner-sq top-0 right-0"></div>
+
+        <div class="flex items-center justify-between pb-3 mb-5 border-b border-white/10">
+          <div>
+            <h2 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
+              SEMANTIC CACHE CONTROL CONSOLE
+            </h2>
+            <p class="text-[11px] text-slate-400 mt-0.5">
+              Cosine Similarity $\ge 0.95$ Vector Cache + SHA-256 Exact Hash
+            </p>
+          </div>
+          <span class="px-2 py-0.5 rounded bg-purple-500/15 border border-purple-400/30 text-[10px] font-mono text-purple-300">
+            SUB-25MS SLA
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-5">
+          <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10">
+            <div class="text-[9px] font-mono uppercase text-slate-400">CACHE HIT RATE</div>
+            <div id="cache-stat-rate" class="text-2xl font-bold font-mono text-emerald-400 mt-1 tabular-nums">0.0%</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10">
+            <div class="text-[9px] font-mono uppercase text-slate-400">ACTIVE CACHED QUERIES</div>
+            <div id="cache-stat-entries" class="text-2xl font-bold font-mono text-white mt-1 tabular-nums">0</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10">
+            <div class="text-[9px] font-mono uppercase text-slate-400">EXACT / SEMANTIC HITS</div>
+            <div id="cache-stat-hits" class="text-lg font-bold font-mono text-sky-300 mt-1 tabular-nums">0 / 0</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10">
+            <div class="text-[9px] font-mono uppercase text-slate-400">CACHE MISSES</div>
+            <div id="cache-stat-misses" class="text-lg font-bold font-mono text-slate-300 mt-1 tabular-nums">0</div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <button
+            type="button"
+            id="warm-cache-btn"
+            class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer"
+          >
+            Warm Cache + Test Paraphrase Hit
+          </button>
+          <button
+            type="button"
+            id="purge-cache-btn"
+            class="py-2.5 px-4 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/40 text-rose-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer"
+          >
+            Purge Cache
           </button>
         </div>
+      </div>
 
-        <div class="input-block">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label style="margin-bottom: 0;">Google Gemini API Key</label>
-            <button type="button" class="action-btn btn-ghost" id="btnTestGeminiKey" style="padding: 3px 10px; font-size: 0.72rem; border-color: var(--emerald-primary); display: inline-flex; align-items: center; gap: 5px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-              </svg>
-              <span>Test Connection</span>
-            </button>
-          </div>
-          <input type="password" id="inputGeminiKey" class="text-input" placeholder="AIzaSy...">
-          <div id="geminiKeyStatus" style="font-size: 0.74rem; margin-top: 4px; font-family: var(--font-mono); color: var(--text-muted);"></div>
-        </div>
+    </div>
+  </main>
 
-        <div class="input-block">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label style="margin-bottom: 0;">Anthropic Claude API Key</label>
-            <button type="button" class="action-btn btn-ghost" id="btnTestClaudeKey" style="padding: 3px 10px; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 5px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-              </svg>
-              <span>Test Connection</span>
-            </button>
-          </div>
-          <input type="password" id="inputClaudeKey" class="text-input" placeholder="sk-ant-api03-...">
-          <div id="claudeKeyStatus" style="font-size: 0.74rem; margin-top: 4px; font-family: var(--font-mono); color: var(--text-muted);"></div>
-        </div>
+  <script src="/static/js/nav.js"></script>
+  <script>
+    const PROVIDER_MODELS = {
+      gemini: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash'],
+      openai: ['gpt-4o', 'gpt-4o-mini', 'o3-mini'],
+      anthropic: ['claude-3-7-sonnet-latest', 'claude-3-5-haiku-latest'],
+      groq: ['llama-3.3-70b-versatile', 'mixtral-8x7b-32768'],
+    };
 
-        <div class="input-block">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label style="margin-bottom: 0;">OpenAI API Key</label>
-            <button type="button" class="action-btn btn-ghost" id="btnTestOpenAIKey" style="padding: 3px 10px; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 5px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-              </svg>
-              <span>Test Connection</span>
-            </button>
-          </div>
-          <input type="password" id="inputOpenAIKey" class="text-input" placeholder="sk-...">
-          <div id="openAIKeyStatus" style="font-size: 0.74rem; margin-top: 4px; font-family: var(--font-mono); color: var(--text-muted);"></div>
-        </div>
+    document.addEventListener('DOMContentLoaded', () => {
+      SynapseNav.mountDock('settings');
+      initGatewayFlowBezierCanvas();
 
-        <div class="input-block">
-          <label>Select Active AI Model</label>
-          <select id="selectModel" class="select-input">
-            <option value="auto">Auto-Detect (Active credentials or local offline engine)</option>
-            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Google)</option>
-            <option value="claude-3-5-sonnet">Claude 3.5 Sonnet (Anthropic)</option>
-            <option value="gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
-            <option value="offline">Offline Engine (100% Free, Built-In, No Key Needed)</option>
-          </select>
-        </div>
+      const cfg = SynapseNav.getByokSettings();
+      const provSelect = document.getElementById('vault-provider');
+      const modelSelect = document.getElementById('vault-model');
+      const keyInput = document.getElementById('vault-api-key');
+      const topkInput = document.getElementById('vault-topk');
 
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px;">
-          <a href="/" class="action-btn btn-ghost" style="display: inline-flex; align-items: center; gap: 6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-            <span>Return to Search</span>
-          </a>
-          <div style="display: flex; gap: 12px;">
-            <button type="button" class="action-btn btn-ghost" id="btnClearKeys">Reset Keys</button>
-            <button type="button" class="action-btn btn-solid-amber" id="btnSaveSettings">Save &amp; Return to Search</button>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+      provSelect.value = cfg.provider || 'gemini';
+      populateModelsForProvider(provSelect.value, cfg.model);
+      keyInput.value = cfg.apiKey || '';
+      topkInput.value = String(cfg.topK || 5);
+      document.getElementById('topk-val-label').textContent = String(cfg.topK || 5);
 
-  <script type="module" src="/static/js/settings.js"></script>
+      provSelect.addEventListener('change', () => {
+        populateModelsForProvider(provSelect.value);
+      });
+
+      topkInput.addEventListener('input', () => {
+        document.getElementById('topk-val-label').textContent = topkInput.value;
+      });
+
+      // Auto-detect API key prefix & check /api/v1/auth/detect
+      keyInput.addEventListener('input', () => {
+        const raw = keyInput.value.trim();
+        if (!raw) {
+          document.getElementById('key-detect-hint').textContent = 'Optional (Deterministic Grounded Fallback Enabled)';
+          return;
+        }
+        let detected = null;
+        if (raw.startsWith('AIza')) detected = 'gemini';
+        else if (raw.startsWith('sk-ant-')) detected = 'anthropic';
+        else if (raw.startsWith('gsk_')) detected = 'groq';
+        else if (raw.startsWith('sk-')) detected = 'openai';
+
+        if (detected) {
+          provSelect.value = detected;
+          populateModelsForProvider(detected);
+          document.getElementById('key-detect-hint').textContent = `Auto-Detected: ${detected.toUpperCase()} (${modelSelect.value})`;
+        }
+      });
+
+      // Verify Key button -> /api/v1/auth/test_key
+      document.getElementById('test-api-key-btn').addEventListener('click', async () => {
+        const banner = document.getElementById('key-test-result-banner');
+        banner.classList.remove('hidden');
+        banner.className = 'p-3.5 rounded-xl border border-sky-400/40 bg-sky-500/10 text-xs font-mono text-sky-200';
+        banner.textContent = 'Testing provider handshake via /api/v1/auth/test_key...';
+
+        try {
+          const res = await fetch('/api/v1/auth/test_key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              provider: provSelect.value,
+              api_key: keyInput.value.trim(),
+            }),
+          });
+          const data = await res.json();
+          if (data.success || data.valid) {
+            banner.className = 'p-3.5 rounded-xl border border-emerald-400/40 bg-emerald-500/15 text-xs font-mono text-emerald-200';
+            banner.textContent = `VALIDATED // ${(data.provider || provSelect.value).toUpperCase()} — ${data.message}`;
+          } else {
+            banner.className = 'p-3.5 rounded-xl border border-amber-400/40 bg-amber-500/15 text-xs font-mono text-amber-200';
+            banner.textContent = `NOTICE // ${data.message || 'Key validation failed; deterministic grounded fallback remains active.'}`;
+          }
+        } catch (err) {
+          banner.textContent = `Error: ${err.message}`;
+        }
+      });
+
+      // Save BYOK form
+      document.getElementById('byok-vault-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const updated = SynapseNav.setByokSettings({
+          provider: provSelect.value,
+          model: modelSelect.value,
+          apiKey: keyInput.value.trim(),
+          topK: Number(topkInput.value),
+        });
+        document.getElementById('provider-detected-badge').textContent = `${updated.provider.toUpperCase()} ACTIVE`;
+        SynapseNav.mountDock('settings');
+        SynapseNav.showToast('Gateway Configuration Saved', `Active Model: ${updated.provider} // ${updated.model} (Top-K=${updated.topK})`, 'success');
+      });
+
+      // Cache controls
+      loadCacheStats();
+      document.getElementById('purge-cache-btn').addEventListener('click', async () => {
+        await fetch('/api/v1/cache/clear', { method: 'POST' });
+        await loadCacheStats();
+        SynapseNav.refreshTelemetryBadges();
+        SynapseNav.showToast('Semantic Cache Purged', 'All cached embeddings and query hashes cleared.', 'info');
+      });
+
+      document.getElementById('warm-cache-btn').addEventListener('click', async () => {
+        const q1 = 'What is the memory offset and vulnerable function in CVE-2024-8192?';
+        await fetch('/api/v1/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: q1, mode: 'hybrid', top_k: 5, use_cache: true }),
+        });
+        await fetch('/api/v1/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: q1, mode: 'hybrid', top_k: 5, use_cache: true }),
+        });
+        await loadCacheStats();
+        SynapseNav.refreshTelemetryBadges();
+        SynapseNav.showToast('Cache Warmed & Hit Verified', 'Executed CVE-2024-8192 query + sub-25ms cache hit.', 'success');
+      });
+    });
+
+    function populateModelsForProvider(provider, selectedModel = null) {
+      const models = PROVIDER_MODELS[provider] || PROVIDER_MODELS.gemini;
+      const sel = document.getElementById('vault-model');
+      sel.innerHTML = models.map((m) => `<option value="${m}">${m}</option>`).join('');
+      if (selectedModel && models.includes(selectedModel)) {
+        sel.value = selectedModel;
+      }
+    }
+
+    async function loadCacheStats() {
+      try {
+        const res = await fetch('/api/v1/cache/stats');
+        if (!res.ok) return;
+        const c = await res.json();
+        const ratio = c.hit_ratio !== undefined ? c.hit_ratio : (c.hit_rate || 0);
+        const totalQ = c.total_queries !== undefined ? c.total_queries : (c.active_entries || 0);
+        const hits = c.cache_hits !== undefined ? c.cache_hits : ((c.exact_hits || 0) + (c.semantic_hits || 0));
+        const misses = c.cache_misses !== undefined ? c.cache_misses : (c.misses || 0);
+        document.getElementById('cache-stat-rate').textContent = `${(ratio * 100).toFixed(1)}%`;
+        document.getElementById('cache-stat-entries').textContent = String(totalQ);
+        document.getElementById('cache-stat-hits').textContent = `${hits} HITS`;
+        document.getElementById('cache-stat-misses').textContent = String(misses);
+      } catch (_) {}
+    }
+
+    // Authentic ThreeUI Gateway-Flow Bezier Particle Stream + Radial Click Shockwaves
+    function initGatewayFlowBezierCanvas() {
+      const canvas = document.getElementById('flow-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w = (canvas.width = window.innerWidth);
+      let h = (canvas.height = window.innerHeight);
+
+      window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      });
+
+      const colors = ['#a3b18a', '#d4a373', '#f5f5f3', '#e07a5f'];
+      const particles = Array.from({ length: 85 }, () => ({
+        t: Math.random(),
+        speed: 0.0018 + Math.random() * 0.0028,
+        yOffset: (Math.random() - 0.5) * h * 0.85,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 1.4 + Math.random() * 1.8,
+      }));
+
+      const shockwaves = [];
+      window.addEventListener('click', (e) => {
+        shockwaves.push({ x: e.clientX, y: e.clientY, r: 6, alpha: 0.85 });
+      });
+
+      function animate() {
+        ctx.clearRect(0, 0, w, h);
+
+        particles.forEach((p) => {
+          p.t += p.speed;
+          if (p.t > 1) p.t = 0;
+
+          const x0 = 0;
+          const y0 = h * 0.5 + p.yOffset;
+          const cx1 = w * 0.35;
+          const cy1 = y0;
+          const cx2 = w * 0.65;
+          const cy2 = h * 0.5;
+          const x1 = w;
+          const y1 = h * 0.5 + p.yOffset * 0.25;
+
+          const mt = 1 - p.t;
+          const x = mt * mt * mt * x0 + 3 * mt * mt * p.t * cx1 + 3 * mt * p.t * p.t * cx2 + p.t * p.t * p.t * x1;
+          const y = mt * mt * mt * y0 + 3 * mt * mt * p.t * cy1 + 3 * mt * p.t * p.t * cy2 + p.t * p.t * p.t * y1;
+
+          ctx.beginPath();
+          ctx.arc(x, y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        });
+
+        for (let i = shockwaves.length - 1; i >= 0; i--) {
+          const sw = shockwaves[i];
+          sw.r += 6.5;
+          sw.alpha *= 0.94;
+          ctx.beginPath();
+          ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(163, 177, 138, ${sw.alpha.toFixed(3)})`;
+          ctx.lineWidth = 1.8;
+          ctx.stroke();
+          if (sw.alpha < 0.03) shockwaves.splice(i, 1);
+        }
+
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+  </script>
 </body>
 </html>

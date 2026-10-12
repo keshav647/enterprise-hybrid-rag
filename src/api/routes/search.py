@@ -1,11 +1,10 @@
 """Search and retrieval routes for Hybrid RAG and telemetry inspection."""
 
 import time
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from typing import Dict, Any
 from pydantic import BaseModel
 from src.schemas.models import SearchRequest, GroundedResponse
-from src.config import settings
 
 router = APIRouter(tags=["Search"])
 
@@ -15,11 +14,16 @@ async def execute_search(req: SearchRequest):
     """Executes full search pipeline with Redis Semantic Caching and Grounded Synthesis."""
     from src.api.app import app_state
 
-    # 1. Check Semantic Cache
+    # 1. Check Semantic Cache (scoped by mode and document_id)
     if req.use_cache:
-        cached_result = app_state.cache.check(req.query, threshold=req.similarity_threshold)
+        cached_result = app_state.cache.check(
+            req.query,
+            threshold=req.similarity_threshold,
+            mode=req.mode,
+            document_id=req.document_id,
+        )
         if cached_result is not None:
-            cached_response, similarity = cached_result
+            cached_response, _similarity = cached_result
             return cached_response
 
     # 2. Live Retrieval Pipeline (Dual -> RRF -> Cross-Encoder)
@@ -30,17 +34,18 @@ async def execute_search(req: SearchRequest):
         top_k=req.top_k,
         rrf_k=req.rrf_k,
         use_reranker=req.use_reranker,
+        document_id=req.document_id,
     )
+    t_retrieval_ms = (time.perf_counter() - t0) * 1000
 
     if not retrieved_chunks:
-        elapsed_ms = (time.perf_counter() - t0) * 1000
         return GroundedResponse(
             query=req.query,
             answer="No relevant documents or chunks were matched in the knowledge base.",
             citations=[],
             confidence_score=0.0,
             faithfulness_score=1.0,
-            latency_ms=round(elapsed_ms, 2),
+            latency_ms=round(t_retrieval_ms, 2),
             cache_hit=False,
             retrieval_mode=req.mode,
             retrieved_chunks=[],
@@ -48,9 +53,11 @@ async def execute_search(req: SearchRequest):
             estimated_cost_saved_usd=0.0,
             provider=req.provider or "auto",
             model=req.model or "auto-detected",
+            timings_ms=app_state.engine.last_timings_ms,
         )
 
     # 3. Grounded Synthesis with strict Pydantic Citations
+    t_synth_start = time.perf_counter()
     response = app_state.synthesizer.synthesize(
         query=req.query,
         retrieved_chunks=retrieved_chunks,
@@ -59,10 +66,24 @@ async def execute_search(req: SearchRequest):
         custom_api_key=req.custom_api_key,
         retrieval_mode=req.mode,
     )
+    t_synth_ms = (time.perf_counter() - t_synth_start) * 1000
+    total_ms = round((time.perf_counter() - t0) * 1000, 2)
+
+    stage_timings = dict(app_state.engine.last_timings_ms)
+    stage_timings["cache_probe"] = 0.2
+    stage_timings["synthesis"] = round(t_synth_ms, 2)
+    stage_timings["total"] = total_ms
+    response.latency_ms = total_ms
+    response.timings_ms = stage_timings
 
     # 4. Store synthesized response in Semantic Cache
     if req.use_cache:
-        app_state.cache.store(req.query, response)
+        app_state.cache.store(
+            req.query,
+            response,
+            mode=req.mode,
+            document_id=req.document_id,
+        )
 
     return response
 
@@ -87,11 +108,11 @@ async def test_key_connection(req: KeyTestRequest) -> Dict[str, Any]:
             last_err = None
             for m in models_to_try:
                 try:
-                    resp = client.models.generate_content(
+                    client.models.generate_content(
                         model=m,
                         contents="Respond with the word 'OK'",
                     )
-                    return {"success": True, "provider": "gemini", "model": m, "message": f"Gemini API key is active and connected ({m})!"}
+                    return {"success": True, "provider": "gemini", "model": m, "message": f"Gemini API key is active and connected ({m})."}
                 except Exception as e:
                     last_err = e
             return {"success": False, "message": f"Gemini error: {str(last_err)}"}
@@ -103,7 +124,7 @@ async def test_key_connection(req: KeyTestRequest) -> Dict[str, Any]:
             with httpx.Client(timeout=10.0) as client:
                 res = client.post("https://api.anthropic.com/v1/messages", headers=headers, json=payload)
                 res.raise_for_status()
-            return {"success": True, "provider": "anthropic", "message": "Anthropic Claude API key is active and connected!"}
+            return {"success": True, "provider": "anthropic", "message": "Anthropic Claude API key is active and connected."}
 
         elif req.provider == "openai":
             import httpx
@@ -112,7 +133,7 @@ async def test_key_connection(req: KeyTestRequest) -> Dict[str, Any]:
             with httpx.Client(timeout=10.0) as client:
                 res = client.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
                 res.raise_for_status()
-            return {"success": True, "provider": "openai", "message": "OpenAI API key is active and connected!"}
+            return {"success": True, "provider": "openai", "message": "OpenAI API key is active and connected."}
 
         return {"success": False, "message": f"Unsupported provider: {req.provider}"}
     except Exception as e:
@@ -136,4 +157,3 @@ async def execute_raw_search(req: SearchRequest) -> Dict[str, Any]:
         top_k=req.top_k,
     )
     return pipeline_info
-

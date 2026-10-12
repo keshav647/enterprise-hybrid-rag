@@ -73,4 +73,26 @@ BENCHMARK_CASES: List[Dict[str, Any]] = [
         "ground_truth_facts": ["Leader Lease Protocol", "200ms", "heartbeat"],
         "category": "conceptual_architecture",
     },
+    {
+        "id": "bench_11_legal_msa_sla_liability",
+        "query": "What is the service credit for 99.50% monthly uptime and the GDPR breach notification window?",
+        "expected_doc_id": "enterprise_msa_gdpr_compliance_sla",
+        "ground_truth_facts": ["25%", "14 hours", "$15,000,000"],
+        "category": "legal_sla_and_gdpr_compliance",
+    },
+    {
+        "id": "bench_12_clinical_phase3_efficacy",
+        "query": "What was the median Progression-Free Survival (mPFS) and Hazard Ratio for Cohort A in NCT-09482110?",
+        "expected_doc_id": "fda_phase3_oncology_clinical_protocol",
+        "ground_truth_facts": ["14.8 months", "0.54", "68.4%"],
+        "category": "clinical_biostatistics_endpoint",
+    },
+    {
+        "id": "bench_13_sre_sev1_root_cause",
+        "query": "What caused the SEV-1 payment gateway outage INC-2024-1004 and what was the exact rollback command?",
+        "expected_doc_id": "sev1_global_payment_gateway_postmortem",
+        "ground_truth_facts": ["4,096", "PgBouncer", "kubectl rollout undo"],
+        "category": "sre_incident_forensics",
+    },
 ]
+

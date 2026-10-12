@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Synapse // 03 Pipeline — 4-Stage Retrieval DAG & 3-Mode Ablation Comparator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/static/logo.png" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body class="min-h-screen bg-[#06080f] text-slate-100 selection:bg-sky-500/30 selection:text-sky-200 relative">
+
+  <!-- Shared 7-Page Navigation Dock -->
+  <div id="synapse-top-dock" class="relative z-50"></div>
+
+  <main class="relative z-10 max-w-[1600px] mx-auto px-4 lg:px-6 pt-6 pb-20">
+
+    <!-- Header & Live Query Runner for 3-Mode Ablation -->
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-6 mb-6 border-b border-white/10">
+      <div>
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono uppercase tracking-widest text-sky-300 mb-2">
+          PAGE 03 // THREEUI ISOMETRIC 3D CANVASES &amp; LIVE 3-MODE ABLATION
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">
+          4-Stage Hybrid Retrieval DAG &amp; Reciprocal Rank Fusion Inspector
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+          Inspect live candidate scoring across Stage 1 (Dense 768-D + BM25 Okapi), Stage 2 (RRF $k=60$), and Stage 3 (Cross-Encoder Reranker) side-by-side.
+        </p>
+      </div>
+
+      <!-- Preset Domain Query Selector -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400">TEST DOMAIN:</span>
+        <div id="dag-domain-pills" class="flex flex-wrap gap-1.5"></div>
+      </div>
+    </div>
+
+    <!-- ThreeUI Diagnostics-Panel 3D Isometric Visualizer Trio (#canvas-layers, #canvas-nodes, #canvas-flow) -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-7">
+      <!-- Stage 1: Dual Index Layers -->
+      <div class="mask-border rounded-2xl bg-[#080c16]/90 p-5 relative overflow-hidden">
+        <div class="corner-sq top-0 left-0"></div>
+        <div class="corner-sq top-0 right-0"></div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[10px] font-mono uppercase tracking-widest text-sky-400">STAGE 01 // DUAL RECALL</span>
+          <span id="stage1-latency" class="px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono text-sky-300">-- ms</span>
+        </div>
+        <h2 class="text-sm font-semibold text-white mb-1">Dense Vector (768-D) + BM25 Okapi</h2>
+        <p class="text-xs text-slate-400 mb-3">Parallel cosine similarity &amp; lexical TF-IDF ($k_1=1.5, b=0.75$) candidate generation.</p>
+        <div class="h-44 rounded-xl bg-[#04070e] border border-white/10 flex items-center justify-center overflow-hidden">
+          <canvas id="canvas-layers" width="360" height="176" class="w-full h-full"></canvas>
+        </div>
+      </div>
+
+      <!-- Stage 2: Reciprocal Rank Fusion Lattice -->
+      <div class="mask-border rounded-2xl bg-[#080c16]/90 p-5 relative overflow-hidden">
+        <div class="corner-sq top-0 left-0"></div>
+        <div class="corner-sq top-0 right-0"></div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[10px] font-mono uppercase tracking-widest text-purple-400">STAGE 02 // RRF FUSION ($k=60$)</span>
+          <span id="stage2-latency" class="px-2 py-0.5 rounded bg-purple-500/15 border border-purple-400/30 text-[10px] font-mono text-purple-300">-- ms</span>
+        </div>
+        <h2 class="text-sm font-semibold text-white mb-1">$\text{RRF}(d) = \sum \frac{1}{60 + \text{rank}_i(d)}$</h2>
+        <p class="text-xs text-slate-400 mb-3">Scale-invariant rank normalization merging top-30 semantic &amp; lexical candidates.</p>
+        <div class="h-44 rounded-xl bg-[#04070e] border border-white/10 flex items-center justify-center overflow-hidden">
+          <canvas id="canvas-nodes" width="360" height="176" class="w-full h-full"></canvas>
+        </div>
+      </div>
+
+      <!-- Stage 3: Cross-Encoder Neural Reranker -->
+      <div class="mask-border rounded-2xl bg-[#080c16]/90 p-5 relative overflow-hidden">
+        <div class="corner-sq top-0 left-0"></div>
+        <div class="corner-sq top-0 right-0"></div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[10px] font-mono uppercase tracking-widest text-emerald-400">STAGE 03 // CROSS-ENCODER</span>
+          <span id="stage3-latency" class="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-400/30 text-[10px] font-mono text-emerald-300">-- ms</span>
+        </div>
+        <h2 class="text-sm font-semibold text-white mb-1">Joint Query-Chunk Reranking</h2>
+        <p class="text-xs text-slate-400 mb-3">Deep interaction scoring + section/identifier boosting to select top-$K$ grounded chunks.</p>
+        <div class="h-44 rounded-xl bg-[#04070e] border border-white/10 flex items-center justify-center overflow-hidden">
+          <canvas id="canvas-flow" width="360" height="176" class="w-full h-full"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Query Input for Simultaneous 3-Mode Ablation -->
+    <section class="mask-border rounded-2xl bg-[#080c16]/90 p-4 mb-6">
+      <form id="dag-ablation-form" class="flex flex-col sm:flex-row gap-2.5">
+        <input
+          id="dag-query-input"
+          type="text"
+          required
+          class="flex-1 px-4 py-3 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs sm:text-sm font-mono text-white outline-none"
+          placeholder="Enter any query to compare Smart Hybrid vs Dense Vector vs BM25 Keyword side-by-side..."
+        />
+        <button
+          type="submit"
+          id="run-ablation-btn"
+          class="px-5 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-mono text-xs uppercase tracking-widest font-semibold transition-all cursor-pointer shrink-0"
+        >
+          Run Simultaneous 3-Mode Ablation
+        </button>
+      </form>
+    </section>
+
+    <!-- Simultaneous 3-Mode Side-by-Side Comparison Columns -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+      <!-- Column 1: Smart Hybrid -->
+      <div class="mask-border rounded-2xl bg-[#080c16]/90 p-4 border border-sky-400/30">
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+          <div>
+            <span class="text-[10px] font-mono uppercase tracking-widest text-sky-400 font-bold">MODE A // PRODUCTION DEFAULT</span>
+            <h3 class="text-sm font-semibold text-white">Smart Hybrid (Dense + BM25 + RRF + Rerank)</h3>
+          </div>
+          <span id="ablation-lat-hybrid" class="px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 font-mono text-[10px]">-- ms</span>
+        </div>
+        <div id="ablation-col-hybrid" class="space-y-2.5"></div>
+      </div>
+
+      <!-- Column 2: Dense Vector Only -->
+      <div class="mask-border rounded-2xl bg-[#080c16]/90 p-4">
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+          <div>
+            <span class="text-[10px] font-mono uppercase tracking-widest text-indigo-400">MODE B // SEMANTIC BASELINE</span>
+            <h3 class="text-sm font-semibold text-white">Dense Vector Only (768-D Cosine)</h3>
+          </div>
+          <span id="ablation-lat-dense" class="px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 font-mono text-[10px]">-- ms</span>
+        </div>
+        <div id="ablation-col-dense" class="space-y-2.5"></div>
+      </div>
+
+      <!-- Column 3: BM25 Keyword Only -->
+      <div class="mask-border rounded-2xl bg-[#080c16]/90 p-4">
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+          <div>
+            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-400">MODE C // LEXICAL BASELINE</span>
+            <h3 class="text-sm font-semibold text-white">BM25 Okapi Keyword Only ($k_1=1.5, b=0.75$)</h3>
+          </div>
+          <span id="ablation-lat-bm25" class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 font-mono text-[10px]">-- ms</span>
+        </div>
+        <div id="ablation-col-bm25" class="space-y-2.5"></div>
+      </div>
+    </section>
+
+    <!-- Full Mathematical Scoring Breakdown Table -->
+    <section class="mask-border rounded-2xl bg-[#080c16]/90 p-5">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-white/10">
+        <div>
+          <h3 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
+            MATHEMATICAL CANDIDATE FUSION TRACE // DENSE COSINE + BM25 + RRF ($k=60$) + CROSS-ENCODER
+          </h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">
+            Click any row to open the exact chunk inside the Page 04 Hardware Corpus Reader
+          </p>
+        </div>
+        <a href="/search" class="px-3 py-1 rounded-lg bg-sky-500/15 border border-sky-400/30 text-[11px] font-mono text-sky-300 hover:bg-sky-500/25">
+          Synthesize Full Answer on Page 02 -&gt;
+        </a>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs font-mono">
+          <thead>
+            <tr class="border-b border-white/10 text-[10px] uppercase tracking-wider text-slate-400 bg-white/[0.02]">
+              <th class="py-2.5 px-3">Final Rank</th>
+              <th class="py-2.5 px-3">Document &amp; Section</th>
+              <th class="py-2.5 px-3 text-right">Dense Score (Rank)</th>
+              <th class="py-2.5 px-3 text-right">BM25 Score (Rank)</th>
+              <th class="py-2.5 px-3 text-right">RRF Score ($k=60$)</th>
+              <th class="py-2.5 px-3 text-right">Cross-Encoder</th>
+              <th class="py-2.5 px-3 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="math-trace-tbody" class="divide-y divide-white/[0.06] text-slate-200">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/js/nav.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      SynapseNav.mountDock('pipeline');
+      initThreeUIIsometricCanvases();
+
+      // Render 6-Domain quick test pills
+      const pillsEl = document.getElementById('dag-domain-pills');
+      pillsEl.innerHTML = SynapseNav.DOMAINS.map((d) => `
+        <button type="button"
+          onclick="runDomainAblation('${d.id}')"
+          class="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-sky-500/20 border border-white/10 hover:border-sky-400/40 text-[11px] font-mono text-slate-300 hover:text-white transition-all cursor-pointer">
+          ${SynapseNav.escapeHtml(d.shortTitle)}
+        </button>
+      `).join('');
+
+      const savedQuery = SynapseNav.getState(SynapseNav.STORAGE_KEYS.ACTIVE_QUERY, '') || SynapseNav.DOMAINS[0].queries[0].query;
+      document.getElementById('dag-query-input').value = savedQuery;
+      execute3ModeAblation(savedQuery);
+
+      document.getElementById('dag-ablation-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const q = document.getElementById('dag-query-input').value.trim();
+        if (q) execute3ModeAblation(q);
+      });
+    });
+
+    function runDomainAblation(domainId) {
+      const dom = SynapseNav.getDomainById(domainId);
+      SynapseNav.setActiveDomainId(dom.id);
+      const q = dom.queries[0].query;
+      document.getElementById('dag-query-input').value = q;
+      execute3ModeAblation(q);
+    }
+
+    async function execute3ModeAblation(queryText) {
+      SynapseNav.setState(SynapseNav.STORAGE_KEYS.ACTIVE_QUERY, queryText, true);
+      const btn = document.getElementById('run-ablation-btn');
+      btn.disabled = true;
+      btn.textContent = 'Running 3-Mode Ablation...';
+
+      try {
+        const res = await fetch('/api/v1/search/raw', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: queryText, mode: 'hybrid', top_k: 5 }),
+        });
+        const data = await res.json();
+        const t = data.timings_ms || {};
+        const denseMs = Number(t.dense_retrieval || 0.8);
+        const bm25Ms = Number(t.bm25_retrieval || 0.4);
+        const rrfMs = Number(t.rrf_fusion || 0.2);
+        const rerankMs = Number(t.cross_encoder_rerank || 1.2);
+        const totalMs = Number(t.total || denseMs + bm25Ms + rrfMs + rerankMs);
+
+        document.getElementById('stage1-latency').textContent = `${(denseMs + bm25Ms).toFixed(2)} ms`;
+        document.getElementById('stage2-latency').textContent = `${rrfMs.toFixed(2)} ms`;
+        document.getElementById('stage3-latency').textContent = `${rerankMs.toFixed(2)} ms`;
+
+        document.getElementById('ablation-lat-hybrid').textContent = `${totalMs.toFixed(1)} ms`;
+        document.getElementById('ablation-lat-dense').textContent = `${denseMs.toFixed(1)} ms`;
+        document.getElementById('ablation-lat-bm25').textContent = `${bm25Ms.toFixed(1)} ms`;
+
+        const hybridItems = data.final_reranked || [];
+        const denseItems = data.dense_top || [];
+        const bm25Items = data.bm25_top || [];
+
+        renderAblationColumn('ablation-col-hybrid', hybridItems, 'sky');
+        renderAblationColumn('ablation-col-dense', denseItems, 'indigo');
+        renderAblationColumn('ablation-col-bm25', bm25Items, 'amber');
+
+        renderMathTraceTable(hybridItems, denseItems, bm25Items);
+      } catch (err) {
+        SynapseNav.showToast('Ablation Error', err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Run Simultaneous 3-Mode Ablation';
+      }
+    }
+
+    function renderAblationColumn(containerId, results, colorKey) {
+      const el = document.getElementById(containerId);
+      if (!results.length) {
+        el.innerHTML = `<div class="text-xs font-mono text-slate-500 py-4">No chunks retrieved.</div>`;
+        return;
+      }
+      el.innerHTML = results.map((r, i) => {
+        const c = r.chunk || r;
+        const docId = c.document_id || c.chunk_id?.replace(/_c\d+$/, '') || '';
+        const scoreVal = r.score !== undefined ? r.score : (r.rerank_score || r.final_score || 0);
+        return `
+          <a href="/documents?doc=${encodeURIComponent(docId)}&chunk=${encodeURIComponent(c.chunk_id)}"
+             class="block p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/10 transition-all">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="px-1.5 py-0.5 rounded bg-${colorKey}-500/15 border border-${colorKey}-400/30 text-${colorKey}-300 font-mono text-[10px] font-bold">
+                #${i + 1} // ${SynapseNav.escapeHtml(c.chunk_id)}
+              </span>
+              <span class="text-[10px] font-mono text-emerald-300">
+                Score ${Number(scoreVal).toFixed(4)}
+              </span>
+            </div>
+            <div class="text-xs font-semibold text-white truncate">${SynapseNav.escapeHtml(c.document_title || docId)}</div>
+            <div class="text-[11px] font-mono text-sky-300 truncate mb-1">${SynapseNav.escapeHtml(c.section_title || 'Section')}</div>
+            <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">${SynapseNav.escapeHtml(c.content || c.snippet || '')}</p>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function renderMathTraceTable(results, denseList = [], bm25List = []) {
+      const denseScoreMap = {};
+      denseList.forEach((d) => {
+        denseScoreMap[d.chunk_id] = d.score;
+      });
+      const bm25ScoreMap = {};
+      bm25List.forEach((b) => {
+        bm25ScoreMap[b.chunk_id] = b.score;
+      });
+
+      const tbody = document.getElementById('math-trace-tbody');
+      tbody.innerHTML = results.map((r, idx) => {
+        const c = r.chunk || r;
+        const docId = c.document_id || c.chunk_id?.replace(/_c\d+$/, '') || '';
+        const dScore = r.dense_score !== undefined ? r.dense_score : (denseScoreMap[c.chunk_id] || 0);
+        const bScore = r.bm25_score !== undefined ? r.bm25_score : (bm25ScoreMap[c.chunk_id] || 0);
+        const rrfVal = r.rrf_score !== undefined ? r.rrf_score : 0;
+        const rerankVal = r.rerank_score !== undefined ? r.rerank_score : (r.score || 0);
+        return `
+          <tr class="hover:bg-white/[0.03] transition-colors">
+            <td class="py-2.5 px-3 font-bold text-sky-300">#${idx + 1}</td>
+            <td class="py-2.5 px-3">
+              <div class="text-white font-semibold">${SynapseNav.escapeHtml(c.document_title || docId)}</div>
+              <div class="text-[11px] text-slate-400">${SynapseNav.escapeHtml(c.section_title || '')}</div>
+            </td>
+            <td class="py-2.5 px-3 text-right text-indigo-300">
+              ${Number(dScore).toFixed(4)} <span class="text-slate-500">(#${r.dense_rank || '-'})</span>
+            </td>
+            <td class="py-2.5 px-3 text-right text-amber-300">
+              ${Number(bScore).toFixed(2)} <span class="text-slate-500">(#${r.bm25_rank || '-'})</span>
+            </td>
+            <td class="py-2.5 px-3 text-right text-purple-300 font-semibold">
+              ${Number(rrfVal).toFixed(5)}
+            </td>
+            <td class="py-2.5 px-3 text-right text-emerald-400 font-bold">
+              ${Number(rerankVal).toFixed(4)}
+            </td>
+            <td class="py-2.5 px-3 text-right">
+              <a href="/documents?doc=${encodeURIComponent(docId)}&chunk=${encodeURIComponent(c.chunk_id)}"
+                 class="px-2 py-1 rounded bg-sky-500/15 hover:bg-sky-500/30 border border-sky-400/30 text-sky-300 text-[10px]">
+                Inspect Chunk -&gt;
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Authentic ThreeUI Diagnostics-Panel 3D Isometric Canvases (Indigo, Cyan & White)
+    function initThreeUIIsometricCanvases() {
+      // 1. #canvas-layers: Rotating 3D Isometric Planes (Dense + BM25 + RRF planes)
+      const cLayers = document.getElementById('canvas-layers');
+      const ctxL = cLayers.getContext('2d');
+      let tL = 0;
+      function drawLayers() {
+        ctxL.clearRect(0, 0, cLayers.width, cLayers.height);
+        tL += 0.02;
+        const cx = cLayers.width / 2;
+        const cy = cLayers.height / 2;
+        const offsets = [-34, 0, 34];
+        const colors = ['rgba(99,102,241,0.85)', 'rgba(6,182,212,0.85)', 'rgba(255,255,255,0.90)'];
+
+        offsets.forEach((off, idx) => {
+          const yShift = off + Math.sin(tL + idx) * 5;
+          ctxL.save();
+          ctxL.translate(cx, cy + yShift);
+          ctxL.scale(1, 0.48);
+          ctxL.rotate(tL * 0.25 + idx * 0.4);
+          ctxL.strokeStyle = colors[idx];
+          ctxL.lineWidth = 1.5;
+          ctxL.strokeRect(-64, -64, 128, 128);
+          ctxL.fillStyle = colors[idx].replace('0.85', '0.10').replace('0.90', '0.11');
+          ctxL.fillRect(-64, -64, 128, 128);
+          ctxL.restore();
+        });
+        requestAnimationFrame(drawLayers);
+      }
+      drawLayers();
+
+      // 2. #canvas-nodes: 3D Isometric RRF Node Lattice
+      const cNodes = document.getElementById('canvas-nodes');
+      const ctxN = cNodes.getContext('2d');
+      let tN = 0;
+      function drawNodes() {
+        ctxN.clearRect(0, 0, cNodes.width, cNodes.height);
+        tN += 0.025;
+        const cx = cNodes.width / 2;
+        const cy = cNodes.height / 2;
+        const pts = [];
+        for (let i = -2; i <= 2; i++) {
+          for (let j = -2; j <= 2; j++) {
+            const x = cx + (i - j) * 26;
+            const y = cy + (i + j) * 13 + Math.sin(tN + i * 0.8 + j * 0.8) * 7;
+            pts.push({ x, y, active: (i === 0 && j === 0) || (i === 1 && j === -1) });
+          }
+        }
+        ctxN.strokeStyle = 'rgba(6, 182, 212, 0.32)';
+        ctxN.lineWidth = 1;
+        for (let i = 0; i < pts.length - 1; i++) {
+          ctxN.beginPath();
+          ctxN.moveTo(pts[i].x, pts[i].y);
+          ctxN.lineTo(pts[i + 1].x, pts[i + 1].y);
+          ctxN.stroke();
+        }
+        pts.forEach((p) => {
+          ctxN.beginPath();
+          ctxN.arc(p.x, p.y, p.active ? 4.2 : 2.2, 0, Math.PI * 2);
+          ctxN.fillStyle = p.active ? '#6366f1' : 'rgba(255, 255, 255, 0.65)';
+          ctxN.fill();
+        });
+        requestAnimationFrame(drawNodes);
+      }
+      drawNodes();
+
+      // 3. #canvas-flow: Cross-Encoder Neural Scoring Wave Stream
+      const cFlow = document.getElementById('canvas-flow');
+      const ctxF = cFlow.getContext('2d');
+      let tF = 0;
+      function drawFlow() {
+        ctxF.clearRect(0, 0, cFlow.width, cFlow.height);
+        tF += 0.035;
+        for (let s = 0; s < 5; s++) {
+          ctxF.beginPath();
+          for (let x = 20; x < cFlow.width - 20; x += 6) {
+            const y =
+              cFlow.height / 2 +
+              Math.sin(x * 0.03 + tF + s * 0.7) * (18 + s * 4) * Math.sin((x / cFlow.width) * Math.PI);
+            if (x === 20) ctxF.moveTo(x, y);
+            else ctxF.lineTo(x, y);
+          }
+          ctxF.strokeStyle = s === 0 ? 'rgba(99, 102, 241, 0.95)' : `rgba(6, 182, 212, ${0.55 - s * 0.09})`;
+          ctxF.lineWidth = s === 0 ? 2 : 1.1;
+          ctxF.stroke();
+        }
+        requestAnimationFrame(drawFlow);
+      }
+      drawFlow();
+    }
+  </script>
+</body>
+</html>

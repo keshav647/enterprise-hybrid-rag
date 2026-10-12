@@ -1,0 +1,26 @@
+{
+  "name": "synapse-enterprise-rag-ui",
+  "version": "2.5.0",
+  "private": true,
+  "description": "Synapse Enterprise Hybrid Search & Document Intelligence UI Templates (ThreeUI + Poimandres R3F/Drei + GSAP + Motion + Lenis + 21st.dev Primitives)",
+  "dependencies": {
+    "@designcodeio/threeui": "latest",
+    "@react-three/drei": "^9.120.4",
+    "@react-three/fiber": "^8.17.10",
+    "animejs": "^3.2.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dompurify": "^3.2.3",
+    "gsap": "^3.12.5",
+    "highlight.js": "^11.11.1",
+    "lenis": "^1.1.18",
+    "lucide": "^0.468.0",
+    "lucide-react": "^0.468.0",
+    "marked": "^15.0.6",
+    "motion": "^11.15.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.6.0",
+    "three": "^0.170.0"
+  }
+}

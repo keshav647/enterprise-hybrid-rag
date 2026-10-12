@@ -12,8 +12,11 @@ from src.config import (
     settings,
     DOCUMENTS_DIR,
     STATIC_DIR,
+    UI_OVERVIEW_PATH,
     UI_INDEX_PATH,
+    UI_PIPELINE_PATH,
     UI_DOCUMENTS_PATH,
+    UI_INGEST_PATH,
     UI_ANALYTICS_PATH,
     UI_SETTINGS_PATH,
 )
@@ -117,31 +120,58 @@ def create_app() -> FastAPI:
     if STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-    # Distinct Multi-Page HTML File Endpoints
+    @app.get("/favicon.ico", include_in_schema=False)
+    async def serve_favicon():
+        logo_path = STATIC_DIR / "logo.png"
+        if logo_path.is_file():
+            return FileResponse(str(logo_path), media_type="image/png")
+        return {"message": "No favicon"}
+
+    # 7-Page Multi-Template Architecture Endpoints
     @app.get("/", include_in_schema=False)
+    @app.get("/overview", include_in_schema=False)
+    async def serve_overview_page():
+        if UI_OVERVIEW_PATH.exists():
+            return FileResponse(str(UI_OVERVIEW_PATH))
+        if UI_INDEX_PATH.exists():
+            return FileResponse(str(UI_INDEX_PATH))
+        return {"message": "Overview UI not found"}
+
     @app.get("/search", include_in_schema=False)
     async def serve_search_page():
         if UI_INDEX_PATH.exists():
             return FileResponse(str(UI_INDEX_PATH))
         return {"message": "Search UI not found"}
 
+    @app.get("/pipeline", include_in_schema=False)
+    async def serve_pipeline_page():
+        if UI_PIPELINE_PATH.exists():
+            return FileResponse(str(UI_PIPELINE_PATH))
+        return {"message": "Pipeline UI not found"}
+
     @app.get("/documents", include_in_schema=False)
     async def serve_documents_page():
         if UI_DOCUMENTS_PATH.exists():
             return FileResponse(str(UI_DOCUMENTS_PATH))
-        return FileResponse(str(UI_INDEX_PATH))
+        return {"message": "Documents UI not found"}
+
+    @app.get("/ingest", include_in_schema=False)
+    async def serve_ingest_page():
+        if UI_INGEST_PATH.exists():
+            return FileResponse(str(UI_INGEST_PATH))
+        return {"message": "Ingest UI not found"}
 
     @app.get("/analytics", include_in_schema=False)
     async def serve_analytics_page():
         if UI_ANALYTICS_PATH.exists():
             return FileResponse(str(UI_ANALYTICS_PATH))
-        return FileResponse(str(UI_INDEX_PATH))
+        return {"message": "Analytics UI not found"}
 
     @app.get("/settings", include_in_schema=False)
     async def serve_settings_page():
         if UI_SETTINGS_PATH.exists():
             return FileResponse(str(UI_SETTINGS_PATH))
-        return FileResponse(str(UI_INDEX_PATH))
+        return {"message": "Settings UI not found"}
 
     return app
 

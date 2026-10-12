@@ -1,9 +1,11 @@
 """Document management and ingestion routes."""
 
+import re
 from typing import List, Dict, Any
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
-from src.schemas.models import DocumentMetadata, IngestRequest, DocumentChunk
+from src.schemas.models import DocumentMetadata, IngestRequest
+from src.ingestion.document_loader import DocumentLoader
 
 router = APIRouter(tags=["Documents"])
 
@@ -42,7 +44,8 @@ async def ingest_document(req: IngestRequest):
     """Dynamically parses, chunks, and indexes a new document into both Dense and BM25 systems."""
     from src.api.app import app_state
 
-    doc_id = req.title.lower().replace(" ", "_").replace("-", "_")
+    slug = re.sub(r"[^a-z0-9]+", "_", req.title.lower()).strip("_") or "custom_doc"
+    doc_id = slug
     chunks = app_state.chunker.chunk_document(
         document_id=doc_id,
         document_title=req.title,
@@ -50,15 +53,19 @@ async def ingest_document(req: IngestRequest):
         base_metadata=req.metadata,
     )
 
+    suggested = DocumentLoader.generate_suggested_queries(req.title, chunks)
+
     metadata = DocumentMetadata(
         document_id=doc_id,
         title=req.title,
         file_path=None,
         document_type=req.document_type,
-        tags=["user-ingested"],
+        tags=["user-ingested", req.domain or "custom"],
         total_pages=max([c.page_number or 1 for c in chunks]) if chunks else 1,
         total_chunks=len(chunks),
         created_at=datetime.utcnow().isoformat(),
+        domain=req.domain or "custom",
+        suggested_queries=suggested,
     )
 
     app_state.documents[doc_id] = metadata

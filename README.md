@@ -1,13 +1,17 @@
-# Synapse // Enterprise Hybrid Search & Document Intelligence Engine
+<div align="center">
+  <img src="src/ui/static/logo.png" alt="Synapse — Enterprise Hybrid Search & Document Intelligence Logo" width="140" />
 
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.128-009688.svg)](https://fastapi.tiangolo.com/)
-[![pgvector](https://img.shields.io/badge/pgvector-HNSW-336791.svg)](https://github.com/pgvector/pgvector)
-[![Redis](https://img.shields.io/badge/Redis-Semantic%20Cache-DC382D.svg)](https://redis.io/)
-[![Ragas Evaluated](https://img.shields.io/badge/Ragas-Context%20Recall%20100%25-green.svg)](https://github.com/explodinggradients/ragas)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
+  # Synapse // Enterprise Hybrid Search & Document Intelligence Engine
 
-> A production-grade Retrieval-Augmented Generation (RAG) platform engineered for complex enterprise documents (financial statements, kernel advisories, architectural specifications). Replaces naive vector search with **Dense + BM25 Hybrid Retrieval**, **Reciprocal Rank Fusion (RRF)**, **Cross-Encoder Re-Ranking**, **Redis Semantic Caching**, and **Exact Citation Grounding**.
+  [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+  [![FastAPI](https://img.shields.io/badge/FastAPI-0.128-009688.svg)](https://fastapi.tiangolo.com/)
+  [![pgvector](https://img.shields.io/badge/pgvector-HNSW-336791.svg)](https://github.com/pgvector/pgvector)
+  [![Redis](https://img.shields.io/badge/Redis-Semantic%20Cache-DC382D.svg)](https://redis.io/)
+  [![Ragas Evaluated](https://img.shields.io/badge/Ragas-Context%20Recall%20100%25-green.svg)](https://github.com/explodinggradients/ragas)
+  [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
+</div>
+
+> A production-grade Retrieval-Augmented Generation (RAG) platform engineered for complex enterprise documents (kernel security advisories, Q3 10-Q financial statements, distributed consensus RFCs, legal GDPR SLAs, FDA clinical trial protocols, and SRE SEV-1 post-mortems). Replaces naive vector search with **Dense + BM25 Hybrid Retrieval**, **Reciprocal Rank Fusion (RRF)**, **Cross-Encoder Re-Ranking**, **Redis Semantic Caching**, and **Exact Citation Grounding** across a **7-Page Three.js WebGL & Double-Bezel UI Architecture**.
 
 ---
 

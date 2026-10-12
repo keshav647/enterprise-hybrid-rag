@@ -116,3 +116,114 @@ def test_test_key_endpoint(client):
     res2 = client.post("/api/v1/auth/test_key", json={"provider": "unknown_ai", "api_key": "dummy"})
     assert res2.status_code == 200
     assert res2.json()["success"] is False
+
+
+def test_six_enterprise_domains_and_suggested_queries(client):
+    res = client.get("/api/v1/documents")
+    assert res.status_code == 200
+    docs = res.json()
+    assert len(docs) >= 6
+
+    for doc in docs[:6]:
+        assert doc.get("domain")
+        assert isinstance(doc.get("suggested_queries"), list)
+        assert len(doc["suggested_queries"]) >= 3
+
+
+def test_new_domains_grounded_synthesis(client):
+    # Legal MSA / GDPR SLA domain
+    r_legal = client.post(
+        "/api/v1/search",
+        json={
+            "query": "What is the service credit percentage if monthly uptime drops to 99.50% and what is the GDPR breach notification window?",
+            "mode": "hybrid",
+            "use_cache": False,
+        },
+    )
+    assert r_legal.status_code == 200
+    d_legal = r_legal.json()
+    assert "25%" in d_legal["answer"]
+    assert "14 hours" in d_legal["answer"]
+
+    # FDA Phase III Clinical Protocol domain
+    r_clin = client.post(
+        "/api/v1/search",
+        json={
+            "query": "What was the median Progression-Free Survival (mPFS) and Hazard Ratio for Cohort A in NCT-09482110?",
+            "mode": "hybrid",
+            "use_cache": False,
+        },
+    )
+    assert r_clin.status_code == 200
+    d_clin = r_clin.json()
+    assert "14.8 months" in d_clin["answer"]
+    assert "0.54" in d_clin["answer"]
+
+    # Production SRE SEV-1 Post-Mortem domain
+    r_sre = client.post(
+        "/api/v1/search",
+        json={
+            "query": "What caused the SEV-1 payment gateway outage INC-2024-1004 and what was the exact rollback command?",
+            "mode": "hybrid",
+            "use_cache": False,
+        },
+    )
+    assert r_sre.status_code == 200
+    d_sre = r_sre.json()
+    assert "4,096" in d_sre["answer"]
+    assert "kubectl rollout undo" in d_sre["answer"]
+
+
+def test_custom_document_ingest_and_query_workflow(client):
+    ingest_payload = {
+        "title": "Zero-Trust KMS Security Specification v5",
+        "domain": "Cybersecurity & Kernel Sec",
+        "author": "Cloud Security Team",
+        "category": "custom_spec",
+        "content": (
+            "# Zero-Trust KMS Security Specification v5\n\n"
+            "## 1. Envelope Encryption & Key Rotation\n"
+            "All production envelope keys under `mrk-778899aabb` rotate every **3,600 seconds** "
+            "and enforce VPC endpoint `vpce-099118822aabb` with session TTL **900 seconds**.\n"
+        ),
+    }
+    ing_res = client.post("/api/v1/documents/ingest", json=ingest_payload)
+    assert ing_res.status_code == 200
+    new_doc = ing_res.json()
+    assert new_doc["document_id"] == "zero_trust_kms_security_specification_v5"
+    assert len(new_doc["suggested_queries"]) >= 3
+
+    # Query the newly ingested custom document
+    q_res = client.post(
+        "/api/v1/search",
+        json={
+            "query": "What is the key rotation interval for mrk-778899aabb and VPC endpoint?",
+            "mode": "hybrid",
+            "document_id": new_doc["document_id"],
+            "use_cache": False,
+        },
+    )
+    assert q_res.status_code == 200
+    q_data = q_res.json()
+    assert "3,600" in q_data["answer"] or "mrk-778899aabb" in q_data["answer"]
+    assert len(q_data["citations"]) >= 1
+
+
+def test_seven_page_threeui_architecture_routes(client):
+    expected_pages = [
+        ("/", "webgl-vanguard"),
+        ("/overview", "webgl-vanguard"),
+        ("/search", "bg-waves"),
+        ("/pipeline", "canvas-layers"),
+        ("/documents", "void-dotmatrix"),
+        ("/ingest", "glcanvas-matrix"),
+        ("/analytics", "dial-arc-p5"),
+        ("/settings", "flow-canvas"),
+    ]
+    for route, signature in expected_pages:
+        res = client.get(route)
+        assert res.status_code == 200, f"Route {route} failed with {res.status_code}"
+        assert signature in res.text, f"Route {route} missing ThreeUI signature {signature}"
+        assert "synapse-top-dock" in res.text
+
+

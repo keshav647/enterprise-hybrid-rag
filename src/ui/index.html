@@ -1,465 +1,784 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Synapse // Search & Answers</title>
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Synapse // 02 Search — Hybrid RAG & Grounded Citations Workbench</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <link rel="stylesheet" href="/static/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/static/logo.png" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
 </head>
-<body>
-  <!-- Ambient Backdrop -->
-  <div class="mesh-background">
-    <div class="dot-grid"></div>
-    <div class="glow-orb orb-amber"></div>
-    <div class="glow-orb orb-iris"></div>
-    <div class="glow-orb orb-rose"></div>
-  </div>
+<body class="min-h-screen bg-[#06080f] text-slate-100 selection:bg-sky-500/30 selection:text-sky-200 relative">
 
-  <div class="app-container">
-    <!-- Top Bar Navigation -->
-    <header class="app-header">
-      <div class="header-brand">
-        <div class="brand-crest">
-          <div class="crest-inner">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-              <path d="M2 17l10 5 10-5"></path>
-              <path d="M2 12l10 5 10-5"></path>
-            </svg>
-          </div>
-          <div class="crest-glow"></div>
+  <!-- ThreeUI Diagnostics-Panel 3D Perspective Wave Lattice Canvas -->
+  <canvas id="bg-waves" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-65"></canvas>
+
+  <!-- Shared 7-Page Navigation Dock -->
+  <div id="synapse-top-dock" class="relative z-50"></div>
+
+  <!-- Main Workbench Container -->
+  <main id="workbench-surface" class="flashlight-surface relative z-10 max-w-[1600px] mx-auto px-4 lg:px-6 pt-5 pb-16">
+
+    <!-- Animated Shooting Laser Lines (ThreeUI Diagnostics Signature) -->
+    <div id="shoot-h" class="laser-line-h top-0 left-0"></div>
+
+    <!-- Step 1: 6-Domain Use-Case Ribbon ("What to Test Where") -->
+    <section class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-4 mb-4 relative">
+      <div class="corner-sq top-0 left-0"></div>
+      <div class="corner-sq top-0 right-0"></div>
+      <div class="corner-sq bottom-0 left-0"></div>
+      <div class="corner-sq bottom-0 right-0"></div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono uppercase tracking-widest text-sky-300">
+            STEP 01 // SELECT ENTERPRISE USE-CASE DOMAIN
+          </span>
+          <span class="text-xs text-slate-400 hidden md:inline">
+            Clicking a domain loads its tailored verification questions &amp; syncs the right-hand Source Inspector
+          </span>
         </div>
-        <div class="brand-typography">
-          <div class="brand-title">
-            <span>SYNAPSE</span>
-            <span class="edition-pill">SEARCH</span>
+        <div class="flex items-center gap-2">
+          <a href="/ingest" class="text-[11px] font-mono text-amber-300 hover:text-amber-200 px-2.5 py-1 rounded bg-amber-500/10 border border-amber-400/30 transition-all">
+            + Paste Custom Doc (Page 05)
+          </a>
+          <a href="/pipeline" class="text-[11px] font-mono text-sky-300 hover:text-sky-200 px-2.5 py-1 rounded bg-sky-500/10 border border-sky-400/30 transition-all">
+            3-Mode DAG Comparator (Page 03) -&gt;
+          </a>
+        </div>
+      </div>
+
+      <!-- 6 Domain Selector Pills -->
+      <div id="domain-selector-ribbon" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-3">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Tailored 1-Click Verification Queries for Active Domain -->
+      <div class="flex flex-wrap items-center gap-2 pt-2.5 border-t border-white/[0.08]">
+        <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 shrink-0">
+          1-CLICK DOMAIN QUERIES:
+        </span>
+        <div id="domain-query-chips" class="flex flex-wrap items-center gap-2 flex-1">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2: Command Search Bar & Retrieval Mode Controls -->
+    <section class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-4 mb-5 relative">
+      <form id="rag-search-form" class="space-y-3">
+        <div class="flex flex-col lg:flex-row gap-2.5">
+          <div class="relative flex-1">
+            <input
+              id="search-query-input"
+              type="text"
+              required
+              placeholder="Ask a technical, financial, architectural, legal, clinical, or incident question..."
+              class="w-full pl-4 pr-24 py-3.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-sm text-white font-mono outline-none shadow-inner transition-all"
+            />
+            <span id="active-mode-pill" class="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono uppercase text-sky-300">
+              HYBRID RRF
+            </span>
           </div>
-          <div class="brand-meta">Dual Search &bull; Fast Memory Cache &bull; Verified Citations</div>
+
+          <button
+            type="submit"
+            id="execute-search-btn"
+            class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-mono text-xs uppercase tracking-widest font-semibold shadow-[0_0_24px_rgba(56,189,248,0.3)] transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span id="execute-btn-label">Synthesize Grounded Answer</span>
+          </button>
+
+          <button
+            type="button"
+            id="repeat-cache-btn"
+            title="Re-run the active query to demonstrate <25ms Semantic Cache Hit"
+            class="px-4 py-3.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            <span>Test &lt;25ms Cache Hit</span>
+          </button>
+        </div>
+
+        <!-- Retrieval Mode & Filter Controls -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/[0.07] text-xs">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400">RETRIEVAL ENGINE:</span>
+            <div class="inline-flex rounded-lg bg-[#050811] p-0.5 border border-white/10">
+              <button type="button" data-mode="hybrid" class="mode-switch-btn px-3 py-1 rounded-md text-[11px] font-mono bg-sky-500/20 text-sky-300 border border-sky-400/40 transition-all cursor-pointer">
+                Smart Hybrid (Dense + BM25 + RRF + Reranker)
+              </button>
+              <button type="button" data-mode="dense" class="mode-switch-btn px-3 py-1 rounded-md text-[11px] font-mono text-slate-400 hover:text-white transition-all cursor-pointer">
+                Dense Vector (768-d)
+              </button>
+              <button type="button" data-mode="bm25" class="mode-switch-btn px-3 py-1 rounded-md text-[11px] font-mono text-slate-400 hover:text-white transition-all cursor-pointer">
+                BM25 Okapi Lexical
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-4">
+            <label class="flex items-center gap-1.5 text-[11px] font-mono text-slate-300">
+              <span class="text-slate-400">CATEGORY:</span>
+              <select id="category-filter-select" class="bg-[#050811] border border-white/15 rounded px-2 py-1 text-[11px] font-mono text-white outline-none">
+                <option value="">All 6 Enterprise Domains</option>
+                <option value="security">security (CVE-2024-8192)</option>
+                <option value="financial">financial (Q3 10-Q)</option>
+                <option value="architecture">architecture (Raft RFC)</option>
+                <option value="compliance">compliance (MSA &amp; GDPR)</option>
+                <option value="biomedical">biomedical (FDA Phase III)</option>
+                <option value="incident">incident (SRE SEV-1)</option>
+              </select>
+            </label>
+
+            <label class="flex items-center gap-1.5 text-[11px] font-mono text-slate-300 cursor-pointer">
+              <input id="bypass-cache-checkbox" type="checkbox" class="rounded bg-slate-900 border-white/20 text-sky-500 focus:ring-0" />
+              <span>Bypass Semantic Cache</span>
+            </label>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Step 3: Split-Screen Grounded Synthesis (Left) & Interactive Source Corpus Reader (Right) -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+      <!-- Left 7 Columns: Telemetry Strip + Synthesized Answer + Verified Citation Cards -->
+      <div class="lg:col-span-7 space-y-4">
+
+        <!-- Live Execution Telemetry Strip -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <div class="mask-border rounded-xl bg-[#080c16]/90 p-3">
+            <div class="text-[9px] font-mono uppercase tracking-widest text-slate-400">END-TO-END LATENCY</div>
+            <div id="metric-latency" class="text-lg font-bold font-mono text-white mt-0.5 tabular-nums">-- ms</div>
+          </div>
+          <div class="mask-border rounded-xl bg-[#080c16]/90 p-3">
+            <div class="text-[9px] font-mono uppercase tracking-widest text-slate-400">SEMANTIC CACHE</div>
+            <div id="metric-cache-status" class="text-xs font-bold font-mono text-sky-300 mt-1 uppercase">READY</div>
+          </div>
+          <div class="mask-border rounded-xl bg-[#080c16]/90 p-3">
+            <div class="text-[9px] font-mono uppercase tracking-widest text-slate-400">FAITHFULNESS</div>
+            <div id="metric-faithfulness" class="text-lg font-bold font-mono text-emerald-400 mt-0.5 tabular-nums">--%</div>
+          </div>
+          <div class="mask-border rounded-xl bg-[#080c16]/90 p-3">
+            <div class="text-[9px] font-mono uppercase tracking-widest text-slate-400">CONTEXT RELEVANCE</div>
+            <div id="metric-relevance" class="text-lg font-bold font-mono text-sky-300 mt-0.5 tabular-nums">--%</div>
+          </div>
+          <div class="mask-border rounded-xl bg-[#080c16]/90 p-3 col-span-2 sm:col-span-1">
+            <div class="text-[9px] font-mono uppercase tracking-widest text-slate-400">EST. TOKEN COST</div>
+            <div id="metric-cost" class="text-lg font-bold font-mono text-purple-300 mt-0.5 tabular-nums">$0.0000</div>
+          </div>
+        </div>
+
+        <!-- Grounded Answer Synthesis Card -->
+        <div class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-5 lg:p-6 relative">
+          <div class="corner-sq top-0 left-0"></div>
+          <div class="corner-sq top-0 right-0"></div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <h2 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
+                GROUNDED AI SYNTHESIS // CLICK INLINE [1] CITATIONS TO LOCK SOURCE CHUNK
+              </h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="answer-model-pill" class="px-2 py-0.5 rounded bg-white/[0.04] border border-white/10 text-[10px] font-mono text-slate-300">
+                gemini-2.5-flash
+              </span>
+              <a href="/pipeline" class="px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono text-sky-300 hover:bg-sky-500/25">
+                Inspect 4-Stage DAG -&gt;
+              </a>
+            </div>
+          </div>
+
+          <div id="synthesized-answer-body" class="prose prose-invert max-w-none text-slate-200 leading-relaxed min-h-[180px]">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Verified Grounded Citations & Retrieval Ranking Cards -->
+        <div class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-5">
+          <div class="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
+            <div>
+              <h3 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
+                VERIFIED GROUNDING CHUNKS // RRF ($k=60$) &amp; CROSS-ENCODER SCORES
+              </h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                Click any citation card to highlight its exact paragraph/table in the Live Source Inspector on the right
+              </p>
+            </div>
+            <span id="citation-count-badge" class="px-2.5 py-1 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono text-sky-300">
+              0 CITATIONS
+            </span>
+          </div>
+
+          <div id="citations-list-container" class="space-y-3">
+            <!-- Populated by JS -->
+          </div>
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
-      <nav class="header-nav">
-        <a href="/" class="nav-tab-btn active">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <span>Search &amp; Answers</span>
-        </a>
-        <a href="/documents" class="nav-tab-btn">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-          </svg>
-          <span>Document Library</span>
-        </a>
-        <a href="/analytics" class="nav-tab-btn">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 3v18h18"></path>
-            <path d="M18 17V9"></path>
-            <path d="M13 17V5"></path>
-            <path d="M8 17v-3"></path>
-          </svg>
-          <span>Accuracy &amp; Metrics</span>
-        </a>
-        <a href="/settings" class="nav-tab-btn">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          <span>AI Models &amp; Keys</span>
-        </a>
-      </nav>
-
-      <!-- Fast Cache Pill -->
-      <div class="header-hud-pills">
-        <div class="hud-pill hud-pill-cache" id="cacheStatusBadge">
-          <svg class="cache-spark" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-          </svg>
-          <span class="pill-label">FAST CACHE</span>
-          <span class="pill-metric" id="cacheHitStat">Active</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- Main Content: Focused Search Stage -->
-    <main class="search-view-stage">
-      <section class="command-section">
-        <form id="searchForm" class="command-form">
-          <div class="border-beam-container">
-            <div class="border-beam-effect"></div>
-            <div class="command-bar">
-              <div class="search-indicator">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-              </div>
-              
-              <input
-                type="text"
-                id="queryInput"
-                class="command-input"
-                placeholder="Ask any question across enterprise documents..."
-                autocomplete="off"
-                spellcheck="false"
-              />
-
-              <button type="submit" class="command-submit-btn" id="btnSubmitSearch">
-                <span class="btn-text">Search Documents</span>
-                <kbd class="shortcut-key">↵</kbd>
-              </button>
-            </div>
-          </div>
-
-          <!-- Controls row -->
-          <div class="command-toggles-bar">
-            <div class="mode-selector-group">
-              <span class="group-label">SEARCH METHOD:</span>
-              <div class="mode-segmented-control">
-                <label class="segment-btn active" data-mode="hybrid">
-                  <input type="radio" name="retrievalMode" value="hybrid" checked>
-                  <span class="segment-icon">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                    </svg>
-                  </span>
-                  <span class="segment-text">Smart Dual Search (Best)</span>
-                </label>
-                <label class="segment-btn" data-mode="dense">
-                  <input type="radio" name="retrievalMode" value="dense">
-                  <span class="segment-icon">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="3"></circle>
-                      <path d="M12 2a10 10 0 0 0-7.07 17.07l1.41-1.41A8 8 0 1 1 12 4z"></path>
-                      <path d="m4.93 4.93 1.41 1.41"></path>
-                      <path d="m19.07 19.07-1.41-1.41"></path>
-                    </svg>
-                  </span>
-                  <span class="segment-text">Meaning Only</span>
-                </label>
-                <label class="segment-btn" data-mode="bm25">
-                  <input type="radio" name="retrievalMode" value="bm25">
-                  <span class="segment-icon">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="4 7 4 4 20 4 20 7"></polyline>
-                      <line x1="9" y1="20" x2="15" y2="20"></line>
-                      <line x1="12" y1="4" x2="12" y2="20"></line>
-                    </svg>
-                  </span>
-                  <span class="segment-text">Exact Words Only</span>
-                </label>
+      <!-- Right 5 Columns: Live Interactive Source Document & Chunk Highlight Reader -->
+      <div class="lg:col-span-5 lg:sticky lg:top-20">
+        <div class="hardware-chassis rounded-2xl border border-white/15 p-4 relative overflow-hidden">
+          <!-- Hardware Corner Rivets -->
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <div class="hardware-rivet"></div>
+              <div>
+                <div class="text-[10px] font-mono uppercase tracking-widest text-sky-400 font-semibold">
+                  LIVE SOURCE INSPECTOR &amp; CHUNK HIGHLIGHTER
+                </div>
+                <div id="reader-doc-title" class="text-xs font-semibold text-white truncate max-w-[300px]">
+                  Loading Enterprise Document...
+                </div>
               </div>
             </div>
-
-            <div class="cache-control-group">
-              <label class="ios-switch">
-                <input type="checkbox" id="cacheToggle" checked>
-                <span class="ios-slider"></span>
-              </label>
-              <div class="cache-desc">
-                <span class="cache-title">Instant Memory Cache</span>
-                <span class="cache-threshold">Sub-25ms repeat answers ($0 cost)</span>
-              </div>
+            <div class="flex items-center gap-2">
+              <select id="reader-doc-switcher" class="bg-[#050811] border border-white/15 rounded-lg px-2.5 py-1 text-[11px] font-mono text-slate-200 outline-none max-w-[180px]">
+                <!-- Populated with all indexed documents -->
+              </select>
+              <a id="open-full-corpus-link" href="/documents" class="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-[10px] font-mono text-sky-300 shrink-0" title="Open Full-Screen Hardware Corpus Reader on Page 04">
+                Full Reader -&gt;
+              </a>
             </div>
           </div>
 
-          <!-- 4 Quick Questions (Clean layout, no overflow) -->
-          <div class="scenarios-carousel">
-            <div class="scenarios-label">QUICK TEST QUESTIONS (CLICK TO RUN)</div>
-            <div class="scenarios-track">
-              <button type="button" class="scenario-card" data-query="What is the memory offset and vulnerable function in CVE-2024-8192?">
-                <div class="scenario-icon icon-rose">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m8 2 1.88 1.88"></path>
-                    <path d="M14.12 3.88 16 2"></path>
-                    <path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"></path>
-                    <path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"></path>
-                    <path d="M12 20v-9"></path>
-                    <path d="M6.53 9C4.6 8.8 3 7.1 3 5"></path>
-                    <path d="M6 13H2"></path>
-                    <path d="M3 21c0-2.1 1.7-3.9 3.8-4"></path>
-                    <path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"></path>
-                    <path d="M22 13h-4"></path>
-                    <path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"></path>
-                  </svg>
-                </div>
-                <div class="scenario-content">
-                  <div class="scenario-title">Find Exact Bug Code</div>
-                  <div class="scenario-desc">Hex offset 0x7fff90a4 &amp; patch commit</div>
-                </div>
-              </button>
-
-              <button type="button" class="scenario-card" data-query="What was total consolidated revenue, AI Cloud growth, and Q3 CAPEX?">
-                <div class="scenario-icon icon-amber">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                  </svg>
-                </div>
-                <div class="scenario-content">
-                  <div class="scenario-title">Read Financial Tables</div>
-                  <div class="scenario-desc">Q3 Revenue, $3.41B CAPEX &amp; 48k GPUs</div>
-                </div>
-              </button>
-
-              <button type="button" class="scenario-card" data-query="What is the heartbeat interval and follower election timeout in Raft?">
-                <div class="scenario-icon icon-iris">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                    <polyline points="2 17 12 22 22 17"></polyline>
-                    <polyline points="2 12 12 17 22 12"></polyline>
-                  </svg>
-                </div>
-                <div class="scenario-content">
-                  <div class="scenario-title">Read System Rules</div>
-                  <div class="scenario-desc">50ms heartbeats &amp; election timeout rules</div>
-                </div>
-              </button>
-
-              <button type="button" class="scenario-card scenario-cache-demo" id="btnTestCacheHit">
-                <div class="scenario-icon icon-gold">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                  </svg>
-                </div>
-                <div class="scenario-content">
-                  <div class="scenario-title">Test Instant Cache</div>
-                  <div class="scenario-desc">Repeated queries run in &lt;25ms at $0 cost</div>
-                </div>
-              </button>
+          <!-- Active Citation Target Banner -->
+          <div id="reader-target-banner" class="hidden mb-3 px-3 py-2 rounded-lg bg-sky-500/15 border border-sky-400/40 flex items-center justify-between gap-2">
+            <div class="text-[11px] font-mono text-sky-200 truncate">
+              <span class="font-bold text-sky-400">TARGET LOCKED:</span>
+              <span id="reader-target-section">Section</span>
             </div>
-          </div>
-        </form>
-      </section>
-
-      <!-- AI Grounded Answer Card -->
-      <section class="spatial-card answer-card">
-        <div class="card-top-bar">
-          <div class="card-title-group">
-            <div class="card-icon-badge">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-            </div>
-            <span class="card-heading">AI Answer with Verified Sources</span>
-          </div>
-          <div class="card-meta-actions">
-            <span class="model-badge" id="answerModelBadge">Auto-Detect (Offline Ready)</span>
-            <button class="icon-action-btn" id="btnCopyAnswer" title="Copy answer text">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
+            <button type="button" onclick="clearReaderTargetLock()" class="text-[10px] font-mono text-slate-300 hover:text-white underline shrink-0">
+              Reset View
             </button>
           </div>
-        </div>
 
-        <div class="card-body">
-          <div class="kinetic-loader hidden" id="answerLoading">
-            <div class="loader-orbit">
-              <div class="orbit-particle"></div>
+          <!-- View Mode Toggle: Chunk Boundaries vs Rendered Full Document -->
+          <div class="flex items-center justify-between gap-2 mb-2.5">
+            <div class="inline-flex rounded-lg bg-[#04060c] p-0.5 border border-white/10">
+              <button type="button" id="reader-tab-chunks" class="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase bg-sky-500/20 text-sky-300 border border-sky-400/30 cursor-pointer">
+                Indexed Chunks (<span id="reader-chunk-total">0</span>)
+              </button>
+              <button type="button" id="reader-tab-full" class="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase text-slate-400 hover:text-white cursor-pointer">
+                Full Markdown Document
+              </button>
             </div>
-            <div class="loader-copy">
-              <span class="loader-headline">Searching Documents</span>
-              <span class="loader-sub">Comparing meaning and exact words...</span>
-            </div>
+            <span id="reader-category-badge" class="px-2 py-0.5 rounded bg-white/[0.04] border border-white/10 text-[10px] font-mono uppercase text-slate-300">
+              security
+            </span>
           </div>
 
-          <div class="answer-output-wrapper" id="answerContainer">
-            <div class="empty-state-studio" id="emptyStateGuide">
-              <div class="onboarding-guide-container">
-                <!-- Hero explanation -->
-                <div class="onboarding-hero">
-                  <div class="onboarding-hero-title">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-bright)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                      <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                      <polyline points="2 17 12 22 22 17"></polyline>
-                      <polyline points="2 12 12 17 22 12"></polyline>
-                    </svg>
-                    <span>Enterprise Hybrid RAG Architecture</span>
-                    <span class="onboarding-hero-tag">Dual Engine</span>
-                  </div>
-                  <p class="onboarding-hero-desc">
-                    Standard vector databases hallucinate and miss exact technical codes, memory offsets, and financial figures. Synapse unifies Dense Semantic Vectors with Sparse BM25 Keywords, Reciprocal Rank Fusion (<span style="color: var(--yellow-solar); font-family: var(--font-mono);">k=60</span>), and Cross-Encoder Re-Ranking to guarantee 100% fact-checked citations.
-                  </p>
-                </div>
+          <!-- Corrugated Dot-Matrix Scrollable Document Viewport -->
+          <div id="reader-scroll-viewport" class="corrugated-screen rounded-xl border border-white/10 p-4 max-h-[680px] overflow-y-auto space-y-3">
+            <!-- Populated with indexed chunks or full markdown -->
+          </div>
+        </div>
+      </div>
 
-                <!-- 3 Ways to Use It -->
-                <div class="onboarding-options-grid">
-                  <div class="onboarding-option-card">
-                    <div class="onboarding-card-top">
-                      <div class="onboarding-card-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                          <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
-                          <rect x="9" y="9" width="6" height="6"></rect>
-                          <line x1="9" y1="1" x2="9" y2="4"></line>
-                          <line x1="15" y1="1" x2="15" y2="4"></line>
-                          <line x1="9" y1="20" x2="9" y2="23"></line>
-                          <line x1="15" y1="20" x2="15" y2="23"></line>
-                          <line x1="20" y1="9" x2="23" y2="9"></line>
-                          <line x1="20" y1="14" x2="23" y2="14"></line>
-                          <line x1="1" y1="9" x2="4" y2="9"></line>
-                          <line x1="1" y1="14" x2="4" y2="14"></line>
-                        </svg>
-                      </div>
-                      <div class="onboarding-card-title">1. Instant Free Engine</div>
-                    </div>
-                    <div class="onboarding-card-body">
-                      Runs out of the box at <strong>$0.00 cost</strong> with zero API keys required. Extracts grounded answers with verified citations directly from the local corpus.
-                    </div>
-                    <div class="onboarding-card-footer">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                      <span>Click any Quick Question above</span>
-                    </div>
-                  </div>
+    </section>
+  </main>
 
-                  <a href="/settings" class="onboarding-option-card" style="text-decoration: none;">
-                    <div class="onboarding-card-top">
-                      <div class="onboarding-card-icon icon-solar">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                        </svg>
-                      </div>
-                      <div class="onboarding-card-title">2. Connect Cloud AI (BYOK)</div>
-                    </div>
-                    <div class="onboarding-card-body">
-                      Plug in your <strong>Google Gemini</strong>, Claude, or OpenAI key. Sub-second live connection tests verify your credentials instantly.
-                    </div>
-                    <div class="onboarding-card-footer" style="color: var(--yellow-solar);">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                      <span>Configure in AI Models &amp; Keys</span>
-                    </div>
-                  </a>
+  <script src="/static/js/nav.js"></script>
+  <script>
+    let currentRetrievalMode = 'hybrid';
+    let activeDomain = SynapseNav.DOMAINS[0];
+    let loadedDocumentsMap = {};
+    let activeReaderDoc = null;
+    let activeReaderView = 'chunks'; // 'chunks' | 'full'
+    let activeHighlightChunkId = null;
 
-                  <a href="/documents" class="onboarding-option-card" style="text-decoration: none;">
-                    <div class="onboarding-card-top">
-                      <div class="onboarding-card-icon icon-mint">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                          <polyline points="14 2 14 8 20 8"></polyline>
-                        </svg>
-                      </div>
-                      <div class="onboarding-card-title">3. Ingest Custom Files</div>
-                    </div>
-                    <div class="onboarding-card-body">
-                      Index custom technical manuals, markdown specs, or financial sheets. Automatically split with layout-aware chunking and dual indexed.
-                    </div>
-                    <div class="onboarding-card-footer" style="color: var(--emerald-mint);">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                      <span>Open Document Library</span>
-                    </div>
-                  </a>
-                </div>
+    document.addEventListener('DOMContentLoaded', async () => {
+      SynapseNav.mountDock('search');
+      initDiagnosticsWaveCanvas();
+      initDiagnosticsLasersAndFlashlight();
 
-                <!-- 4-Stage Pipeline Flow Strip -->
-                <div class="pipeline-flow-strip">
-                  <div class="pipeline-flow-header">
-                    <span class="pipeline-flow-label">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
-                      <span>The 4-Stage Cognitive Retrieval Pipeline</span>
-                    </span>
-                    <span class="pipeline-flow-metrics">+21.4% Higher Technical Accuracy</span>
-                  </div>
-                  <div class="pipeline-steps-track">
-                    <div class="pipeline-step-box">
-                      <span class="pipeline-step-num">STAGE 1</span>
-                      <span class="pipeline-step-title">Fast Memory Cache</span>
-                      <span class="pipeline-step-desc">Cosine similarity check (&ge;0.95) returns cached answers in &lt;25ms at $0 cost.</span>
-                    </div>
-                    <div class="pipeline-step-box">
-                      <span class="pipeline-step-num">STAGE 2</span>
-                      <span class="pipeline-step-title">Dual Search in Parallel</span>
-                      <span class="pipeline-step-desc">Dense semantic vector search + Sparse BM25 token inverted index run simultaneously.</span>
-                    </div>
-                    <div class="pipeline-step-box">
-                      <span class="pipeline-step-num">STAGE 3</span>
-                      <span class="pipeline-step-title">Reciprocal Rank Fusion</span>
-                      <span class="pipeline-step-desc">RRF (k=60) mathematically harmonizes dense meaning and keyword rankings.</span>
-                    </div>
-                    <div class="pipeline-step-box">
-                      <span class="pipeline-step-num">STAGE 4</span>
-                      <span class="pipeline-step-title">Cross-Encoder Re-Ranking</span>
-                      <span class="pipeline-step-desc">Deep sequence evaluation rescores candidates to output verifiable citations.</span>
-                    </div>
-                  </div>
-                </div>
+      // Check URL params or session state
+      const params = new URLSearchParams(window.location.search);
+      const domainParam = params.get('domain') || SynapseNav.getActiveDomainId();
+      const queryParam = params.get('q') || SynapseNav.getState(SynapseNav.STORAGE_KEYS.ACTIVE_QUERY, '');
+      const modeParam = params.get('mode');
+
+      if (modeParam && ['hybrid', 'dense', 'bm25'].includes(modeParam)) {
+        setRetrievalMode(modeParam);
+      }
+
+      activeDomain = SynapseNav.getDomainById(domainParam);
+      SynapseNav.setActiveDomainId(activeDomain.id);
+
+      renderDomainRibbon();
+      await loadAllCorpusDocuments();
+
+      // Select active domain's document in the right-hand reader
+      await selectReaderDocument(activeDomain.docId);
+
+      // Determine initial query and execute automatically so the workbench is alive with real data
+      const initialQuery = queryParam || activeDomain.queries[0].query;
+      document.getElementById('search-query-input').value = initialQuery;
+      await executeSearchQuery(initialQuery, false);
+
+      // Wire events
+      document.getElementById('rag-search-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const q = document.getElementById('search-query-input').value.trim();
+        if (q) executeSearchQuery(q, document.getElementById('bypass-cache-checkbox').checked);
+      });
+
+      document.getElementById('repeat-cache-btn').addEventListener('click', () => {
+        const q = document.getElementById('search-query-input').value.trim();
+        if (q) {
+          document.getElementById('bypass-cache-checkbox').checked = false;
+          executeSearchQuery(q, false);
+        }
+      });
+
+      document.querySelectorAll('.mode-switch-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          setRetrievalMode(btn.dataset.mode);
+          const q = document.getElementById('search-query-input').value.trim();
+          if (q) executeSearchQuery(q, true);
+        });
+      });
+
+      document.getElementById('reader-doc-switcher').addEventListener('change', (e) => {
+        selectReaderDocument(e.target.value);
+      });
+
+      document.getElementById('reader-tab-chunks').addEventListener('click', () => {
+        activeReaderView = 'chunks';
+        updateReaderTabsUI();
+        renderActiveReaderContent();
+      });
+
+      document.getElementById('reader-tab-full').addEventListener('click', () => {
+        activeReaderView = 'full';
+        updateReaderTabsUI();
+        renderActiveReaderContent();
+      });
+    });
+
+    function setRetrievalMode(mode) {
+      currentRetrievalMode = mode;
+      const labelMap = {
+        hybrid: 'HYBRID RRF',
+        dense: 'DENSE 768-D',
+        bm25: 'BM25 OKAPI',
+      };
+      document.getElementById('active-mode-pill').textContent = labelMap[mode] || 'HYBRID RRF';
+      document.querySelectorAll('.mode-switch-btn').forEach((b) => {
+        if (b.dataset.mode === mode) {
+          b.className = 'mode-switch-btn px-3 py-1 rounded-md text-[11px] font-mono bg-sky-500/20 text-sky-300 border border-sky-400/40 transition-all cursor-pointer';
+        } else {
+          b.className = 'mode-switch-btn px-3 py-1 rounded-md text-[11px] font-mono text-slate-400 hover:text-white transition-all cursor-pointer';
+        }
+      });
+    }
+
+    function renderDomainRibbon() {
+      const ribbon = document.getElementById('domain-selector-ribbon');
+      ribbon.innerHTML = SynapseNav.DOMAINS.map((d, idx) => {
+        const isCurrent = d.id === activeDomain.id;
+        return `
+          <button type="button"
+            onclick="selectDomainPreset('${d.id}')"
+            class="text-left p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+              isCurrent
+                ? 'bg-sky-500/15 border-sky-400/50 shadow-[0_0_20px_rgba(56,189,248,0.18)]'
+                : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.08]'
+            }">
+            <div class="flex items-center justify-between gap-1 mb-1">
+              <span class="font-mono text-[9px] uppercase tracking-wider ${isCurrent ? 'text-sky-300 font-bold' : 'text-slate-400'}">
+                0${idx + 1} // ${d.category}
+              </span>
+              <span class="${isCurrent ? 'text-sky-300' : 'text-slate-500'}">${d.svg}</span>
+            </div>
+            <div class="text-xs font-semibold text-white truncate">${SynapseNav.escapeHtml(d.shortTitle)}</div>
+          </button>
+        `;
+      }).join('');
+
+      const chips = document.getElementById('domain-query-chips');
+      chips.innerHTML = activeDomain.queries.map((q) => `
+        <button type="button"
+          onclick="runPresetChipQuery('${SynapseNav.escapeHtml(q.query).replace(/'/g, "\\'")}')"
+          title="${SynapseNav.escapeHtml(q.modeHint)}"
+          class="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-sky-500/20 border border-white/10 hover:border-sky-400/40 text-xs font-mono text-slate-200 hover:text-white transition-all cursor-pointer flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+          <span>${SynapseNav.escapeHtml(q.label)}</span>
+        </button>
+      `).join('');
+    }
+
+    async function selectDomainPreset(domainId) {
+      activeDomain = SynapseNav.getDomainById(domainId);
+      SynapseNav.setActiveDomainId(activeDomain.id);
+      renderDomainRibbon();
+      await selectReaderDocument(activeDomain.docId);
+      const q = activeDomain.queries[0].query;
+      document.getElementById('search-query-input').value = q;
+      await executeSearchQuery(q, false);
+    }
+
+    async function runPresetChipQuery(queryText) {
+      document.getElementById('search-query-input').value = queryText;
+      await executeSearchQuery(queryText, false);
+    }
+
+    async function loadAllCorpusDocuments() {
+      try {
+        const res = await fetch('/api/v1/documents');
+        if (!res.ok) return;
+        const data = await res.json();
+        const docs = Array.isArray(data) ? data : (data.documents || []);
+        const switcher = document.getElementById('reader-doc-switcher');
+        switcher.innerHTML = docs.map((d) => `
+          <option value="${SynapseNav.escapeHtml(d.document_id)}">${SynapseNav.escapeHtml(d.title)}</option>
+        `).join('');
+      } catch (_) {}
+    }
+
+    async function selectReaderDocument(docId, highlightChunkId = null, sectionLabel = null) {
+      if (!docId) return;
+      try {
+        if (!loadedDocumentsMap[docId]) {
+          const res = await fetch(`/api/v1/documents/${encodeURIComponent(docId)}`);
+          if (res.ok) {
+            loadedDocumentsMap[docId] = await res.json();
+          }
+        }
+        activeReaderDoc = loadedDocumentsMap[docId];
+        if (!activeReaderDoc) return;
+
+        activeHighlightChunkId = highlightChunkId;
+        document.getElementById('reader-doc-title').textContent = activeReaderDoc.metadata.title;
+        document.getElementById('reader-category-badge').textContent =
+          activeReaderDoc.metadata.domain || activeReaderDoc.metadata.category || 'enterprise';
+        document.getElementById('reader-chunk-total').textContent = String((activeReaderDoc.chunks || []).length);
+        document.getElementById('reader-doc-switcher').value = docId;
+        document.getElementById('open-full-corpus-link').href = `/documents?doc=${encodeURIComponent(docId)}${highlightChunkId ? '&chunk=' + encodeURIComponent(highlightChunkId) : ''}`;
+
+        const banner = document.getElementById('reader-target-banner');
+        if (highlightChunkId) {
+          banner.classList.remove('hidden');
+          document.getElementById('reader-target-section').textContent = sectionLabel || highlightChunkId;
+        } else {
+          banner.classList.add('hidden');
+        }
+
+        renderActiveReaderContent();
+      } catch (_) {}
+    }
+
+    function clearReaderTargetLock() {
+      activeHighlightChunkId = null;
+      document.getElementById('reader-target-banner').classList.add('hidden');
+      renderActiveReaderContent();
+    }
+
+    function updateReaderTabsUI() {
+      const btnChunks = document.getElementById('reader-tab-chunks');
+      const btnFull = document.getElementById('reader-tab-full');
+      if (activeReaderView === 'chunks') {
+        btnChunks.className = 'px-2.5 py-1 rounded-md text-[10px] font-mono uppercase bg-sky-500/20 text-sky-300 border border-sky-400/30 cursor-pointer';
+        btnFull.className = 'px-2.5 py-1 rounded-md text-[10px] font-mono uppercase text-slate-400 hover:text-white cursor-pointer';
+      } else {
+        btnFull.className = 'px-2.5 py-1 rounded-md text-[10px] font-mono uppercase bg-sky-500/20 text-sky-300 border border-sky-400/30 cursor-pointer';
+        btnChunks.className = 'px-2.5 py-1 rounded-md text-[10px] font-mono uppercase text-slate-400 hover:text-white cursor-pointer';
+      }
+    }
+
+    function renderActiveReaderContent() {
+      const viewport = document.getElementById('reader-scroll-viewport');
+      if (!activeReaderDoc) return;
+
+      const chunks = activeReaderDoc.chunks || [];
+      if (activeReaderView === 'full') {
+        const fullMd =
+          activeReaderDoc.raw_markdown ||
+          `# ${activeReaderDoc.metadata.title}\n\n` +
+            chunks.map((c) => `## ${c.section_title}\n\n${c.raw_content || c.content}`).join('\n\n');
+        viewport.innerHTML = `
+          <div class="p-2">
+            ${SynapseNav.renderMarkdown(fullMd)}
+          </div>
+        `;
+        return;
+      }
+
+      viewport.innerHTML = chunks.map((c, idx) => {
+        const isTarget = activeHighlightChunkId && c.chunk_id === activeHighlightChunkId;
+        const cIdx = c.chunk_index !== undefined ? c.chunk_index + 1 : idx + 1;
+        return `
+          <div id="reader-chunk-${SynapseNav.escapeHtml(c.chunk_id)}"
+               class="p-3.5 rounded-xl border transition-all ${
+                 isTarget
+                   ? 'chunk-target-lock border-sky-400 bg-sky-950/30'
+                   : 'border-white/[0.08] bg-white/[0.02] hover:border-white/15'
+               }">
+            <div class="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-white/[0.07]">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono text-sky-300 font-semibold">
+                  CHUNK #${cIdx}
+                </span>
+                <span class="text-xs font-mono font-semibold text-white truncate max-w-[210px]">
+                  ${SynapseNav.escapeHtml(c.section_title)}
+                </span>
+              </div>
+              <span class="text-[10px] font-mono text-slate-400">${c.token_count} TOKENS</span>
+            </div>
+            <div class="text-xs text-slate-300 leading-relaxed">
+              ${SynapseNav.renderMarkdown(c.raw_content || c.content)}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (activeHighlightChunkId) {
+        setTimeout(() => {
+          const targetEl = document.getElementById(`reader-chunk-${activeHighlightChunkId}`);
+          if (targetEl) {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 80);
+      }
+    }
+
+    // Hook for inline [1], [2] citation clicks inside the synthesized answer
+    window.onPageCitationClick = async function (citationObj) {
+      if (!citationObj) return;
+      activeReaderView = 'chunks';
+      updateReaderTabsUI();
+      const cIdx = citationObj.citation_id || citationObj.citation_index || 1;
+      const docId = citationObj.document_id || citationObj.chunk_id?.replace(/_c\d+$/, '');
+      await selectReaderDocument(
+        docId,
+        citationObj.chunk_id,
+        `[${cIdx}] ${citationObj.section_title}`
+      );
+      SynapseNav.showToast(
+        `Citation [${cIdx}] Locked`,
+        `${citationObj.document_title} — ${citationObj.section_title}`,
+        'info'
+      );
+    };
+
+    async function executeSearchQuery(queryText, bypassCache = false) {
+      const btn = document.getElementById('execute-search-btn');
+      const label = document.getElementById('execute-btn-label');
+      const answerBox = document.getElementById('synthesized-answer-body');
+      const byok = SynapseNav.getByokSettings();
+
+      btn.disabled = true;
+      label.textContent = 'Synthesizing...';
+      answerBox.innerHTML = `
+        <div class="py-12 flex flex-col items-center justify-center text-center gap-3">
+          <div class="w-8 h-8 rounded-full border-2 border-sky-400 border-t-transparent animate-spin"></div>
+          <div class="text-xs font-mono uppercase tracking-widest text-sky-300">
+            Executing ${currentRetrievalMode.toUpperCase()} Pipeline // Dense 768-D + BM25 + RRF + Cross-Encoder...
+          </div>
+        </div>
+      `;
+
+      try {
+        const payload = {
+          query: queryText,
+          mode: currentRetrievalMode,
+          top_k: Number(byok.topK || 5),
+          use_cache: !Boolean(bypassCache),
+          provider: byok.provider || 'auto',
+          model: byok.model || 'gemini-2.5-flash',
+          custom_api_key: byok.apiKey || null,
+        };
+
+        const res = await fetch('/api/v1/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          throw new Error(`Search API returned HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        SynapseNav.setLastSearch(data);
+        SynapseNav.setState(SynapseNav.STORAGE_KEYS.ACTIVE_QUERY, queryText, true);
+        SynapseNav.refreshTelemetryBadges();
+
+        renderSearchResponse(data);
+      } catch (err) {
+        answerBox.innerHTML = `<div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs font-mono text-rose-300">Error executing search: ${SynapseNav.escapeHtml(err.message)}</div>`;
+      } finally {
+        btn.disabled = false;
+        label.textContent = 'Synthesize Grounded Answer';
+      }
+    }
+
+    function renderSearchResponse(data) {
+      const citations = data.citations || [];
+      const retrievedMap = {};
+      (data.retrieved_chunks || []).forEach((rc) => {
+        retrievedMap[rc.chunk_id] = rc;
+      });
+
+      const lat = data.latency_ms !== undefined ? data.latency_ms : (data.telemetry?.total_latency_ms || 0);
+      const isHit = Boolean(data.cache_hit || data.telemetry?.cache_hit);
+      const sim = data.cache_similarity || data.telemetry?.cache_similarity || 1.0;
+      const faith = data.faithfulness_score !== undefined ? data.faithfulness_score : (data.evaluation?.faithfulness || 0.96);
+      const conf = data.confidence_score !== undefined ? data.confidence_score : (data.evaluation?.context_relevance || 0.95);
+      const costSaved = data.estimated_cost_saved_usd !== undefined ? data.estimated_cost_saved_usd : 0.00042;
+
+      document.getElementById('metric-latency').textContent = `${Number(lat).toFixed(1)} ms`;
+      const cacheEl = document.getElementById('metric-cache-status');
+      if (isHit) {
+        cacheEl.textContent = `CACHE HIT (${Number(sim).toFixed(3)})`;
+        cacheEl.className = 'text-xs font-bold font-mono text-emerald-400 mt-1 uppercase';
+      } else {
+        cacheEl.textContent = `MISS // LIVE PIPELINE`;
+        cacheEl.className = 'text-xs font-bold font-mono text-sky-300 mt-1 uppercase';
+      }
+
+      document.getElementById('metric-faithfulness').textContent = `${(Number(faith) * 100).toFixed(1)}%`;
+      document.getElementById('metric-relevance').textContent = `${(Number(conf) * 100).toFixed(1)}%`;
+      document.getElementById('metric-cost').textContent = `$${Number(costSaved).toFixed(5)}`;
+      document.getElementById('answer-model-pill').textContent = `${data.provider || 'gemini'} // ${data.model || 'gemini-2.5-flash'}`;
+
+      // Render Markdown Answer with clickable [1] citations
+      const answerBox = document.getElementById('synthesized-answer-body');
+      answerBox.innerHTML = SynapseNav.renderMarkdown(data.answer);
+
+      // Render Verified Citations List
+      document.getElementById('citation-count-badge').textContent = `${citations.length} VERIFIED CITATIONS`;
+      const citContainer = document.getElementById('citations-list-container');
+
+      if (citations.length === 0) {
+        citContainer.innerHTML = `<div class="text-xs font-mono text-slate-400 py-4">No citations matched the filter criteria.</div>`;
+        return;
+      }
+
+      citContainer.innerHTML = citations.map((c, idx) => {
+        const rc = retrievedMap[c.chunk_id] || {};
+        const cIdx = c.citation_id || c.citation_index || idx + 1;
+        const docId = c.document_id || rc.document_id || c.chunk_id.replace(/_c\d+$/, '');
+        const denseRank = c.dense_rank || rc.dense_rank;
+        const bm25Rank = c.bm25_rank || rc.bm25_rank;
+        const rerankScore = c.relevance_score !== undefined ? c.relevance_score : (rc.rerank_score || rc.score || 0.92);
+        const quote = c.exact_quote || c.snippet || rc.content || '';
+        const clickPayload = {
+          citation_id: cIdx,
+          citation_index: cIdx,
+          chunk_id: c.chunk_id,
+          document_id: docId,
+          document_title: c.document_title,
+          section_title: c.section_title,
+        };
+        return `
+          <div onclick='window.onPageCitationClick(${JSON.stringify(clickPayload).replace(/'/g, "&#39;")})'
+               class="p-3.5 rounded-xl bg-white/[0.02] hover:bg-sky-500/[0.08] border border-white/10 hover:border-sky-400/40 transition-all cursor-pointer group">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/40 text-sky-300 font-mono text-xs font-bold">
+                  [${cIdx}]
+                </span>
+                <span class="text-xs font-semibold text-white group-hover:text-sky-300 transition-colors">
+                  ${SynapseNav.escapeHtml(c.document_title)}
+                </span>
+                <span class="text-[11px] font-mono text-slate-400">
+                  // ${SynapseNav.escapeHtml(c.section_title)}
+                </span>
+              </div>
+              <div class="flex items-center gap-1.5 text-[10px] font-mono">
+                ${denseRank ? `<span class="px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-400/30">Dense #${denseRank}</span>` : ''}
+                ${bm25Rank ? `<span class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-400/30">BM25 #${bm25Rank}</span>` : ''}
+                <span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                  Score ${Number(rerankScore).toFixed(3)}
+                </span>
               </div>
             </div>
+            <p class="text-xs text-slate-300 font-mono line-clamp-2 leading-relaxed">
+              ${SynapseNav.escapeHtml(quote)}
+            </p>
           </div>
+        `;
+      }).join('');
 
-          <!-- Dedicated Citation Proof Cards (Prominent, impossible to miss) -->
-          <div class="citations-deck hidden" id="citationsSection" style="margin-top: 24px; border-top: 1px solid var(--border-subtle); padding-top: 18px;">
-            <div class="citations-header" style="margin-bottom: 14px;">
-              <span class="deck-tag">VERIFIED SOURCE PROOF (CLICK TO READ FULL DOCUMENT)</span>
-              <span class="citation-counter" id="citationCountBadge">0 Verified Sources</span>
-            </div>
-            <div class="citations-grid" id="citationsList"></div>
-          </div>
+      // Automatically sync the top citation #1 into the right-hand reader
+      if (citations[0]) {
+        const firstRc = retrievedMap[citations[0].chunk_id] || {};
+        const firstDocId = citations[0].document_id || firstRc.document_id || citations[0].chunk_id.replace(/_c\d+$/, '');
+        selectReaderDocument(
+          firstDocId,
+          citations[0].chunk_id,
+          `[1] ${citations[0].section_title}`
+        );
+      }
+    }
 
-          <!-- Expandable Pipeline Telemetry Trace Drawer -->
-          <div class="pipeline-trace-drawer hidden" id="pipelineTraceSection">
-            <details>
-              <summary class="pipeline-trace-summary">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-bright)" stroke-width="2.3">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                  </svg>
-                  <span>INSPECT RETRIEVAL PIPELINE &amp; SCORING MATHEMATICS</span>
-                </div>
-                <span style="color: var(--yellow-solar); font-size: 0.68rem;">Click to expand breakdown &darr;</span>
-              </summary>
-              <div style="padding: 12px; overflow-x: auto;">
-                <table class="pipeline-trace-table" id="pipelineTraceTable">
-                  <thead>
-                    <tr>
-                      <th>Candidate Chunk ID</th>
-                      <th>Document &amp; Section</th>
-                      <th>Dense Rank</th>
-                      <th>BM25 Rank</th>
-                      <th>RRF Score (k=60)</th>
-                      <th>Re-Ranker Score</th>
-                      <th>Grounding Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="pipelineTraceBody"></tbody>
-                </table>
-              </div>
-            </details>
-          </div>
-        </div>
+    // ThreeUI Diagnostics-Panel 3D Wave Lattice Canvas
+    function initDiagnosticsWaveCanvas() {
+      const canvas = document.getElementById('bg-waves');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w = (canvas.width = window.innerWidth);
+      let h = (canvas.height = window.innerHeight);
 
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(6, 10, 8, 0.6); border-top: 1px solid var(--border-subtle); font-size: 0.76rem; color: var(--text-muted); font-family: var(--font-mono);">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="pulsing-beacon" style="display: inline-block;"></span>
-            <span id="statusFooterSpeed">Ready to search</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--yellow-solar)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              <path d="m9 12 2 2 4-4"></path>
-            </svg>
-            <span>100% Fact-Checked Against Source Documents</span>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+      window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      });
 
-  <script type="module" src="/static/js/search.js"></script>
+      let t = 0;
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        t += 0.018;
+        const cols = 44;
+        const rows = 24;
+        const spacingX = w / cols;
+        const spacingY = h / rows;
+
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const wave = Math.sin(c * 0.25 + t) * Math.cos(r * 0.3 + t * 0.8) * 10;
+            const x = c * spacingX + spacingX * 0.5;
+            const y = r * spacingY + wave;
+            const alpha = 0.08 + ((wave + 10) / 20) * 0.16;
+            ctx.fillStyle = (c + r) % 3 === 0
+              ? `rgba(212, 163, 115, ${alpha.toFixed(3)})`
+              : `rgba(163, 177, 138, ${alpha.toFixed(3)})`;
+            ctx.fillRect(x, y, 1.6, 1.6);
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    // ThreeUI Shooting Lasers & Mouse Flashlight
+    function initDiagnosticsLasersAndFlashlight() {
+      const surface = document.getElementById('workbench-surface');
+      window.addEventListener('mousemove', (e) => {
+        if (!surface) return;
+        const rect = surface.getBoundingClientRect();
+        surface.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        surface.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+      });
+
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(
+          '#shoot-h',
+          { x: -160, opacity: 0 },
+          { x: window.innerWidth + 160, opacity: 1, duration: 3.8, repeat: -1, ease: 'power1.inOut', repeatDelay: 1.2 }
+        );
+      }
+    }
+  </script>
 </body>
 </html>

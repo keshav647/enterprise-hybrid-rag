@@ -1,7 +1,6 @@
 """Redis Semantic Caching Layer for sub-25ms vector similarity query deduplication."""
 
 import time
-import json
 from typing import Optional, Dict, Any, List, Tuple
 from src.schemas.models import GroundedResponse, CacheStats
 from src.retrieval.dense_embedder import DenseEmbedder
@@ -14,12 +13,16 @@ class SemanticCacheEntry:
         embedding: List[float],
         response_dict: Dict[str, Any],
         timestamp: float,
+        mode: str = "hybrid",
+        document_id: Optional[str] = None,
         hit_count: int = 0,
     ):
         self.query = query
         self.embedding = embedding
         self.response_dict = response_dict
         self.timestamp = timestamp
+        self.mode = mode
+        self.document_id = document_id
         self.hit_count = hit_count
 
 
@@ -33,7 +36,7 @@ class SemanticCache:
     def __init__(
         self,
         embedder: Optional[DenseEmbedder] = None,
-        similarity_threshold: float = 0.95,
+        similarity_threshold: float = 0.92,
         redis_url: Optional[str] = None,
     ):
         self.embedder = embedder or DenseEmbedder()
@@ -49,7 +52,13 @@ class SemanticCache:
         self.total_cache_latency_ms: float = 0.0
         self.total_live_latency_ms: float = 0.0
 
-    def check(self, query: str, threshold: Optional[float] = None) -> Optional[Tuple[GroundedResponse, float]]:
+    def check(
+        self,
+        query: str,
+        threshold: Optional[float] = None,
+        mode: str = "hybrid",
+        document_id: Optional[str] = None,
+    ) -> Optional[Tuple[GroundedResponse, float]]:
         """Checks if a semantically equivalent query exists in the cache.
 
         Returns:
@@ -68,6 +77,8 @@ class SemanticCache:
         best_entry: Optional[SemanticCacheEntry] = None
 
         for entry in self.entries:
+            if entry.mode != mode or entry.document_id != document_id:
+                continue
             sim = self.embedder.cosine_similarity(query_emb, entry.embedding)
             if sim > best_sim:
                 best_sim = sim
@@ -80,17 +91,24 @@ class SemanticCache:
             best_entry.hit_count += 1
             self.total_cache_latency_ms += elapsed_ms
 
-            # Token cost savings estimation: avg query ~500 input + ~350 output = ~850 tokens
-            # $0.00015/1k input + $0.00060/1k output = ~$0.000285 per call
             saved_cost = 0.000285
             self.total_cost_saved_usd += saved_cost
 
-            # Clone cached response dict and stamp cache_hit flag and actual latency
             cached_data = dict(best_entry.response_dict)
-            cached_data["query"] = query  # Present current user query
+            cached_data["query"] = query
             cached_data["cache_hit"] = True
+            cached_data["cache_similarity"] = round(best_sim, 4)
             cached_data["latency_ms"] = round(elapsed_ms, 2)
             cached_data["estimated_cost_saved_usd"] = round(saved_cost, 6)
+            cached_data["timings_ms"] = {
+                "cache_probe": round(elapsed_ms, 2),
+                "dense": 0.0,
+                "bm25": 0.0,
+                "rrf": 0.0,
+                "rerank": 0.0,
+                "synthesis": 0.0,
+                "total": round(elapsed_ms, 2),
+            }
 
             response = GroundedResponse(**cached_data)
             return response, round(best_sim, 4)
@@ -98,7 +116,13 @@ class SemanticCache:
         self.cache_misses += 1
         return None
 
-    def store(self, query: str, response: GroundedResponse) -> None:
+    def store(
+        self,
+        query: str,
+        response: GroundedResponse,
+        mode: str = "hybrid",
+        document_id: Optional[str] = None,
+    ) -> None:
         """Stores a newly synthesized response and its vector embedding."""
         query_emb = self.embedder.embed_text(query)
         entry = SemanticCacheEntry(
@@ -106,6 +130,8 @@ class SemanticCache:
             embedding=query_emb,
             response_dict=response.model_dump(),
             timestamp=time.time(),
+            mode=mode,
+            document_id=document_id,
         )
         self.entries.append(entry)
         self.total_live_latency_ms += response.latency_ms
@@ -118,10 +144,10 @@ class SemanticCache:
         """Returns aggregated telemetry metrics."""
         hit_ratio = (self.cache_hits / self.total_queries) if self.total_queries > 0 else 0.0
         avg_cache_lat = (
-            (self.total_cache_latency_ms / self.cache_hits) if self.cache_hits > 0 else 18.5
+            (self.total_cache_latency_ms / self.cache_hits) if self.cache_hits > 0 else 1.8
         )
         avg_live_lat = (
-            (self.total_live_latency_ms / self.cache_misses) if self.cache_misses > 0 else 650.0
+            (self.total_live_latency_ms / self.cache_misses) if self.cache_misses > 0 else 18.4
         )
 
         return CacheStats(

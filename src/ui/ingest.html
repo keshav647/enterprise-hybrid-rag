@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Synapse // 05 Ingest — "What to Paste Where" Custom Document & Chunking Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/static/logo.png" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body class="min-h-screen bg-[#06080f] text-slate-100 selection:bg-sky-500/30 selection:text-sky-200 relative">
+
+  <!-- ThreeUI Matrix-Field Interactive WebGL Lightning & Plasma Shader Canvas -->
+  <canvas id="glcanvas-matrix" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-60"></canvas>
+
+  <!-- Shared 7-Page Navigation Dock -->
+  <div id="synapse-top-dock" class="relative z-50"></div>
+
+  <main class="relative z-10 max-w-[1600px] mx-auto px-4 lg:px-6 pt-6 pb-20">
+
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-6 border-b border-white/10">
+      <div>
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-amber-500/15 border border-amber-400/30 text-[10px] font-mono uppercase tracking-widest text-amber-300 mb-2">
+          PAGE 05 // THREEUI MATRIX-FIELD WEBGL LIGHTNING SHADER &amp; CONTEXTUAL INGESTION STUDIO
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">
+          "What to Paste Where" — Custom Document Ingestion &amp; Live Chunking Studio
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-300 mt-1">
+          Load a 1-click enterprise sample template, upload a <code class="text-sky-300">.md / .txt</code> file, or paste your own Markdown to index into the live 768-D Dense + BM25 Hybrid Engine.
+        </p>
+      </div>
+      <a href="/documents" class="px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-xs font-mono text-sky-300">
+        Inspect Indexed Corpus (Page 04) -&gt;
+      </a>
+    </div>
+
+    <!-- Step 1: 4 Ready-to-Paste Sample Enterprise Templates -->
+    <section class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-5 mb-6 relative">
+      <div class="corner-sq top-0 left-0"></div>
+      <div class="corner-sq top-0 right-0"></div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300 font-bold">
+            STEP 01 // CLICK A SAMPLE TEMPLATE TO AUTO-FILL THE EDITOR (OR UPLOAD A FILE)
+          </span>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Don't have a document handy? Click any of these 4 enterprise templates to populate the Title, Category, Markdown Body, and Suggested Verification Queries.
+          </p>
+        </div>
+
+        <label class="px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/40 text-sky-300 font-mono text-xs uppercase tracking-wider font-semibold cursor-pointer transition-all">
+          <span>Upload .MD / .TXT File</span>
+          <input id="file-upload-input" type="file" accept=".md,.txt,.json,.log" class="hidden" />
+        </label>
+      </div>
+
+      <div id="sample-templates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- Populated by JS from SynapseNav.SAMPLE_TEMPLATES -->
+      </div>
+    </section>
+
+    <!-- Step 2: Split-Screen Paste Editor (Left) & Live Contextual Chunk Preview + Verification Launcher (Right) -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- Left 7 Columns: Paste Form -->
+      <div class="lg:col-span-7 mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-5 sm:p-6">
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
+          <span class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
+            STEP 02 // PASTE DOCUMENT TITLE, DOMAIN CATEGORY &amp; MARKDOWN CONTENT
+          </span>
+          <span class="text-[10px] font-mono text-emerald-300">REAL-TIME CHUNKER ACTIVE</span>
+        </div>
+
+        <form id="ingest-doc-form" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">
+              <label for="ingest-title" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1.5">
+                DOCUMENT TITLE (REQUIRED)
+              </label>
+              <input
+                id="ingest-title"
+                type="text"
+                required
+                placeholder="e.g., Zero-Trust Istio Service Mesh & mTLS Policy (SEC-2025-901)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs sm:text-sm font-mono text-white outline-none"
+              />
+            </div>
+
+            <div>
+              <label for="ingest-category" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1.5">
+                DOMAIN CATEGORY
+              </label>
+              <select
+                id="ingest-category"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs sm:text-sm font-mono text-white outline-none"
+              >
+                <option value="security">security</option>
+                <option value="financial">financial</option>
+                <option value="architecture">architecture</option>
+                <option value="compliance">compliance</option>
+                <option value="biomedical">biomedical</option>
+                <option value="incident">incident</option>
+                <option value="custom">custom</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="ingest-content" class="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                MARKDOWN CONTENT (USE <code class="text-sky-300">## HEADINGS</code> FOR SEMANTIC SECTION CHUNKING)
+              </label>
+              <span id="editor-word-count" class="text-[10px] font-mono text-sky-300">0 words</span>
+            </div>
+            <textarea
+              id="ingest-content"
+              rows="16"
+              required
+              placeholder="Paste your Markdown document, RFC, security advisory, financial report, or SLA here..."
+              class="w-full p-4 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs font-mono text-slate-200 leading-relaxed outline-none resize-y"
+            ></textarea>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div class="text-[11px] font-mono text-slate-400">
+              Indexes into: <span class="text-white">768-D Dense Vector Store</span> + <span class="text-white">BM25 Okapi Index</span>
+            </div>
+            <button
+              type="submit"
+              id="ingest-submit-btn"
+              class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white font-mono text-xs uppercase tracking-widest font-bold shadow-[0_0_25px_rgba(52,211,153,0.3)] transition-all cursor-pointer"
+            >
+              Ingest &amp; Index into Hybrid Engine -&gt;
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right 5 Columns: Post-Ingest Verification Box + Live Contextual Chunk Preview -->
+      <div class="lg:col-span-5 space-y-5">
+
+        <!-- Post-Ingestion Success & 1-Click Query Verification Card -->
+        <div id="ingest-success-card" class="hidden mask-border rounded-2xl bg-emerald-950/30 border border-emerald-400/50 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold uppercase">
+              INDEXED LIVE IN ENGINE
+            </span>
+            <span id="ingested-doc-stats" class="text-[11px] font-mono text-emerald-200"></span>
+          </div>
+          <h3 id="ingested-doc-title" class="text-sm font-bold text-white mb-2"></h3>
+          <p class="text-xs text-slate-300 mb-3">
+            STEP 03 // Click a tailored verification question below to query your newly ingested document in the Page 02 Hybrid Search Workbench:
+          </p>
+          <div id="ingested-query-buttons" class="space-y-2 mb-3"></div>
+          <div class="flex items-center gap-2 pt-2 border-t border-white/10">
+            <a id="ingested-open-reader-link" href="/documents" class="text-xs font-mono text-sky-300 hover:underline">
+              Open in Page 04 Corpus Reader -&gt;
+            </a>
+          </div>
+        </div>
+
+        <!-- Live Contextual Chunk Boundary Preview -->
+        <div class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-5">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+            <div>
+              <h3 class="text-xs font-mono uppercase tracking-widest text-sky-300 font-semibold">
+                LIVE CONTEXTUAL CHUNK PREVIEW
+              </h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                Shows how ContextualChunker splits your pasted text and prepends headers
+              </p>
+            </div>
+            <span id="preview-chunk-badge" class="px-2.5 py-1 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono text-sky-300">
+              0 CHUNKS
+            </span>
+          </div>
+
+          <div id="live-chunk-preview-list" class="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+            <!-- Populated live as user types or selects template -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/js/nav.js"></script>
+  <script>
+    let activeTemplateQueries = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      SynapseNav.mountDock('ingest');
+      initMatrixFieldLightningShader();
+
+      // Render 4 sample templates
+      const grid = document.getElementById('sample-templates-grid');
+      grid.innerHTML = SynapseNav.SAMPLE_TEMPLATES.map((t, i) => `
+        <button type="button"
+          onclick="loadSampleTemplate('${t.id}')"
+          class="text-left p-3.5 rounded-xl bg-white/[0.03] hover:bg-sky-500/15 border border-white/10 hover:border-sky-400/40 transition-all cursor-pointer flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <span class="px-2 py-0.5 rounded bg-amber-500/15 border border-amber-400/30 text-[10px] font-mono uppercase text-amber-300">
+                TEMPLATE 0${i + 1} // ${t.category}
+              </span>
+              <span class="text-[10px] font-mono text-sky-400">Load -&gt;</span>
+            </div>
+            <div class="text-xs font-semibold text-white mb-1 leading-snug">${SynapseNav.escapeHtml(t.title)}</div>
+            <p class="text-[11px] text-slate-400 line-clamp-2">${SynapseNav.escapeHtml(t.summary)}</p>
+          </div>
+        </button>
+      `).join('');
+
+      // Pre-load Template 01 by default so the studio is immediately ready to test
+      loadSampleTemplate(SynapseNav.SAMPLE_TEMPLATES[0].id);
+
+      document.getElementById('ingest-title').addEventListener('input', updateLiveChunkPreview);
+      document.getElementById('ingest-content').addEventListener('input', updateLiveChunkPreview);
+
+      // File upload handler
+      document.getElementById('file-upload-input').addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const text = String(reader.result || '');
+          const cleanName = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ');
+          document.getElementById('ingest-title').value = cleanName;
+          document.getElementById('ingest-content').value = text;
+          activeTemplateQueries = [
+            `What are the key findings and requirements in ${cleanName}?`,
+            `Summarize the technical metrics and action items in ${cleanName}.`,
+          ];
+          updateLiveChunkPreview();
+          SynapseNav.showToast('File Loaded', `Loaded ${file.name} into the Ingestion Editor.`, 'success');
+        };
+        reader.readAsText(file);
+      });
+
+      // Form Submit -> POST /api/v1/documents/ingest
+      document.getElementById('ingest-doc-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('ingest-title').value.trim();
+        const category = document.getElementById('ingest-category').value;
+        const content = document.getElementById('ingest-content').value.trim();
+        if (!title || !content) return;
+
+        const btn = document.getElementById('ingest-submit-btn');
+        btn.disabled = true;
+        btn.textContent = 'Indexing into Dense + BM25 Engine...';
+
+        try {
+          const res = await fetch('/api/v1/documents/ingest', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, domain: category, content, document_type: 'markdown' }),
+          });
+          if (!res.ok) {
+            const errJson = await res.json().catch(() => ({}));
+            throw new Error(errJson.detail || `HTTP ${res.status}`);
+          }
+          const data = await res.json();
+          const doc = data.document || data;
+          const chunkCnt = doc.total_chunks !== undefined ? doc.total_chunks : (doc.chunk_count || 0);
+
+          SynapseNav.refreshTelemetryBadges();
+          SynapseNav.showToast(
+            'Document Indexed Live',
+            `${doc.title} (${chunkCnt} chunks) added to Hybrid RAG Engine.`,
+            'success'
+          );
+
+          // Show verification card with 1-click query links
+          const card = document.getElementById('ingest-success-card');
+          card.classList.remove('hidden');
+          document.getElementById('ingested-doc-title').textContent = doc.title;
+          document.getElementById('ingested-doc-stats').textContent = `${chunkCnt} Contextual Chunks Indexed`;
+          document.getElementById('ingested-open-reader-link').href = `/documents?doc=${encodeURIComponent(doc.document_id)}`;
+
+          const queriesToOffer =
+            (doc.suggested_queries && doc.suggested_queries.length > 0)
+              ? doc.suggested_queries
+              : (activeTemplateQueries.length > 0
+                  ? activeTemplateQueries
+                  : [
+                      `What are the key specifications and metrics in ${doc.title}?`,
+                      `What remediation or compliance rules are defined in ${doc.title}?`,
+                    ]);
+
+          document.getElementById('ingested-query-buttons').innerHTML = queriesToOffer
+            .map(
+              (q) => `
+              <a href="/search?q=${encodeURIComponent(q)}"
+                 class="block px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-xs font-mono text-white transition-all flex items-center justify-between gap-2">
+                <span class="truncate">Ask: "${SynapseNav.escapeHtml(q)}"</span>
+                <span class="text-emerald-300 shrink-0">Test in Workbench -&gt;</span>
+              </a>
+            `
+            )
+            .join('');
+        } catch (err) {
+          SynapseNav.showToast('Ingestion Error', err.message, 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Ingest & Index into Hybrid Engine ->';
+        }
+      });
+    });
+
+    function loadSampleTemplate(tplId) {
+      const tpl = SynapseNav.SAMPLE_TEMPLATES.find((t) => t.id === tplId);
+      if (!tpl) return;
+      document.getElementById('ingest-title').value = tpl.title;
+      document.getElementById('ingest-category').value = tpl.category;
+      document.getElementById('ingest-content').value = tpl.content;
+      activeTemplateQueries = tpl.suggestedQueries || [];
+      updateLiveChunkPreview();
+    }
+
+    function updateLiveChunkPreview() {
+      const title = document.getElementById('ingest-title').value.trim() || 'Untitled Document';
+      const content = document.getElementById('ingest-content').value;
+      const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+      document.getElementById('editor-word-count').textContent = `${words} words`;
+
+      // Client-side preview of ## section chunking
+      const lines = content.split('\n');
+      const sections = [];
+      let currentSec = 'Overview';
+      let buf = [];
+
+      lines.forEach((line) => {
+        if (line.trim().startsWith('## ')) {
+          if (buf.join('\n').trim()) {
+            sections.push({ section: currentSec, body: buf.join('\n').trim() });
+          }
+          currentSec = line.trim().slice(3).trim();
+          buf = [];
+        } else if (!line.trim().startsWith('# ')) {
+          buf.push(line);
+        }
+      });
+      if (buf.join('\n').trim()) {
+        sections.push({ section: currentSec, body: buf.join('\n').trim() });
+      }
+
+      document.getElementById('preview-chunk-badge').textContent = `${sections.length} CHUNKS`;
+      const container = document.getElementById('live-chunk-preview-list');
+      container.innerHTML = sections
+        .map((s, idx) => {
+          const tokCount = s.body.split(/\s+/).filter(Boolean).length;
+          return `
+            <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono text-sky-300 font-bold">
+                  CHUNK #${idx + 1} // ${SynapseNav.escapeHtml(s.section)}
+                </span>
+                <span class="text-[10px] font-mono text-slate-400">~${tokCount} tokens</span>
+              </div>
+              <div class="mb-2 px-2 py-1 rounded bg-indigo-500/10 border border-indigo-400/20 text-[10px] font-mono text-indigo-300 truncate">
+                [Document: ${SynapseNav.escapeHtml(title)} | Section: ${SynapseNav.escapeHtml(s.section)}]
+              </div>
+              <div class="text-xs text-slate-300 line-clamp-3 font-mono leading-relaxed">
+                ${SynapseNav.escapeHtml(s.body)}
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    // Authentic ThreeUI Matrix-Field Interactive WebGL Lightning Shader
+    function initMatrixFieldLightningShader() {
+      const canvas = document.getElementById('glcanvas-matrix');
+      if (!canvas) return;
+      const gl = canvas.getContext('webgl');
+      if (!gl) return;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const vsSource = `
+        attribute vec2 a_position;
+        void main() {
+          gl_Position = vec4(a_position, 0.0, 1.0);
+        }
+      `;
+
+      const fsSource = `
+        precision highp float;
+        uniform vec2 u_resolution;
+        uniform float u_time;
+        uniform vec2 u_mouse;
+
+        float hash(vec2 p) {
+          p = fract(p * vec2(123.34, 456.21));
+          p += dot(p, p + 45.32);
+          return fract(p.x * p.y);
+        }
+
+        float noise(vec2 p) {
+          vec2 i = floor(p);
+          vec2 f = fract(p);
+          f = f * f * (3.0 - 2.0 * f);
+          float a = hash(i);
+          float b = hash(i + vec2(1.0, 0.0));
+          float c = hash(i + vec2(0.0, 1.0));
+          float d = hash(i + vec2(1.0, 1.0));
+          return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+        }
+
+        float fbm(vec2 p) {
+          float v = 0.0;
+          float a = 0.5;
+          for (int i = 0; i < 4; i++) {
+            v += a * noise(p);
+            p *= 2.02;
+            a *= 0.5;
+          }
+          return v;
+        }
+
+        void main() {
+          vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
+          vec2 mouseUV = (u_mouse - 0.5 * u_resolution.xy) / u_resolution.y;
+
+          vec3 col = vec3(0.047, 0.047, 0.043);
+          vec2 p = uv * 2.5;
+          float n = fbm(p + u_time * 0.15);
+
+          // Subtle plasma beam toward mouse cursor
+          vec2 dVec = mouseUV - vec2(0.0, 0.35);
+          float len = length(dVec);
+          vec2 dir = dVec / max(len, 0.001);
+          vec2 perp = vec2(-dir.y, dir.x);
+          vec2 rel = uv - vec2(0.0, 0.35);
+          float along = dot(rel, dir);
+          float across = dot(rel, perp);
+          float disp = (fbm(vec2(along * 6.0 - u_time * 3.5, u_time * 1.8)) - 0.5) * 0.16;
+          float beam = 0.0025 / (abs(across - disp) + 0.003);
+          float mask = smoothstep(-0.2, 0.1, along) * smoothstep(len + 0.3, len - 0.1, along);
+
+          col += vec3(0.639, 0.694, 0.541) * n * 0.24;
+          col += vec3(0.831, 0.639, 0.451) * beam * mask * 0.42;
+
+          gl_FragColor = vec4(col, 1.0);
+        }
+      `;
+
+      function compile(type, src) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+      }
+
+      const prog = gl.createProgram();
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, vsSource));
+      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fsSource));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+
+      const posLoc = gl.getAttribLocation(prog, 'a_position');
+      gl.enableVertexAttribArray(posLoc);
+      gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+      const uRes = gl.getUniformLocation(prog, 'u_resolution');
+      const uTime = gl.getUniformLocation(prog, 'u_time');
+      const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+      let mx = window.innerWidth * 0.5;
+      let my = window.innerHeight * 0.5;
+      window.addEventListener('mousemove', (e) => {
+        mx = e.clientX;
+        my = window.innerHeight - e.clientY;
+      });
+
+      const start = performance.now();
+      function render() {
+        const t = (performance.now() - start) * 0.001;
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.uniform1f(uTime, t);
+        gl.uniform2f(uMouse, mx, my);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(render);
+      }
+      render();
+    }
+  </script>
+</body>
+</html>

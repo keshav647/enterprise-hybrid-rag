@@ -49,30 +49,30 @@ class CrossEncoderReranker:
             matched_terms = [t for t in query_terms if t in content_lower]
             term_coverage = len(matched_terms) / len(query_terms) if query_terms else 0.0
 
-            # 3. Heading & metadata alignment
-            section_lower = chunk.section_title.lower()
-            heading_matches = sum(1 for t in query_terms if t in section_lower)
+            # 3. Heading & document metadata alignment
+            meta_lower = f"{chunk.document_title} {chunk.section_title}".lower()
+            heading_matches = sum(1 for t in query_terms if t in meta_lower)
             heading_score = min(1.0, heading_matches / max(1, len(query_terms)))
 
             # 4. Technical / Numerical entity fidelity
             query_entities = re.findall(r"[\$]?[0-9]+(?:[\.\-_/:][0-9]+)*|[a-z0-9_\-]+", query_lower)
             entity_matches = sum(1 for e in query_entities if e in content_lower and any(c.isdigit() for c in e))
-            entity_score = 1.0 if entity_matches > 0 else 0.0
+            entity_score = min(1.0, entity_matches * 0.6) if entity_matches > 0 else 0.0
 
             # 5. Base RRF contribution
             rrf_contrib = cand.get("rrf_score", 0.0)
 
             # Combined cross-encoder score normalized to [0.0, 1.0]
             raw_score = (
-                0.35 * term_coverage
-                + 0.25 * exact_phrase_score
-                + 0.20 * heading_score
+                0.42 * term_coverage
+                + 0.18 * exact_phrase_score
+                + 0.18 * heading_score
                 + 0.10 * entity_score
-                + 0.10 * min(1.0, rrf_contrib * 30.0)
+                + 0.12 * min(1.0, rrf_contrib * 30.0)
             )
 
             # Sigmoid smoothing
-            normalized_score = round(1.0 / (1.0 + math.exp(-6.0 * (raw_score - 0.5))), 4)
+            normalized_score = round(1.0 / (1.0 + math.exp(-6.0 * (raw_score - 0.45))), 4)
 
             item = SearchResultItem(
                 chunk_id=chunk.chunk_id,
@@ -103,5 +103,10 @@ class CrossEncoderReranker:
 
     def _extract_terms(self, text: str) -> List[str]:
         words = re.findall(r"\b[a-z0-9_\-\$]+\b", text.lower())
-        stopwords = {"the", "is", "at", "which", "on", "and", "a", "an", "what", "how", "why"}
+        stopwords = {
+            "the", "is", "at", "which", "on", "and", "a", "an", "what", "how", "why",
+            "in", "of", "to", "for", "by", "with", "without", "was", "were", "when",
+            "do", "does", "did", "from", "are", "be",
+        }
         return [w for w in words if w not in stopwords and len(w) > 1]
+

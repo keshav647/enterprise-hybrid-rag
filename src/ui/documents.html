@@ -1,169 +1,396 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Synapse // Document Library</title>
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Synapse // 04 Corpus — 6-Domain Hardware Document Reader & Chunk Inspector</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <link rel="stylesheet" href="/static/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/static/logo.png" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
 </head>
-<body>
-  <div class="mesh-background">
-    <div class="dot-grid"></div>
-    <div class="glow-orb orb-amber"></div>
-    <div class="glow-orb orb-iris"></div>
-    <div class="glow-orb orb-rose"></div>
-  </div>
+<body class="min-h-screen bg-[#06080f] text-slate-100 selection:bg-sky-500/30 selection:text-sky-200 relative">
 
-  <div class="app-container">
-    <!-- Top Bar Navigation -->
-    <header class="app-header">
-      <div class="header-brand">
-        <div class="brand-crest">
-          <div class="crest-inner">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-              <path d="M2 17l10 5 10-5"></path>
-              <path d="M2 12l10 5 10-5"></path>
-            </svg>
-          </div>
-          <div class="crest-glow"></div>
+  <!-- ThreeUI Void-Protocol Dot-Matrix Background Canvas -->
+  <canvas id="void-dotmatrix" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-45"></canvas>
+
+  <!-- Shared 7-Page Navigation Dock -->
+  <div id="synapse-top-dock" class="relative z-50"></div>
+
+  <main class="relative z-10 max-w-[1600px] mx-auto px-4 lg:px-6 pt-6 pb-20">
+
+    <!-- Header Bar -->
+    <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-6 border-b border-white/10">
+      <div>
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-purple-500/15 border border-purple-400/30 text-[10px] font-mono uppercase tracking-widest text-purple-300 mb-2">
+          PAGE 04 // THREEUI VOID-PROTOCOL HARDWARE CHASSIS &amp; CONTEXTUAL CHUNK INSPECTOR
         </div>
-        <div class="brand-typography">
-          <div class="brand-title">
-            <span>SYNAPSE</span>
-            <span class="edition-pill">DOCUMENTS</span>
-          </div>
-          <div class="brand-meta">Enterprise Knowledge Base &bull; Ground Truth Corpus</div>
-        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">
+          Enterprise Knowledge Corpus &amp; Contextual Chunk Boundary Inspector
+        </h1>
       </div>
-
-      <nav class="header-nav">
-        <a href="/" class="nav-tab-btn">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <span>Search &amp; Answers</span>
+      <div class="flex items-center gap-2.5">
+        <a href="/ingest" class="px-4 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all">
+          + Ingest New Custom Doc (Page 05)
         </a>
-        <a href="/documents" class="nav-tab-btn active">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-          </svg>
-          <span>Document Library</span>
-        </a>
-        <a href="/analytics" class="nav-tab-btn">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 3v18h18"></path>
-            <path d="M18 17V9"></path>
-            <path d="M13 17V5"></path>
-            <path d="M8 17v-3"></path>
-          </svg>
-          <span>Accuracy &amp; Metrics</span>
-        </a>
-        <a href="/settings" class="nav-tab-btn">
-          <svg class="nav-tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          <span>AI Models &amp; Keys</span>
-        </a>
-      </nav>
-
-      <div class="header-hud-pills">
-        <div class="hud-pill hud-pill-cache" id="cacheStatusBadge">
-          <svg class="cache-spark" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-          </svg>
-          <span class="pill-label">FAST CACHE</span>
-          <span class="pill-metric" id="cacheHitStat">Active</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- Document Library Main Layout -->
-    <main class="doc-library-layout">
-      <!-- Left: Document List Sidebar -->
-      <aside class="doc-sidebar-card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="font-weight: 800; font-size: 0.82rem; letter-spacing: 0.6px; color: var(--text-mint); text-transform: uppercase;">
-            Available Files
-          </div>
-          <button type="button" class="action-btn btn-solid-amber" id="btnOpenIngestModal" style="padding: 5px 12px; font-size: 0.74rem;">
-            + Ingest File
-          </button>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 8px;" id="docLibraryList">
-          <!-- Dynamically populated document items -->
-        </div>
-      </aside>
-
-      <!-- Right: Document Reader Section -->
-      <section class="spatial-card viewer-card">
-        <div class="card-top-bar">
-          <div class="card-title-group">
-            <div class="card-icon-badge icon-iris">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-              </svg>
-            </div>
-            <span class="card-heading" id="docMetaTitle">Loading document...</span>
-          </div>
-          <div class="doc-tab-ribbon" id="docTabs">
-            <!-- Dynamically populated document tabs -->
-          </div>
-        </div>
-
-        <div class="viewer-body" id="docViewerBody">
-          <div class="viewer-metadata-strip">
-            <div class="strip-left">
-              <span class="page-badge" id="docChunkCountBadge">Sections</span>
-            </div>
-            <div class="strip-right">
-              <span class="page-badge" id="docPageBadge">Page 1</span>
-            </div>
-          </div>
-
-          <div class="reader-scroll-canvas" id="docContentContainer">
-            <!-- Rendered chunks with highlight support -->
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <!-- Ingest Document Modal -->
-    <div class="modal-backdrop hidden" id="ingestModal">
-      <div class="modal-dialog">
-        <div class="modal-top">
-          <h3>Ingest New Document into Corpus</h3>
-          <button class="modal-close-btn" id="btnCloseIngestModal">&times;</button>
-        </div>
-        <div class="modal-content">
-          <p class="modal-explainer">The document will be automatically chunked, embedded into vectors, and indexed into the BM25 catalog live.</p>
-          <div class="input-block">
-            <label>Document Title</label>
-            <input type="text" id="ingestTitle" class="text-input" placeholder="e.g. Q4 Cloud Operations Retrospective">
-          </div>
-          <div class="input-block">
-            <label>Markdown / Text Content</label>
-            <textarea id="ingestContent" class="text-input" rows="8" style="font-family: var(--font-mono); font-size: 0.8rem;" placeholder="# Document Header...&#10;&#10;Detailed contents and technical specifications..."></textarea>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="action-btn btn-ghost" id="btnCancelIngest">Cancel</button>
-          <button class="action-btn btn-solid-amber" id="btnSubmitIngest">Ingest &amp; Index</button>
-        </div>
+        <button type="button" id="query-this-doc-btn" class="px-4 py-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/40 text-sky-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer">
+          Query Active Doc in Workbench -&gt;
+        </button>
       </div>
     </div>
-  </div>
 
-  <script type="module" src="/static/js/documents.js"></script>
+    <!-- Main 12-Col Hardware Reader Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- Left 4 Columns: Indexed Corpus Registry + Section Jump Outline -->
+      <div class="lg:col-span-4 space-y-5">
+        <!-- Corpus Registry -->
+        <div class="hardware-chassis rounded-2xl border border-white/15 p-4">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <div class="hardware-rivet"></div>
+              <span class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
+                INDEXED CORPUS REGISTRY
+              </span>
+            </div>
+            <span id="corpus-total-badge" class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 text-[10px] font-mono">
+              6 DOCS
+            </span>
+          </div>
+
+          <input
+            id="corpus-filter-input"
+            type="text"
+            placeholder="Filter documents by title or category..."
+            class="w-full px-3 py-2 rounded-lg bg-[#050811] border border-white/15 text-xs font-mono text-white outline-none mb-3"
+          />
+
+          <div id="corpus-doc-list" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Section Outline for Active Document -->
+        <div class="hardware-chassis rounded-2xl border border-white/15 p-4">
+          <div class="flex items-center justify-between pb-2.5 mb-3 border-b border-white/10">
+            <span class="text-xs font-mono uppercase tracking-widest text-sky-300 font-semibold">
+              SECTION &amp; CHUNK JUMP OUTLINE
+            </span>
+            <span id="outline-chunk-count" class="text-[10px] font-mono text-slate-400">0 SECTIONS</span>
+          </div>
+          <div id="doc-section-outline" class="space-y-1.5 max-h-[300px] overflow-y-auto">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Right 8 Columns: ThreeUI Void-Protocol Machined Hardware Document & Chunk Screen -->
+      <div class="lg:col-span-8">
+        <div class="hardware-chassis rounded-[2rem] border border-white/15 p-5 sm:p-7 relative">
+          <!-- 4 Physical Corner Rivets -->
+          <div class="hardware-rivet absolute top-4 left-4"></div>
+          <div class="hardware-rivet absolute top-4 right-4"></div>
+          <div class="hardware-rivet absolute bottom-4 left-4"></div>
+          <div class="hardware-rivet absolute bottom-4 right-4"></div>
+
+          <!-- Top Hardware Bezel Header -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-white/10 px-2">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span id="active-doc-cat" class="px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono uppercase text-sky-300">
+                  SECURITY
+                </span>
+                <span id="active-doc-id-pill" class="text-[11px] font-mono text-slate-400">
+                  ID: cve_2024_8192_kernel_security_advisory
+                </span>
+              </div>
+              <h2 id="active-doc-heading" class="text-lg sm:text-xl font-bold text-white tracking-tight">
+                Loading Document...
+              </h2>
+            </div>
+
+            <!-- View Switcher: Contextual Chunks vs Full Markdown -->
+            <div class="inline-flex rounded-xl bg-[#04060c] p-1 border border-white/10">
+              <button type="button" id="mode-btn-chunks" class="px-3.5 py-1.5 rounded-lg text-xs font-mono bg-sky-500/20 text-sky-300 border border-sky-400/40 cursor-pointer">
+                Contextual Chunks View
+              </button>
+              <button type="button" id="mode-btn-markdown" class="px-3.5 py-1.5 rounded-lg text-xs font-mono text-slate-400 hover:text-white cursor-pointer">
+                Full Document Reader
+              </button>
+            </div>
+          </div>
+
+          <!-- Metadata Telemetry Bar -->
+          <div class="grid grid-cols-3 gap-3 mb-4 px-2">
+            <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.07]">
+              <div class="text-[9px] font-mono uppercase text-slate-400">INDEXED CHUNKS</div>
+              <div id="meta-chunks" class="text-sm font-bold font-mono text-white mt-0.5">--</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.07]">
+              <div class="text-[9px] font-mono uppercase text-slate-400">TOTAL WORD COUNT</div>
+              <div id="meta-words" class="text-sm font-bold font-mono text-sky-300 mt-0.5">--</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.07]">
+              <div class="text-[9px] font-mono uppercase text-slate-400">EMBEDDING PREFIX</div>
+              <div class="text-xs font-mono text-emerald-300 mt-0.5 truncate">[Document | Section]</div>
+            </div>
+          </div>
+
+          <!-- Corrugated Scanline Screen Viewport -->
+          <div id="void-screen-viewport" class="corrugated-screen rounded-2xl border border-white/15 p-5 sm:p-6 min-h-[560px] max-h-[760px] overflow-y-auto space-y-4">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/static/js/nav.js"></script>
+  <script>
+    let allDocs = [];
+    let currentDocDetail = null;
+    let viewMode = 'chunks'; // 'chunks' | 'markdown'
+    let targetChunkId = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      SynapseNav.mountDock('documents');
+      initVoidDotMatrixCanvas();
+
+      const params = new URLSearchParams(window.location.search);
+      const requestedDoc = params.get('doc') || SynapseNav.getState(SynapseNav.STORAGE_KEYS.ACTIVE_DOC, 'cve_2024_8192_kernel_security_advisory');
+      targetChunkId = params.get('chunk') || null;
+
+      await fetchCorpusList();
+      const initialDocId = allDocs.some((d) => d.document_id === requestedDoc)
+        ? requestedDoc
+        : (allDocs[0]?.document_id || 'cve_2024_8192_kernel_security_advisory');
+
+      await loadDocumentDetail(initialDocId, targetChunkId);
+
+      document.getElementById('corpus-filter-input').addEventListener('input', (e) => {
+        renderCorpusList(e.target.value.trim().toLowerCase());
+      });
+
+      document.getElementById('mode-btn-chunks').addEventListener('click', () => {
+        viewMode = 'chunks';
+        updateModeButtons();
+        renderDocumentViewport();
+      });
+
+      document.getElementById('mode-btn-markdown').addEventListener('click', () => {
+        viewMode = 'markdown';
+        updateModeButtons();
+        renderDocumentViewport();
+      });
+
+      document.getElementById('query-this-doc-btn').addEventListener('click', () => {
+        if (!currentDocDetail) return;
+        const dom = SynapseNav.getDomainById(currentDocDetail.metadata.document_id);
+        const q = dom ? dom.queries[0].query : `Summarize key findings in ${currentDocDetail.metadata.title}`;
+        SynapseNav.setState(SynapseNav.STORAGE_KEYS.ACTIVE_QUERY, q, true);
+        window.location.href = `/search?doc=${encodeURIComponent(currentDocDetail.metadata.document_id)}&q=${encodeURIComponent(q)}`;
+      });
+    });
+
+    async function fetchCorpusList() {
+      const res = await fetch('/api/v1/documents');
+      if (!res.ok) return;
+      const data = await res.json();
+      allDocs = Array.isArray(data) ? data : (data.documents || []);
+      document.getElementById('corpus-total-badge').textContent = `${allDocs.length} DOCS`;
+      renderCorpusList('');
+    }
+
+    function renderCorpusList(filterText) {
+      const listEl = document.getElementById('corpus-doc-list');
+      const filtered = allDocs.filter((d) => {
+        if (!filterText) return true;
+        const cat = (d.domain || d.category || '').toLowerCase();
+        return (
+          d.title.toLowerCase().includes(filterText) ||
+          cat.includes(filterText) ||
+          d.document_id.toLowerCase().includes(filterText)
+        );
+      });
+
+      listEl.innerHTML = filtered.map((d) => {
+        const isCurrent = currentDocDetail && currentDocDetail.metadata.document_id === d.document_id;
+        const cat = d.domain || d.category || 'enterprise';
+        const chunkCnt = d.total_chunks !== undefined ? d.total_chunks : (d.chunk_count || 0);
+        return `
+          <button type="button"
+            onclick="loadDocumentDetail('${SynapseNav.escapeHtml(d.document_id)}', null)"
+            class="w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${
+              isCurrent
+                ? 'bg-sky-500/15 border-sky-400/50 shadow-[0_0_16px_rgba(56,189,248,0.15)]'
+                : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.08]'
+            }">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="px-2 py-0.5 rounded bg-white/[0.05] text-[10px] font-mono uppercase text-sky-300 truncate max-w-[160px]">
+                ${SynapseNav.escapeHtml(cat)}
+              </span>
+              <span class="text-[10px] font-mono text-slate-400 shrink-0">${chunkCnt} Chunks</span>
+            </div>
+            <div class="text-xs font-semibold text-white leading-snug">${SynapseNav.escapeHtml(d.title)}</div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    async function loadDocumentDetail(docId, highlightChunk = null) {
+      targetChunkId = highlightChunk;
+      SynapseNav.setState(SynapseNav.STORAGE_KEYS.ACTIVE_DOC, docId, true);
+      const res = await fetch(`/api/v1/documents/${encodeURIComponent(docId)}`);
+      if (!res.ok) return;
+      currentDocDetail = await res.json();
+
+      const m = currentDocDetail.metadata;
+      const chunks = currentDocDetail.chunks || [];
+      const totalTokens = chunks.reduce((acc, c) => acc + (c.token_count || 0), 0);
+      const chunkCnt = m.total_chunks !== undefined ? m.total_chunks : chunks.length;
+
+      document.getElementById('active-doc-cat').textContent = m.domain || m.category || 'ENTERPRISE';
+      document.getElementById('active-doc-id-pill').textContent = `ID: ${m.document_id}`;
+      document.getElementById('active-doc-heading').textContent = m.title;
+      document.getElementById('meta-chunks').textContent = `${chunkCnt} Contextual Chunks`;
+      document.getElementById('meta-words').textContent = `${totalTokens} Tokens Indexed`;
+
+      renderCorpusList(document.getElementById('corpus-filter-input').value.trim().toLowerCase());
+      renderSectionOutline();
+      renderDocumentViewport();
+    }
+
+    function renderSectionOutline() {
+      const chunks = currentDocDetail?.chunks || [];
+      document.getElementById('outline-chunk-count').textContent = `${chunks.length} CHUNKS`;
+      const outlineEl = document.getElementById('doc-section-outline');
+      outlineEl.innerHTML = chunks.map((c, idx) => {
+        const cNum = c.chunk_index !== undefined ? c.chunk_index + 1 : idx + 1;
+        return `
+          <button type="button"
+            onclick="jumpToChunk('${SynapseNav.escapeHtml(c.chunk_id)}')"
+            class="w-full text-left px-3 py-2 rounded-lg bg-white/[0.02] hover:bg-sky-500/15 border border-white/[0.06] hover:border-sky-400/30 text-xs font-mono text-slate-300 hover:text-white transition-all flex items-center justify-between gap-2 cursor-pointer">
+            <span class="truncate">#${cNum} // ${SynapseNav.escapeHtml(c.section_title)}</span>
+            <span class="text-[10px] text-slate-500 shrink-0">${c.token_count}t</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function jumpToChunk(chunkId) {
+      targetChunkId = chunkId;
+      viewMode = 'chunks';
+      updateModeButtons();
+      renderDocumentViewport();
+    }
+
+    function updateModeButtons() {
+      const bChunks = document.getElementById('mode-btn-chunks');
+      const bMd = document.getElementById('mode-btn-markdown');
+      if (viewMode === 'chunks') {
+        bChunks.className = 'px-3.5 py-1.5 rounded-lg text-xs font-mono bg-sky-500/20 text-sky-300 border border-sky-400/40 cursor-pointer';
+        bMd.className = 'px-3.5 py-1.5 rounded-lg text-xs font-mono text-slate-400 hover:text-white cursor-pointer';
+      } else {
+        bMd.className = 'px-3.5 py-1.5 rounded-lg text-xs font-mono bg-sky-500/20 text-sky-300 border border-sky-400/40 cursor-pointer';
+        bChunks.className = 'px-3.5 py-1.5 rounded-lg text-xs font-mono text-slate-400 hover:text-white cursor-pointer';
+      }
+    }
+
+    function renderDocumentViewport() {
+      const vp = document.getElementById('void-screen-viewport');
+      if (!currentDocDetail) return;
+
+      const chunks = currentDocDetail.chunks || [];
+      if (viewMode === 'markdown') {
+        const fullMd =
+          currentDocDetail.raw_markdown ||
+          `# ${currentDocDetail.metadata.title}\n\n` +
+            chunks.map((c) => `## ${c.section_title}\n\n${c.raw_content || c.content}`).join('\n\n');
+        vp.innerHTML = `
+          <article class="prose prose-invert max-w-none">
+            ${SynapseNav.renderMarkdown(fullMd)}
+          </article>
+        `;
+        return;
+      }
+
+      vp.innerHTML = chunks.map((c, idx) => {
+        const isLocked = targetChunkId && c.chunk_id === targetChunkId;
+        const cNum = c.chunk_index !== undefined ? c.chunk_index + 1 : idx + 1;
+        return `
+          <div id="corpus-chunk-${SynapseNav.escapeHtml(c.chunk_id)}"
+               class="p-4 rounded-xl border transition-all ${
+                 isLocked
+                   ? 'chunk-target-lock border-sky-400 bg-sky-950/30'
+                   : 'border-white/10 bg-white/[0.02] hover:border-white/20'
+               }">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-white/10">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/40 text-sky-300 font-mono text-[10px] font-bold">
+                  CHUNK #${cNum}
+                </span>
+                <span class="text-xs font-mono font-semibold text-white">
+                  ${SynapseNav.escapeHtml(c.section_title)}
+                </span>
+              </div>
+              <div class="flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                <span>ID: ${SynapseNav.escapeHtml(c.chunk_id)}</span>
+                <span>//</span>
+                <span class="text-emerald-300">${c.token_count} Tokens</span>
+              </div>
+            </div>
+
+            <!-- Contextual Prefix Injected for Dense + BM25 Indexing -->
+            <div class="mb-2.5 px-2.5 py-1.5 rounded bg-indigo-500/10 border border-indigo-400/25 text-[10px] font-mono text-indigo-300">
+              CONTEXTUAL HEADER: [Document: ${SynapseNav.escapeHtml(c.document_title)} | Section: ${SynapseNav.escapeHtml(c.section_title)}]
+            </div>
+
+            <div class="text-xs text-slate-200 leading-relaxed">
+              ${SynapseNav.renderMarkdown(c.raw_content || c.content)}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (targetChunkId) {
+        setTimeout(() => {
+          const el = document.getElementById(`corpus-chunk-${targetChunkId}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 80);
+      }
+    }
+
+    function initVoidDotMatrixCanvas() {
+      const canvas = document.getElementById('void-dotmatrix');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w = (canvas.width = window.innerWidth);
+      let h = (canvas.height = window.innerHeight);
+      window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      });
+      let t = 0;
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        t += 0.015;
+        const step = 28;
+        for (let x = 14; x < w; x += step) {
+          for (let y = 14; y < h; y += step) {
+            const pulse = Math.sin(x * 0.01 + y * 0.01 + t) * 0.5 + 0.5;
+            ctx.fillStyle = `rgba(212, 163, 115, ${(0.05 + pulse * 0.14).toFixed(3)})`;
+            ctx.fillRect(x, y, 1.5, 1.5);
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+  </script>
 </body>
 </html>

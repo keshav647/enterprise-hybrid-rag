@@ -32,6 +32,7 @@ class HybridRetrievalEngine:
         self.rrf = rrf or ReciprocalRankFusion(k=60)
         self.reranker = reranker or CrossEncoderReranker()
         self.chunks_by_id: Dict[str, DocumentChunk] = {}
+        self.last_timings_ms: Dict[str, float] = {}
 
     def index_chunks(self, chunks: List[DocumentChunk]) -> None:
         """Indexes chunks into both the vector store and the BM25 inverted index."""
@@ -49,20 +50,35 @@ class HybridRetrievalEngine:
         rrf_k: int = 60,
         use_reranker: bool = True,
         candidate_count: int = 30,
+        document_id: Optional[str] = None,
     ) -> List[SearchResultItem]:
-        """Executes retrieval according to specified mode."""
+        """Executes retrieval according to specified mode and optional document_id scope."""
         if not self.chunks_by_id:
             return []
 
         if mode == "dense":
-            return self._retrieve_dense_only(query, top_k)
+            items = self._retrieve_dense_only(query, top_k=candidate_count if document_id else top_k)
         elif mode == "bm25":
-            return self._retrieve_bm25_only(query, top_k)
+            items = self._retrieve_bm25_only(query, top_k=candidate_count if document_id else top_k)
         else:
-            return self._retrieve_hybrid(query, top_k, rrf_k, use_reranker, candidate_count)
+            items = self._retrieve_hybrid(query, top_k if not document_id else candidate_count, rrf_k, use_reranker, candidate_count)
+
+        if document_id:
+            items = [it for it in items if it.document_id == document_id][:top_k]
+
+        return items[:top_k]
 
     def _retrieve_dense_only(self, query: str, top_k: int) -> List[SearchResultItem]:
+        t0 = time.perf_counter()
         dense_results = self.vector_store.search(query, top_k=top_k)
+        t_dense = (time.perf_counter() - t0) * 1000
+        self.last_timings_ms = {
+            "dense": round(t_dense, 2),
+            "bm25": 0.0,
+            "rrf": 0.0,
+            "rerank": 0.0,
+            "total": round(t_dense, 2),
+        }
         items: List[SearchResultItem] = []
         for rank, (chunk_id, score) in enumerate(dense_results, start=1):
             chunk = self.chunks_by_id.get(chunk_id)
@@ -86,7 +102,16 @@ class HybridRetrievalEngine:
         return items
 
     def _retrieve_bm25_only(self, query: str, top_k: int) -> List[SearchResultItem]:
+        t0 = time.perf_counter()
         bm25_results = self.bm25.search(query, top_k=top_k)
+        t_bm25 = (time.perf_counter() - t0) * 1000
+        self.last_timings_ms = {
+            "dense": 0.0,
+            "bm25": round(t_bm25, 2),
+            "rrf": 0.0,
+            "rerank": 0.0,
+            "total": round(t_bm25, 2),
+        }
         items: List[SearchResultItem] = []
         for rank, (chunk_id, score) in enumerate(bm25_results, start=1):
             chunk = self.chunks_by_id.get(chunk_id)
@@ -118,22 +143,46 @@ class HybridRetrievalEngine:
         candidate_count: int,
     ) -> List[SearchResultItem]:
         # Stage 1: Dual Retrieval
+        t0 = time.perf_counter()
         dense_candidates = self.vector_store.search(query, top_k=candidate_count)
+        t_dense = (time.perf_counter() - t0) * 1000
+
+        t1 = time.perf_counter()
         bm25_candidates = self.bm25.search(query, top_k=candidate_count)
+        t_bm25 = (time.perf_counter() - t1) * 1000
 
         # Stage 2: Reciprocal Rank Fusion
+        t2 = time.perf_counter()
         self.rrf.k = rrf_k
         fused = self.rrf.fuse(dense_candidates, bm25_candidates, top_k=candidate_count)
+        t_rrf = (time.perf_counter() - t2) * 1000
 
         # Stage 3: Cross-Encoder Re-ranking
         if use_reranker:
-            return self.reranker.rerank(
+            t3 = time.perf_counter()
+            reranked = self.reranker.rerank(
                 query=query,
                 candidates=fused,
                 chunks_by_id=self.chunks_by_id,
                 top_k=top_k,
             )
+            t_rerank = (time.perf_counter() - t3) * 1000
+            self.last_timings_ms = {
+                "dense": round(t_dense, 2),
+                "bm25": round(t_bm25, 2),
+                "rrf": round(t_rrf, 2),
+                "rerank": round(t_rerank, 2),
+                "total": round(t_dense + t_bm25 + t_rrf + t_rerank, 2),
+            }
+            return reranked
         else:
+            self.last_timings_ms = {
+                "dense": round(t_dense, 2),
+                "bm25": round(t_bm25, 2),
+                "rrf": round(t_rrf, 2),
+                "rerank": 0.0,
+                "total": round(t_dense + t_bm25 + t_rrf, 2),
+            }
             items: List[SearchResultItem] = []
             for cand in fused[:top_k]:
                 chunk = self.chunks_by_id.get(cand["chunk_id"])
