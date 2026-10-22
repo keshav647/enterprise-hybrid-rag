@@ -55,6 +55,7 @@ async function testKey(provider, key, statusElementId, buttonElement) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ provider: provider, api_key: key }),
     });
+    const data = await res.json();
     const checkSvg = `<svg width="12" height="12" style="vertical-align: -1px; margin-right: 4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
     const crossSvg = `<svg width="12" height="12" style="vertical-align: -1px; margin-right: 4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
 

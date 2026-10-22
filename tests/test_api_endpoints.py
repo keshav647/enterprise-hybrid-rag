@@ -118,6 +118,36 @@ def test_test_key_endpoint(client):
     assert res2.json()["success"] is False
 
 
+def test_auth_set_key_status_and_disconnect(client):
+    # 1. Set a valid test key
+    res = client.post("/api/v1/auth/set_key", json={"provider": "gemini", "model": "gemini-2.0-flash", "api_key": "test_ai_key_1234567890"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["success"] is True
+    assert data["provider"] == "gemini"
+
+    # 2. Probe status
+    status_res = client.get("/api/v1/auth/key_status")
+    assert status_res.status_code == 200
+    st = status_res.json()
+    assert st["has_key"] is True
+    assert st["provider"] == "gemini"
+    assert st["status"] == "connected"
+    assert "..." in st["masked_key"]
+
+    # 3. Disconnect
+    disco_res = client.post("/api/v1/auth/disconnect")
+    assert disco_res.status_code == 200
+    assert disco_res.json()["success"] is True
+
+    # 4. Probe status after disconnect
+    status_after = client.get("/api/v1/auth/key_status")
+    assert status_after.status_code == 200
+    st_after = status_after.json()
+    assert st_after["has_key"] is False
+    assert st_after["status"] == "offline"
+
+
 def test_six_enterprise_domains_and_suggested_queries(client):
     res = client.get("/api/v1/documents")
     assert res.status_code == 200
@@ -225,5 +255,82 @@ def test_seven_page_threeui_architecture_routes(client):
         assert res.status_code == 200, f"Route {route} failed with {res.status_code}"
         assert signature in res.text, f"Route {route} missing ThreeUI signature {signature}"
         assert "synapse-top-dock" in res.text
+
+
+def test_document_deletion_endpoint(client):
+    # Ingest a temporary test doc
+    payload = {
+        "title": "Ephemeral Deletion Test Spec",
+        "content": "UniqueEphemeralTokenAlpha9988: Confidential hardware token for deletion verification.",
+        "domain": "security",
+        "document_type": "markdown",
+    }
+    ing_res = client.post("/api/v1/documents/ingest", json=payload)
+    assert ing_res.status_code == 200
+    doc_id = ing_res.json()["document_id"]
+
+    # Verify doc exists
+    get_res = client.get(f"/api/v1/documents/{doc_id}")
+    assert get_res.status_code == 200
+
+    # Delete doc
+    del_res = client.delete(f"/api/v1/documents/{doc_id}")
+    assert del_res.status_code == 200
+    del_data = del_res.json()
+    assert del_data["status"] == "deleted"
+    assert del_data["document_id"] == doc_id
+
+    # Verify doc no longer exists
+    get_res2 = client.get(f"/api/v1/documents/{doc_id}")
+    assert get_res2.status_code == 404
+
+
+def test_multi_format_upload_endpoint(client):
+    import io
+    import docx
+
+    # 1. Test CSV Upload
+    csv_bytes = b"Server,IP,Region,Status\napi-prod-01,10.0.1.5,us-east-1,ONLINE\napi-prod-02,10.0.1.6,us-east-1,ONLINE"
+    res_csv = client.post(
+        "/api/v1/documents/upload",
+        files={"file": ("servers_inventory.csv", csv_bytes, "text/csv")},
+        data={"domain": "sre"},
+    )
+    assert res_csv.status_code == 200
+    doc_csv = res_csv.json()
+    assert doc_csv["document_type"] == "csv"
+    assert doc_csv["total_chunks"] >= 1
+
+    # 2. Test JSON Upload
+    json_bytes = b'{"cluster": "k8s-prod-us", "nodes": 128, "version": "v1.31.1"}'
+    res_json = client.post(
+        "/api/v1/documents/upload",
+        files={"file": ("cluster_config.json", json_bytes, "application/json")},
+        data={"domain": "architecture"},
+    )
+    assert res_json.status_code == 200
+    doc_json = res_json.json()
+    assert doc_json["document_type"] == "json"
+    assert doc_json["total_chunks"] >= 1
+
+    # 3. Test DOCX Upload
+    doc = docx.Document()
+    doc.add_heading("Production Runbook", level=1)
+    doc.add_paragraph("Step 1: Check Prometheus alarms.")
+    docx_buf = io.BytesIO()
+    doc.save(docx_buf)
+    docx_bytes = docx_buf.getvalue()
+
+    res_docx = client.post(
+        "/api/v1/documents/upload",
+        files={"file": ("runbook.docx", docx_bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")},
+        data={"domain": "sre"},
+    )
+    assert res_docx.status_code == 200
+    doc_docx = res_docx.json()
+    assert doc_docx["document_type"] == "docx"
+    assert doc_docx["total_chunks"] >= 1
+
+
 
 

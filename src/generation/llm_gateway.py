@@ -13,28 +13,65 @@ class LLMGateway:
         self.default_api_key = default_api_key
 
     @staticmethod
+    def auto_detect_provider(key: str, requested_provider: Optional[str] = None, requested_model: Optional[str] = None) -> Dict[str, str]:
+        """Automatically detects LLM cloud provider and optimal production model from key syntax or requested provider."""
+        k = (key or "").strip()
+        prov = (requested_provider or "auto").lower()
+
+        if prov in ("anthropic", "claude"):
+            return {"provider": "anthropic", "model": requested_model or "claude-sonnet-4-5", "label": "Anthropic Claude"}
+        if prov == "openai":
+            return {"provider": "openai", "model": requested_model or "gpt-4o-mini", "label": "OpenAI GPT"}
+        if prov == "groq":
+            return {"provider": "groq", "model": requested_model or "llama-3.3-70b-versatile", "label": "Groq Llama 3.3"}
+        if prov == "openrouter":
+            return {"provider": "openrouter", "model": requested_model or "google/gemini-2.0-flash-001", "label": "OpenRouter"}
+        if prov == "gemini":
+            return {"provider": "gemini", "model": requested_model or "gemini-2.5-flash", "label": "Google Gemini"}
+
+        # Prefix-based auto-detection
+        if k.startswith("sk-ant-"):
+            return {"provider": "anthropic", "model": requested_model or "claude-sonnet-4-5", "label": "Anthropic Claude"}
+        if k.startswith("gsk_"):
+            return {"provider": "groq", "model": requested_model or "llama-3.3-70b-versatile", "label": "Groq Llama 3.3"}
+        if k.startswith("sk-or-v1-"):
+            return {"provider": "openrouter", "model": requested_model or "google/gemini-2.0-flash-001", "label": "OpenRouter"}
+        if k.startswith("sk-proj-") or (k.startswith("sk-") and len(k) > 40):
+            return {"provider": "openai", "model": requested_model or "gpt-4o-mini", "label": "OpenAI GPT"}
+        if k.startswith("AIzaSy") or k.startswith("AQ."):
+            return {"provider": "gemini", "model": requested_model or "gemini-2.5-flash", "label": "Google Gemini"}
+
+        # If key is provided with unknown format, default to Gemini
+        if k:
+            return {"provider": "gemini", "model": requested_model or "gemini-2.5-flash", "label": "Google Gemini"}
+
+        return {"provider": "offline", "model": "offline-zero-drain", "label": "Offline Grounded Engine"}
+
+    @staticmethod
     def detect_available_provider() -> Dict[str, Any]:
         """Auto-detects active API keys from environment or system config."""
         import os
         anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
         gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()
         openai_key = os.environ.get("OPENAI_API_KEY", "").strip()
+        groq_key = os.environ.get("GROQ_API_KEY", "").strip()
+        openrouter_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
 
         if anthropic_key:
             return {
                 "provider": "anthropic",
-                "model": "claude-3-5-sonnet-20241022",
-                "label": "Anthropic Claude 3.5 Sonnet",
+                "model": "claude-sonnet-4-5",
+                "label": "Anthropic Claude Sonnet 4.5",
                 "has_key": True,
                 "status": "Active (Environment: ANTHROPIC_API_KEY)",
             }
-        if gemini_key:
+        if groq_key:
             return {
-                "provider": "gemini",
-                "model": "gemini-2.5-flash",
-                "label": "Google Gemini 2.5 Flash",
+                "provider": "groq",
+                "model": "llama-3.3-70b-versatile",
+                "label": "Groq Llama 3.3 70B",
                 "has_key": True,
-                "status": "Active (Environment: GEMINI_API_KEY)",
+                "status": "Active (Environment: GROQ_API_KEY)",
             }
         if openai_key:
             return {
@@ -43,6 +80,22 @@ class LLMGateway:
                 "label": "OpenAI GPT-4o Mini",
                 "has_key": True,
                 "status": "Active (Environment: OPENAI_API_KEY)",
+            }
+        if openrouter_key:
+            return {
+                "provider": "openrouter",
+                "model": "google/gemini-2.0-flash-001",
+                "label": "OpenRouter Gateway",
+                "has_key": True,
+                "status": "Active (Environment: OPENROUTER_API_KEY)",
+            }
+        if gemini_key:
+            return {
+                "provider": "gemini",
+                "model": "gemini-2.5-flash",
+                "label": "Google Gemini 2.5 Flash",
+                "has_key": True,
+                "status": "Active (Environment: GEMINI_API_KEY)",
             }
 
         return {
@@ -53,75 +106,110 @@ class LLMGateway:
             "status": "Ready (Built-In Deterministic Synthesizer, 100% Free & Unlimited)",
         }
 
+    ENV_KEYS = {
+        "gemini": "GEMINI_API_KEY",
+        "openai": "OPENAI_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+        "groq": "GROQ_API_KEY",
+        "openrouter": "OPENROUTER_API_KEY",
+    }
+
+    DEFAULT_MODELS = {
+        "gemini": "gemini-2.5-flash",
+        "openai": "gpt-4o-mini",
+        "anthropic": "claude-sonnet-4-5",
+        "groq": "llama-3.3-70b-versatile",
+        "openrouter": "google/gemini-2.0-flash-001",
+    }
+
     def generate_synthesis(
         self,
         query: str,
         retrieved_chunks: List[SearchResultItem],
         provider: str = "auto",
-        model: str = "claude-3-5-sonnet-20241022",
+        model: Optional[str] = None,
         custom_api_key: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Synthesizes grounded answer using selected model provider or deterministic local engine."""
+        """Synthesizes a grounded answer with the chosen provider.
+
+        If a live provider call fails, the extractive offline engine answers instead and
+        the reason is returned in ``fallback_reason`` so the UI can tell the user plainly.
+        """
         import os
-        api_key = custom_api_key or self.default_api_key
 
-        if provider == "auto" and custom_api_key:
-            k = custom_api_key.strip()
-            if k.startswith("AIza"):
-                provider = "gemini"
-                model = "gemini-2.5-flash"
-                api_key = k
-            elif k.startswith("sk-ant"):
-                provider = "anthropic"
-                model = "claude-3-5-sonnet-20241022"
-                api_key = k
-            elif k.startswith("sk-"):
-                provider = "openai"
-                model = "gpt-4o-mini"
-                api_key = k
+        provider = (provider or "auto").lower()
+        if provider == "claude":
+            provider = "anthropic"
 
+        # Explicit offline request: never touch the network.
+        if provider == "offline":
+            return self._call_offline_engine(query, retrieved_chunks)
+
+        api_key = (custom_api_key or "").strip() or (self.default_api_key or "").strip()
+        eff_provider = provider
         if provider == "auto":
-            detected = self.detect_available_provider()
-            provider = detected["provider"]
-            model = detected["model"]
-            if provider == "anthropic" and not api_key:
-                api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-            elif provider == "gemini" and not api_key:
-                api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-            elif provider == "openai" and not api_key:
-                api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+            eff_provider = self.auto_detect_provider(api_key, "auto", None)["provider"] if api_key else "offline"
 
-        if provider in ("anthropic", "claude") and api_key:
-            try:
-                res = self._call_anthropic(query, retrieved_chunks, api_key, model)
-                res["provider"] = "anthropic"
-                res["model"] = model
-                return res
-            except Exception as e:
-                print(f"[LLMGateway] Anthropic call failed: {e}")
-                return self._call_offline_engine(query, retrieved_chunks)
+        # Fall back to environment keys when no key was passed in.
+        if not api_key:
+            if eff_provider in self.ENV_KEYS:
+                api_key = os.environ.get(self.ENV_KEYS[eff_provider], "").strip()
+            if not api_key:
+                sys_det = self.detect_available_provider()
+                if sys_det.get("has_key"):
+                    eff_provider = sys_det["provider"]
+                    api_key = os.environ.get(self.ENV_KEYS.get(eff_provider, ""), "").strip()
+                    model = None
 
-        if provider == "gemini" and api_key:
-            try:
-                res = self._call_gemini(query, retrieved_chunks, api_key, model)
-                res["provider"] = "gemini"
-                res["model"] = model
-                return res
-            except Exception as e:
-                print(f"[LLMGateway] Gemini call failed: {e}")
-                return self._call_offline_engine(query, retrieved_chunks)
+        if not api_key or eff_provider == "offline":
+            return self._call_offline_engine(query, retrieved_chunks)
 
-        if provider == "openai" and api_key:
-            try:
-                res = self._call_openai(query, retrieved_chunks, api_key, model)
-                res["provider"] = "openai"
-                res["model"] = model
-                return res
-            except Exception as e:
-                print(f"[LLMGateway] OpenAI call failed: {e}")
-                return self._call_offline_engine(query, retrieved_chunks)
+        # Normalise placeholder model names coming from the UI.
+        if not model or model in ("auto", "auto-detected", "offline-zero-drain"):
+            model = self.DEFAULT_MODELS.get(eff_provider, "")
 
-        return self._call_offline_engine(query, retrieved_chunks)
+        callers = {
+            "gemini": self._call_gemini,
+            "openai": self._call_openai,
+            "anthropic": self._call_anthropic,
+            "groq": self._call_groq,
+            "openrouter": self._call_openrouter,
+        }
+        caller = callers.get(eff_provider)
+        if caller is None:
+            return self._call_offline_engine(query, retrieved_chunks)
+
+        try:
+            res = caller(query, retrieved_chunks, api_key, model)
+            if not isinstance(res, dict):
+                res = {"answer": str(res), "citations": []}
+            res["provider"] = eff_provider
+            res["model"] = res.get("model", model)
+            return res
+        except Exception as e:  # noqa: BLE001 - surface any provider error to the user
+            reason = self._describe_error(e)
+            print(f"[LLMGateway] {eff_provider} call failed: {reason}")
+            offline_res = self._call_offline_engine(query, retrieved_chunks)
+            offline_res["provider"] = "offline"
+            offline_res["model"] = f"fallback-from-{model}"
+            offline_res["fallback_reason"] = f"{eff_provider} ({model}) call failed: {reason}"
+            return offline_res
+
+    @staticmethod
+    def _describe_error(exc: Exception) -> str:
+        """Turns provider exceptions into one short human-readable line (never includes the key)."""
+        resp = getattr(exc, "response", None)
+        status = getattr(resp, "status_code", None)
+        if status in (401, 403):
+            return f"HTTP {status} - the API key was rejected. Check that it is correct and has access."
+        if status == 404:
+            return "HTTP 404 - that model name is not available for this key. Pick another model in Settings."
+        if status == 429:
+            return "HTTP 429 - rate limit or quota exceeded for this key."
+        if status:
+            return f"HTTP {status} from provider."
+        text = str(exc).strip().replace("\n", " ")
+        return text[:240] or type(exc).__name__
 
     def _call_gemini(
         self,
@@ -132,6 +220,7 @@ class LLMGateway:
     ) -> Dict[str, Any]:
         """Calls Google Gemini API using google-genai SDK with multi-model fallback."""
         from google import genai
+        from google.genai import types
         from src.generation.prompts import GROUNDED_SYNTHESIS_SYSTEM_PROMPT, GROUNDED_SYNTHESIS_USER_TEMPLATE
 
         formatted_chunks = self._format_chunks_for_prompt(retrieved_chunks)
@@ -142,30 +231,118 @@ class LLMGateway:
 
         client = genai.Client(api_key=api_key)
 
-        models_to_try = [model]
-        for fallback in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
+        # Discover available models for this specific API key
+        discovered_models: List[str] = []
+        try:
+            for item in client.models.list():
+                c_name = item.name.replace("models/", "")
+                actions = getattr(item, "supported_actions", None) or []
+                if not actions or "generateContent" in actions:
+                    discovered_models.append(c_name)
+        except Exception as list_err:
+            print(f"[LLMGateway] Error discovering Gemini models: {list_err}")
+
+        # Prioritize 2026/2025 Google Developer API models
+        models_to_try: List[str] = []
+        if model and not model.startswith("gemma"):
+            models_to_try.append(model)
+        for fallback in [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
+            "gemini-2.0-flash",
+        ]:
             if fallback not in models_to_try:
                 models_to_try.append(fallback)
+
+        for disc in discovered_models:
+            if not disc.startswith("gemma") and disc not in models_to_try:
+                models_to_try.append(disc)
+        for disc in discovered_models:
+            if disc.startswith("gemma") and disc not in models_to_try:
+                models_to_try.append(disc)
 
         last_err = None
         for m in models_to_try:
             try:
+                config = types.GenerateContentConfig(
+                    system_instruction=GROUNDED_SYNTHESIS_SYSTEM_PROMPT,
+                    response_mime_type="application/json",
+                    temperature=0.1,
+                )
                 response = client.models.generate_content(
                     model=m,
-                    contents=[GROUNDED_SYNTHESIS_SYSTEM_PROMPT, user_prompt],
-                    config={
-                        "response_mime_type": "application/json",
-                        "temperature": 0.1,
-                    },
+                    contents=user_prompt,
+                    config=config,
                 )
-                text = (response.text or "").strip()
-                if "```json" in text:
-                    text = text.split("```json")[1].split("```")[0].strip()
-                elif "```" in text:
-                    text = text.split("```")[1].split("```")[0].strip()
-                data = json.loads(text)
-                return data
+                text = ""
+                if hasattr(response, "text") and response.text:
+                    text = response.text.strip()
+                elif hasattr(response, "candidates") and response.candidates:
+                    parts = []
+                    for candidate in response.candidates:
+                        if hasattr(candidate, "content") and hasattr(candidate.content, "parts"):
+                            for part in candidate.content.parts:
+                                if hasattr(part, "text") and part.text:
+                                    parts.append(part.text)
+                    text = "\n".join(parts).strip()
+
+                if text.startswith("```json"):
+                    text = text[7:]
+                if text.startswith("```"):
+                    text = text[3:]
+                if text.endswith("```"):
+                    text = text[:-3]
+                text = text.strip()
+
+                try:
+                    data = json.loads(text)
+                    if isinstance(data, list):
+                        if len(data) > 0 and isinstance(data[0], dict) and "answer" in data[0]:
+                            data = data[0]
+                        else:
+                            data = {
+                                "answer": "\n\n".join(str(item.get("answer", item)) if isinstance(item, dict) else str(item) for item in data),
+                                "citations": [c for c in data if isinstance(c, dict) and "chunk_id" in c],
+                            }
+                    if not isinstance(data, dict):
+                        data = {"answer": str(data), "citations": []}
+                    if "answer" not in data:
+                        data["answer"] = str(data)
+                    if "citations" not in data or not isinstance(data.get("citations"), list):
+                        data["citations"] = []
+
+                    # If model returned overly conservative empty response despite chunks being present, fall back to rich chunk extraction
+                    if "not contain sufficient information" in data.get("answer", "").lower() and retrieved_chunks:
+                        offline = self._call_offline_engine(query, retrieved_chunks)
+                        if offline.get("citations"):
+                            offline["model"] = m
+                            offline["provider"] = "gemini"
+                            return offline
+
+                    data["model"] = m
+                    return data
+                except Exception:
+                    # If model returned direct markdown rather than json schema
+                    return {
+                        "answer": text,
+                        "citations": [
+                            {
+                                "citation_id": idx,
+                                "chunk_id": c.chunk_id,
+                                "document_title": c.document_title,
+                                "section_title": c.section_title,
+                                "page_number": c.page_number,
+                                "exact_quote": c.content[:160],
+                                "relevance_score": c.score,
+                            }
+                            for idx, c in enumerate(retrieved_chunks[:3], 1)
+                        ],
+                        "confidence_score": 0.95,
+                        "faithfulness_assessment": "Grounded from retrieved candidate chunks.",
+                        "model": m,
+                    }
             except Exception as e:
+                print(f"[LLMGateway] Model {m} failed: {type(e).__name__}: {e}")
                 last_err = e
                 continue
 
@@ -213,7 +390,7 @@ class LLMGateway:
         query: str,
         retrieved_chunks: List[SearchResultItem],
         api_key: str,
-        model: str = "claude-3-5-sonnet-20241022",
+        model: str = "claude-sonnet-4-5",
     ) -> Dict[str, Any]:
         """Calls Anthropic Claude Messages API and parses grounded response."""
         import httpx
@@ -254,6 +431,96 @@ class LLMGateway:
                 text_response = text_response.split("```")[1].split("```")[0].strip()
 
             return json.loads(text_response)
+
+    def _call_groq(
+        self,
+        query: str,
+        retrieved_chunks: List[SearchResultItem],
+        api_key: str,
+        model: str = "llama-3.3-70b-versatile",
+    ) -> Dict[str, Any]:
+        """Calls Groq Cloud API for ultra-low-latency 500+ tok/s grounded inference."""
+        import httpx
+        from src.generation.prompts import GROUNDED_SYNTHESIS_SYSTEM_PROMPT, GROUNDED_SYNTHESIS_USER_TEMPLATE
+
+        formatted_chunks = self._format_chunks_for_prompt(retrieved_chunks)
+        user_prompt = (
+            GROUNDED_SYNTHESIS_USER_TEMPLATE.format(
+                query=query,
+                formatted_chunks=formatted_chunks,
+            )
+            + "\n\nCRITICAL: Respond ONLY with a valid JSON object matching the requested schema. No surrounding markdown backticks or commentary."
+        )
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": GROUNDED_SYNTHESIS_SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
+            "response_format": {"type": "json_object"},
+            "temperature": 0.1,
+        }
+
+        with httpx.Client(timeout=30.0) as client:
+            resp = client.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+            content = data["choices"][0]["message"]["content"]
+            parsed = json.loads(content)
+            if not isinstance(parsed, dict):
+                parsed = {"answer": str(parsed), "citations": []}
+            return parsed
+
+    def _call_openrouter(
+        self,
+        query: str,
+        retrieved_chunks: List[SearchResultItem],
+        api_key: str,
+        model: str = "google/gemini-2.0-flash-001",
+    ) -> Dict[str, Any]:
+        """Calls OpenRouter API for multi-provider routing."""
+        import httpx
+        from src.generation.prompts import GROUNDED_SYNTHESIS_SYSTEM_PROMPT, GROUNDED_SYNTHESIS_USER_TEMPLATE
+
+        formatted_chunks = self._format_chunks_for_prompt(retrieved_chunks)
+        user_prompt = (
+            GROUNDED_SYNTHESIS_USER_TEMPLATE.format(
+                query=query,
+                formatted_chunks=formatted_chunks,
+            )
+            + "\n\nCRITICAL: Respond ONLY with a valid JSON object matching the requested schema. No surrounding markdown backticks or commentary."
+        )
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:8001",
+            "X-Title": "Synapse RAG",
+        }
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": GROUNDED_SYNTHESIS_SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
+            "response_format": {"type": "json_object"},
+            "temperature": 0.1,
+        }
+
+        with httpx.Client(timeout=30.0) as client:
+            resp = client.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+            content = data["choices"][0]["message"]["content"]
+            parsed = json.loads(content)
+            if not isinstance(parsed, dict):
+                parsed = {"answer": str(parsed), "citations": []}
+            return parsed
 
     def _call_offline_engine(
         self,

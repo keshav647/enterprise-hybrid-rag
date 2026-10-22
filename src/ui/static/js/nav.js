@@ -12,71 +12,61 @@ window.SynapseNav = (function () {
     ACTIVE_QUERY: 'synapse_active_query_v2',
     BYOK_SETTINGS: 'synapse_byok_settings_v2',
     SHADER_THEME: 'synapse_shader_theme_v2',
+    CUSTOM_DOCUMENTS: 'synapse_custom_documents_v2',
   };
 
   const PAGES = [
     {
-      id: 'overview',
-      num: '01',
-      label: 'Overview',
-      sub: '3D Topology Hub',
-      href: '/overview',
-      templateBadge: 'THREEUI // VANGUARD-DIMENSIONAL',
-      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
-    },
-    {
       id: 'search',
-      num: '02',
-      label: 'Search',
-      sub: 'Hybrid RAG Workbench',
+      label: 'Ask',
+      sub: 'Ask a question, get a cited answer',
       href: '/search',
-      templateBadge: 'THREEUI // DIAGNOSTICS-LASER',
-      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
-    },
-    {
-      id: 'pipeline',
-      num: '03',
-      label: 'Pipeline',
-      sub: '4-Stage RRF & Reranker',
-      href: '/pipeline',
-      templateBadge: 'THREEUI // ISOMETRIC-DAG',
-      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="9" y="15" width="6" height="6" rx="1"/><path d="M5 9v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><line x1="12" y1="13" x2="12" y2="15"/></svg>',
-    },
-    {
-      id: 'documents',
-      num: '04',
-      label: 'Corpus',
-      sub: '6-Domain Reader',
-      href: '/documents',
-      templateBadge: 'THREEUI // VOID-PROTOCOL',
-      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="m11 8 0 6"/><path d="m8 11 6 0"/></svg>',
     },
     {
       id: 'ingest',
-      num: '05',
-      label: 'Ingest',
-      sub: 'Paste & Chunk Studio',
+      label: 'Add Documents',
+      sub: 'Upload or paste your own files',
       href: '/ingest',
-      templateBadge: 'THREEUI // MATRIX-FIELD',
-      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>',
     },
     {
-      id: 'analytics',
-      num: '06',
-      label: 'Benchmarks',
-      sub: 'Ragas & Hardware Dials',
-      href: '/analytics',
-      templateBadge: 'THREEUI // PERFORMANCE-GAUGES',
-      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>',
+      id: 'documents',
+      label: 'Library',
+      sub: 'Everything that is indexed',
+      href: '/documents',
+      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
     },
     {
       id: 'settings',
-      num: '07',
-      label: 'Gateway',
-      sub: 'BYOK Vault & Cache',
+      label: 'Settings',
+      sub: 'API key and model',
       href: '/settings',
-      templateBadge: 'THREEUI // GATEWAY-FLOW',
       svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+    },
+  ];
+
+  const SECONDARY_PAGES = [
+    {
+      id: 'analytics',
+      label: 'Accuracy Test',
+      sub: 'Benchmark the search quality',
+      href: '/analytics',
+      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>',
+    },
+    {
+      id: 'pipeline',
+      label: 'How Search Works',
+      sub: 'Pipeline explained step by step',
+      href: '/pipeline',
+      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="9" y="15" width="6" height="6" rx="1"/><path d="M5 9v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/></svg>',
+    },
+    {
+      id: 'overview',
+      label: 'Overview',
+      sub: 'Architecture overview',
+      href: '/overview',
+      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-3.5 h-3.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
     },
   ];
 
@@ -97,7 +87,7 @@ window.SynapseNav = (function () {
         {
           label: 'Memory Offset & Function (CVE-2024-8192)',
           query: 'What is the memory offset and vulnerable function in CVE-2024-8192?',
-          modeHint: 'Hybrid (BM25 exact 0x7fff90a4 offset + Dense remediation context)',
+          modeHint: 'Combined Search (Exact keyword 0x7fff90a4 + AI meaning context)',
         },
         {
           label: 'Zero-Reboot Sysctl Workaround',
@@ -132,7 +122,7 @@ window.SynapseNav = (function () {
         {
           label: 'AI Cloud YoY Revenue Growth',
           query: 'How much did AI Cloud revenue grow year-over-year in Q3?',
-          modeHint: 'Synthesizes 84.0% YoY growth ($2.70B segment table)',
+          modeHint: 'Extracts 84.0% YoY growth from $2.70B segment table',
         },
         {
           label: 'Q3 GPU CapEx & Hardware Fleet',
@@ -157,7 +147,7 @@ window.SynapseNav = (function () {
         {
           label: 'Linearizable Leader Lease Reads',
           query: 'How does the Raft leader serve linearizable reads without disk round-trips?',
-          modeHint: 'Dense + BM25 synthesis on 200ms Leader Lease Protocol',
+          modeHint: 'Semantic Meaning + Keyword search on 200ms Leader Lease Protocol',
         },
         {
           label: 'Leader Heartbeat & Election Timeout',
@@ -217,7 +207,7 @@ window.SynapseNav = (function () {
         {
           label: 'Grade 3+ Toxicity & Dose Protocol',
           query: 'What are the dose modification rules and efficacy endpoints in clinical trial NCT-09482110?',
-          modeHint: 'Synthesizes clinical biostatistics & safety tables',
+          modeHint: 'Extracts clinical biostatistics & safety tables',
         },
       ],
     },
@@ -386,6 +376,98 @@ All Electronic Protected Health Information (ePHI) processed by the Document Int
     } catch (_) {}
   }
 
+  function getCustomDocuments() {
+    return getState(STORAGE_KEYS.CUSTOM_DOCUMENTS, []);
+  }
+
+  function addCustomDocument(doc) {
+    const list = getCustomDocuments();
+    const docId = doc.document_id || doc.docId || doc.id || 'custom_doc';
+    const title = doc.title || 'Custom Document';
+    const category = doc.domain || doc.category || 'custom';
+    const item = {
+      id: docId,
+      docId: docId,
+      code: 'User Upload',
+      shortTitle: title.length > 28 ? title.slice(0, 26) + '...' : title,
+      title: title,
+      category: category,
+      accent: '#10b981',
+      badgeClass: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/15 rounded-full px-3 py-0.5',
+      summary: doc.summary || `User document indexed into Dense + BM25 engine with ${doc.total_chunks || 1} chunks.`,
+      metrics: `${doc.total_chunks || 1} Chunks · User Data`,
+      isCustom: true,
+      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-4 h-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+      queries: (doc.suggested_queries && doc.suggested_queries.length ? doc.suggested_queries : [
+        `What are the key points and summary of ${title}?`,
+        `What specific requirements or technical metrics are specified in ${title}?`,
+      ]).map((q) => {
+        if (typeof q === 'string') {
+          return {
+            label: q.length > 35 ? q.slice(0, 32) + '...' : q,
+            query: q,
+            modeHint: 'Direct custom document query',
+          };
+        }
+        return q;
+      }),
+    };
+    const filtered = list.filter((d) => d.id !== item.id && d.docId !== item.docId);
+    filtered.unshift(item);
+    setState(STORAGE_KEYS.CUSTOM_DOCUMENTS, filtered, true);
+    return item;
+  }
+
+  async function deleteCustomDocument(docId) {
+    if (!docId) return;
+    try {
+      await fetch(`/api/v1/documents/${encodeURIComponent(docId)}`, { method: 'DELETE' }).catch(() => {});
+    } catch (_) {}
+
+    const list = getCustomDocuments();
+    const filtered = list.filter((d) => d.id !== docId && d.docId !== docId);
+    setState(STORAGE_KEYS.CUSTOM_DOCUMENTS, filtered, true);
+
+    if (getActiveDomainId() === docId) {
+      setActiveDomainId('security');
+    }
+    if (getState(STORAGE_KEYS.ACTIVE_DOC) === docId) {
+      setState(STORAGE_KEYS.ACTIVE_DOC, 'cve_2024_8192_kernel_security_advisory', true);
+    }
+
+    refreshTelemetryBadges();
+    showToast('Document Deleted', `Custom document removed from Hybrid RAG index.`, 'info');
+
+    if (typeof window.onCustomDocumentsChanged === 'function') {
+      window.onCustomDocumentsChanged();
+    }
+    return filtered;
+  }
+
+  async function resetAllCustomDocuments() {
+    try {
+      await fetch('/api/v1/documents/reset', { method: 'POST' }).catch(() => {});
+      await fetch('/api/v1/cache/clear', { method: 'POST' }).catch(() => {});
+    } catch (_) {}
+
+    setState(STORAGE_KEYS.CUSTOM_DOCUMENTS, [], true);
+    setState(STORAGE_KEYS.LAST_SEARCH, null, true);
+    setActiveDomainId('security');
+    setState(STORAGE_KEYS.ACTIVE_DOC, 'cve_2024_8192_kernel_security_advisory', true);
+
+    refreshTelemetryBadges();
+    showToast('Platform Reset', 'All custom uploaded documents and cached queries cleared.', 'info');
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 400);
+  }
+
+  function getAllDomains() {
+    const customs = getCustomDocuments();
+    return [...customs, ...DOMAINS];
+  }
+
   function getLastSearch() {
     return getState(STORAGE_KEYS.LAST_SEARCH, null);
   }
@@ -403,15 +485,16 @@ All Electronic Protected Health Information (ePHI) processed by the Document Int
   }
 
   function getDomainById(idOrDocId) {
+    const all = getAllDomains();
     return (
-      DOMAINS.find((d) => d.id === idOrDocId || d.docId === idOrDocId) || DOMAINS[0]
+      all.find((d) => d.id === idOrDocId || d.docId === idOrDocId) || all[0]
     );
   }
 
   function getByokSettings() {
     return getState(STORAGE_KEYS.BYOK_SETTINGS, {
       provider: 'gemini',
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       apiKey: '',
       bypassCache: false,
       topK: 5,
@@ -421,7 +504,372 @@ All Electronic Protected Health Information (ePHI) processed by the Document Int
   function setByokSettings(cfg) {
     const merged = Object.assign({}, getByokSettings(), cfg);
     setState(STORAGE_KEYS.BYOK_SETTINGS, merged, true);
+    if (merged.apiKey && merged.apiKey.trim()) {
+      syncBackendKey(merged.apiKey.trim(), merged.provider || 'gemini', merged.model || 'gemini-2.0-flash').catch(() => {});
+    }
     return merged;
+  }
+
+  async function checkBackendKeyStatus() {
+    try {
+      const res = await fetch('/api/v1/auth/key_status');
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (_) {}
+    return {
+      has_key: false,
+      status: 'offline',
+      provider: 'offline',
+      model: 'offline-zero-drain',
+      label: 'Offline Deterministic Mode',
+      masked_key: '',
+    };
+  }
+
+  function detectProviderFromSyntax(key) {
+    const k = String(key || '').trim();
+    if (k.startsWith('sk-ant-')) return { provider: 'anthropic', model: 'claude-sonnet-4-5', label: 'Anthropic Claude' };
+    if (k.startsWith('gsk_')) return { provider: 'groq', model: 'llama-3.3-70b-versatile', label: 'Groq Cloud (Llama 3.3)' };
+    if (k.startsWith('sk-or-v1-')) return { provider: 'openrouter', model: 'google/gemini-2.0-flash-001', label: 'OpenRouter' };
+    if (k.startsWith('sk-proj-') || (k.startsWith('sk-') && k.length > 35)) return { provider: 'openai', model: 'gpt-4o-mini', label: 'OpenAI GPT' };
+    if (k.startsWith('AIzaSy') || k.startsWith('AQ.')) return { provider: 'gemini', model: 'gemini-2.5-flash', label: 'Google Gemini' };
+    if (k.length > 20) return { provider: 'gemini', model: 'gemini-2.5-flash', label: 'Google Gemini (or compatible)' };
+    return null;
+  }
+
+  async function syncBackendKey(apiKey, provider = 'auto', model = null) {
+    const cleanKey = String(apiKey || '').trim();
+    if (!cleanKey) {
+      return { success: false, message: 'API key cannot be empty' };
+    }
+    const det = detectProviderFromSyntax(cleanKey);
+    const effProvider = (provider && provider !== 'auto') ? provider : (det ? det.provider : 'gemini');
+    const effModel = model || (det ? det.model : 'gemini-2.5-flash');
+
+    try {
+      const res = await fetch('/api/v1/auth/set_key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key: cleanKey,
+          provider: effProvider,
+          model: effModel,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const current = getByokSettings();
+        const updated = Object.assign({}, current, { apiKey: cleanKey, provider: data.provider || effProvider, model: data.model || effModel });
+        setState(STORAGE_KEYS.BYOK_SETTINGS, updated, true);
+        refreshTelemetryBadges();
+        window.dispatchEvent(new CustomEvent('synapse:key_status_changed', {
+          detail: {
+            has_key: true,
+            provider: data.provider || effProvider,
+            model: data.model || effModel,
+            label: data.message || `${effProvider.toUpperCase()} (${effModel})`,
+            masked_key: cleanKey.slice(0, 6) + '...' + cleanKey.slice(-4),
+          }
+        }));
+        return data;
+      }
+      return { success: false, message: `Server returned HTTP ${res.status}` };
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }
+
+  async function disconnectBackendKey() {
+    try {
+      const res = await fetch('/api/v1/auth/disconnect', { method: 'POST' });
+      const current = getByokSettings();
+      const updated = Object.assign({}, current, { apiKey: '' });
+      setState(STORAGE_KEYS.BYOK_SETTINGS, updated, true);
+      refreshTelemetryBadges();
+      window.dispatchEvent(new CustomEvent('synapse:key_status_changed', {
+        detail: { has_key: false, provider: 'offline', model: 'offline-zero-drain', status: 'offline' }
+      }));
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return { success: true };
+  }
+
+  function openQuickKeyModal() {
+    let modal = document.getElementById('synapse-quick-key-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'synapse-quick-key-modal';
+      modal.className = 'fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all';
+      modal.innerHTML = `
+        <div class="relative w-full max-w-lg rounded-2xl bg-[#090b16] border border-indigo-500/30 p-6 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-mono font-bold text-white uppercase tracking-wider">Connect Cloud AI Model</h3>
+                <p class="text-xs text-slate-400">Auto-detects Google Gemini, OpenAI, Claude, Groq &amp; OpenRouter</p>
+              </div>
+            </div>
+            <button type="button" onclick="SynapseNav.closeQuickKeyModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+              ✕
+            </button>
+          </div>
+
+          <div id="quick-key-status-banner" class="p-3 rounded-xl border border-white/10 bg-white/[0.02] flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Checking connection status...</span>
+          </div>
+
+          <!-- Provider Selector & Detection Indicator -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+                Cloud Provider Mode
+              </label>
+              <select id="quick-key-provider-select" onchange="SynapseNav.onProviderSelectChange()" class="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/20 focus:border-indigo-400 text-xs font-mono text-white outline-none cursor-pointer">
+                <option value="auto">⚡ Auto-Detect Provider</option>
+                <option value="gemini">Google Gemini (Gemini 2.5 Flash)</option>
+                <option value="openai">OpenAI (GPT-4o / 4o-mini)</option>
+                <option value="anthropic">Anthropic Claude (Sonnet 4.5)</option>
+                <option value="groq">Groq Cloud (Llama 3.3 70B)</option>
+                <option value="openrouter">OpenRouter Gateway</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+                Live Key Detection
+              </label>
+              <div id="quick-key-detection-badge" class="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 text-xs font-mono text-slate-300 flex items-center gap-1.5 h-[38px]">
+                <span id="quick-key-detection-dot" class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                <span id="quick-key-detection-text" class="truncate">Paste key to detect</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- API Key Input -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label id="quick-key-label" class="text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold">
+                API Key (Any Cloud Provider)
+              </label>
+              <a id="quick-key-help-link" href="https://aistudio.google.com/apikey" target="_blank" class="text-xs text-indigo-400 hover:underline flex items-center gap-1 font-mono">
+                <span id="quick-key-help-text">Get Free Gemini Key &nearr;</span>
+              </a>
+            </div>
+            <div class="relative">
+              <input type="password" id="quick-key-input" oninput="SynapseNav.onKeyInputChanged()" placeholder="Paste AIzaSy..., sk-..., sk-ant-..., or gsk_..." class="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/20 focus:border-indigo-400 text-sm font-mono text-white outline-none" />
+              <button type="button" id="toggle-quick-key-visibility" onclick="SynapseNav.toggleQuickKeyVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400 hover:text-white cursor-pointer px-1 py-0.5">
+                SHOW
+              </button>
+            </div>
+            <p id="quick-key-hint-text" class="text-[11px] text-slate-400 leading-relaxed">
+              Accepts Google Gemini (free 15 RPM), OpenAI, Anthropic Claude, Groq, or OpenRouter. Keys persist in backend session memory.
+            </p>
+          </div>
+
+          <div id="quick-key-error-box" class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs font-mono text-rose-300"></div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-white/10">
+            <button type="button" onclick="SynapseNav.handleQuickKeyDisconnect()" id="quick-key-disconnect-btn" class="px-3 py-2 rounded-xl text-xs font-mono text-rose-300 hover:bg-rose-500/10 border border-rose-500/30 transition-all cursor-pointer hidden">
+              Disconnect Key
+            </button>
+            <div class="flex items-center gap-2 ml-auto">
+              <button type="button" onclick="SynapseNav.closeQuickKeyModal()" class="px-3.5 py-2 rounded-xl text-xs font-mono text-slate-300 hover:text-white border border-white/10 hover:bg-white/[0.05] transition-all cursor-pointer">
+                Cancel
+              </button>
+              <button type="button" onclick="SynapseNav.handleQuickKeySubmit()" id="quick-key-submit-btn" class="px-4 py-2 rounded-xl text-xs font-mono font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition-all cursor-pointer flex items-center gap-1.5">
+                <span>Connect &amp; Save Key</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    modal.classList.remove('hidden');
+
+    // Populate current status
+    checkBackendKeyStatus().then((st) => {
+      const banner = document.getElementById('quick-key-status-banner');
+      const input = document.getElementById('quick-key-input');
+      const disconnectBtn = document.getElementById('quick-key-disconnect-btn');
+      const byok = getByokSettings();
+
+      if (st.has_key) {
+        banner.className = 'p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 flex items-center justify-between text-xs font-mono';
+        banner.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-emerald-300 font-semibold">ACTIVE: ${escapeHtml(st.label || st.provider.toUpperCase())}</span>
+          </div>
+          <span class="text-emerald-400/80 font-mono text-[11px]">${escapeHtml(st.masked_key || '')}</span>
+        `;
+        if (byok.apiKey && input) {
+          input.value = byok.apiKey;
+          onKeyInputChanged();
+        }
+        if (disconnectBtn) disconnectBtn.classList.remove('hidden');
+      } else {
+        banner.className = 'p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 flex items-center justify-between text-xs font-mono';
+        banner.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span class="text-amber-300 font-semibold">OFFLINE FREE MODE (NO KEY REQUIRED)</span>
+          </div>
+          <span class="text-amber-400/80 text-[11px]">Free built-in engine active</span>
+        `;
+        if (byok.apiKey && input) {
+          input.value = byok.apiKey;
+          onKeyInputChanged();
+        }
+        if (disconnectBtn) disconnectBtn.classList.add('hidden');
+      }
+    });
+  }
+
+  function onKeyInputChanged() {
+    const input = document.getElementById('quick-key-input');
+    const badgeText = document.getElementById('quick-key-detection-text');
+    const badgeDot = document.getElementById('quick-key-detection-dot');
+    const helpLink = document.getElementById('quick-key-help-link');
+    const helpText = document.getElementById('quick-key-help-text');
+    const provSelect = document.getElementById('quick-key-provider-select');
+    if (!input || !badgeText || !badgeDot) return;
+
+    const val = input.value.trim();
+    if (!val) {
+      badgeText.textContent = 'Paste key to detect';
+      badgeDot.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
+      return;
+    }
+
+    const det = detectProviderFromSyntax(val);
+    if (det) {
+      badgeText.textContent = `⚡ Detected: ${det.label}`;
+      badgeDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
+
+      if (provSelect && provSelect.value === 'auto') {
+        // sync help link
+        if (helpLink && helpText) {
+          if (det.provider === 'gemini') {
+            helpLink.href = 'https://aistudio.google.com/apikey';
+            helpText.textContent = 'Get Free Gemini Key ↗';
+          } else if (det.provider === 'openai') {
+            helpLink.href = 'https://platform.openai.com/api-keys';
+            helpText.textContent = 'Get OpenAI Key ↗';
+          } else if (det.provider === 'anthropic') {
+            helpLink.href = 'https://console.anthropic.com/settings/keys';
+            helpText.textContent = 'Get Claude Key ↗';
+          } else if (det.provider === 'groq') {
+            helpLink.href = 'https://console.groq.com/keys';
+            helpText.textContent = 'Get Groq Key ↗';
+          }
+        }
+      }
+    } else {
+      badgeText.textContent = `Custom Key (${val.length} chars)`;
+      badgeDot.className = 'w-1.5 h-1.5 rounded-full bg-sky-400';
+    }
+  }
+
+  function onProviderSelectChange() {
+    const provSelect = document.getElementById('quick-key-provider-select');
+    const helpLink = document.getElementById('quick-key-help-link');
+    const helpText = document.getElementById('quick-key-help-text');
+    if (!provSelect || !helpLink || !helpText) return;
+
+    const val = provSelect.value;
+    const linkMap = {
+      gemini: { url: 'https://aistudio.google.com/apikey', text: 'Get Free Gemini Key ↗' },
+      openai: { url: 'https://platform.openai.com/api-keys', text: 'Get OpenAI Key ↗' },
+      anthropic: { url: 'https://console.anthropic.com/settings/keys', text: 'Get Claude Key ↗' },
+      groq: { url: 'https://console.groq.com/keys', text: 'Get Free Groq Key ↗' },
+      openrouter: { url: 'https://openrouter.ai/keys', text: 'Get OpenRouter Key ↗' },
+      auto: { url: 'https://aistudio.google.com/apikey', text: 'Get Free Gemini Key ↗' },
+    };
+    const item = linkMap[val] || linkMap.auto;
+    helpLink.href = item.url;
+    helpText.textContent = item.text;
+  }
+
+  function closeQuickKeyModal() {
+    const modal = document.getElementById('synapse-quick-key-modal');
+    if (modal) modal.classList.add('hidden');
+    const errBox = document.getElementById('quick-key-error-box');
+    if (errBox) errBox.classList.add('hidden');
+  }
+
+  function toggleQuickKeyVisibility() {
+    const input = document.getElementById('quick-key-input');
+    const btn = document.getElementById('toggle-quick-key-visibility');
+    if (!input || !btn) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = 'HIDE';
+    } else {
+      input.type = 'password';
+      btn.textContent = 'SHOW';
+    }
+  }
+
+  async function handleQuickKeySubmit() {
+    const input = document.getElementById('quick-key-input');
+    const provSelect = document.getElementById('quick-key-provider-select');
+    const errBox = document.getElementById('quick-key-error-box');
+    const submitBtn = document.getElementById('quick-key-submit-btn');
+    if (!input) return;
+    const key = input.value.trim();
+    if (!key) {
+      if (errBox) {
+        errBox.textContent = 'Please paste a valid cloud API key.';
+        errBox.classList.remove('hidden');
+      }
+      return;
+    }
+
+    const selectedProv = provSelect ? provSelect.value : 'auto';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Connecting & Verifying Key...';
+    if (errBox) errBox.classList.add('hidden');
+
+    try {
+      // 1. Live ping test
+      const testRes = await fetch('/api/v1/auth/test_key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: key, provider: selectedProv }),
+      });
+      const testData = await testRes.json();
+
+      if (!testData.success) {
+        if (errBox) {
+          errBox.textContent = testData.message || 'Key verification failed. Please check your API key.';
+          errBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      // 2. Persist validated key in backend
+      const actRes = await syncBackendKey(key, testData.provider, testData.model);
+      showToast('AI Model Connected', `Verified ${testData.provider.toUpperCase()} (${testData.model}) for AI answers.`, 'info');
+      closeQuickKeyModal();
+    } catch (e) {
+      if (errBox) {
+        errBox.textContent = e.message;
+        errBox.classList.remove('hidden');
+      }
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>Connect &amp; Save Key</span>';
+    }
+  }
+
+  async function handleQuickKeyDisconnect() {
+    await disconnectBackendKey();
+    showToast('AI Model Disconnected', 'Switched to offline free mode.', 'info');
+    closeQuickKeyModal();
   }
 
   // Escape HTML safely
@@ -661,17 +1109,18 @@ All Electronic Protected Health Information (ePHI) processed by the Document Int
   let vanguardState = null;
 
   function getShaderTheme() {
-    const saved = getState(STORAGE_KEYS.SHADER_THEME, 'void');
-    return SHADER_PALETTES[saved] ? saved : 'void';
+    const saved = getState(STORAGE_KEYS.SHADER_THEME, 'crimson');
+    return SHADER_PALETTES[saved] ? saved : 'crimson';
   }
 
   function updateShaderButtonsUI(activeTheme) {
     document.querySelectorAll('.shader-theme-btn').forEach((btn) => {
       const isMatch = btn.dataset.theme === activeTheme;
       if (btn.classList.contains('dock-shader-pill')) {
+        const themeColor = activeTheme === 'aurora' ? 'cyan' : activeTheme === 'crimson' ? 'rose' : 'indigo';
         btn.className = isMatch
-          ? 'shader-theme-btn dock-shader-pill px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide bg-white text-[#070709] shadow-sm transition-all cursor-pointer'
-          : 'shader-theme-btn dock-shader-pill px-2.5 py-1 rounded-full text-[10px] font-medium tracking-wide text-zinc-400 hover:text-white transition-all cursor-pointer';
+          ? `shader-theme-btn dock-shader-pill px-2 py-0.5 rounded-md text-[10px] font-mono uppercase tracking-wider font-semibold bg-${themeColor}-500/30 text-${themeColor}-200 border border-${themeColor}-400/50 shadow-[0_0_10px_rgba(99,102,241,0.4)] transition-all cursor-pointer`
+          : 'shader-theme-btn dock-shader-pill px-2 py-0.5 rounded-md text-[10px] font-mono uppercase tracking-wider text-zinc-400 hover:text-white transition-all cursor-pointer';
       } else {
         btn.className = isMatch
           ? 'shader-theme-btn px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide bg-white text-[#070709] shadow-md transition-all cursor-pointer'
@@ -949,12 +1398,10 @@ All Electronic Protected Health Information (ePHI) processed by the Document Int
     });
   }
 
-  // Render the Shared 7-Page Floating "Fluid Island" Pill Navbar (High-End Visual Design)
+  // Render the Shared 3-Hub Tactical Cybernetic Command Deck
   function mountDock(activePageId) {
     const mount = document.getElementById('synapse-top-dock');
     if (!mount) return;
-    const activePage = PAGES.find((p) => p.id === activePageId) || PAGES[0];
-    const byok = getByokSettings();
     const currentShader = getShaderTheme();
 
     if (!document.querySelector('link[rel="icon"]')) {
@@ -966,54 +1413,78 @@ All Electronic Protected Health Information (ePHI) processed by the Document Int
     }
 
     mount.innerHTML = `
-      <div class="sticky top-4 z-50 px-3 sm:px-6 pt-3 pb-1 pointer-events-none">
-        <header class="pointer-events-auto max-w-[1520px] mx-auto px-3 py-2 rounded-full bg-[#0d0d14]/85 backdrop-blur-2xl border border-white/[0.11] shadow-[0_24px_60px_rgba(0,0,0,0.75),0_0_0_4px_rgba(255,255,255,0.025),inset_0_1px_0_rgba(255,255,255,0.18)] flex items-center justify-between gap-3">
-          <!-- Brand Identity Pill -->
-          <a href="/overview" class="flex items-center gap-2.5 pl-1.5 pr-3 py-1 rounded-full hover:bg-white/[0.04] transition-all shrink-0 group">
-            <img src="/static/logo.png" alt="Synapse Logo" class="w-8 h-8 rounded-full object-cover border border-white/15 shadow-[0_0_20px_rgba(99,102,241,0.45)] group-hover:scale-105 transition-transform" />
-            <div class="leading-none">
+      <div class="sticky top-3 z-50 px-3 sm:px-6 pt-2 pb-1 pointer-events-none">
+        <header class="pointer-events-auto max-w-[1640px] mx-auto flex items-center justify-between gap-3">
+          
+          <!-- POD 1: System Core Node (Brand & Search Jump) -->
+          <a href="/search" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#090b16]/92 backdrop-blur-2xl border border-indigo-500/30 shadow-[0_12px_32px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.12)] hover:border-indigo-400/60 transition-all shrink-0 group">
+            <div class="relative w-8 h-8 rounded-lg bg-indigo-950/70 border border-indigo-400/40 p-1 flex items-center justify-center shadow-[0_0_16px_rgba(99,102,241,0.4)] group-hover:scale-105 group-hover:border-indigo-300 transition-all">
+              <img src="/static/logo.png" alt="Synapse Logo" class="w-full h-full object-contain rounded" />
+              <div class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-indigo-400 shadow-[0_0_8px_#818cf8] animate-ping"></div>
+            </div>
+            <div class="flex flex-col leading-none">
               <div class="flex items-center gap-1.5">
-                <span class="text-sm font-extrabold tracking-tight text-white" style="font-family: 'Syne', 'Outfit', sans-serif;">Synapse</span>
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">2.4</span>
+                <span class="text-sm font-black tracking-wider text-white font-mono uppercase">Synapse</span>
+                <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded-[4px] bg-indigo-500/20 text-indigo-300 border border-indigo-400/35">v1.0</span>
               </div>
-              <div class="text-[10px] text-zinc-400 mt-0.5 hidden sm:block">${activePage.sub}</div>
+              <span class="font-mono text-[9px] uppercase tracking-widest text-zinc-500 mt-1 hidden sm:block">Ask your documents</span>
             </div>
           </a>
 
-          <!-- Floating Island 7-Page Pill Navigation -->
-          <nav class="flex items-center gap-1 overflow-x-auto py-0.5 px-1 rounded-full bg-black/40 border border-white/[0.06] no-scrollbar" aria-label="7-Page Architecture Navigation">
+          <!-- POD 2: 3-Hub Switchboard -->
+          <nav class="flex items-center gap-1 p-1 rounded-xl bg-[#080914]/92 backdrop-blur-2xl border border-white/[0.09] shadow-[0_16px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.06)] overflow-visible" aria-label="Engine Navigation">
             ${PAGES.map((p) => {
               const isActive = p.id === activePageId;
               return `
                 <a href="${p.href}"
-                   class="group relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs transition-all shrink-0 ${
+                   class="group relative flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all shrink-0 ${
                      isActive
-                       ? 'bg-white text-[#070709] font-bold shadow-[0_4px_20px_rgba(255,255,255,0.28)]'
-                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] font-medium'
+                       ? 'bg-gradient-to-r from-indigo-950/80 via-indigo-600/35 to-indigo-950/80 border border-indigo-400/60 text-white font-bold shadow-[0_0_16px_rgba(99,102,241,0.4),inset_0_1px_1px_rgba(255,255,255,0.25)]'
+                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.04] border border-transparent font-medium'
                    }"
                    title="${p.label} — ${p.sub}">
-                  <span class="${isActive ? 'text-indigo-600' : 'text-zinc-500 group-hover:text-zinc-300'}">${p.svg}</span>
-                  <span>${p.label}</span>
+                  ${isActive ? '<span class="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_#818cf8] animate-pulse"></span>' : ''}
+                  <span class="${isActive ? 'text-indigo-300' : 'text-zinc-500 group-hover:text-zinc-300'}">${p.svg}</span>
+                  <span class="text-[11px] font-semibold">${p.label}</span>
                 </a>
               `;
             }).join('')}
+
+            <!-- Secondary Pages Dropdown -->
+            <div class="relative group pl-1 border-l border-white/10">
+              <button type="button" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-mono text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-all cursor-pointer">
+                <span>Under the hood</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3 group-hover:rotate-180 transition-transform"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="absolute left-0 top-full mt-1.5 w-52 rounded-xl bg-[#090b16] border border-white/15 p-1.5 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[90]">
+                ${SECONDARY_PAGES.map((sp) => `
+                  <a href="${sp.href}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/[0.08] transition-colors ${sp.id === activePageId ? 'bg-indigo-500/20 text-indigo-300 font-bold' : ''}">
+                    <span class="text-zinc-400">${sp.svg}</span>
+                    <div class="flex flex-col">
+                      <span class="leading-none">${sp.label}</span>
+                      <span class="text-[9px] text-zinc-500 mt-0.5">${sp.sub}</span>
+                    </div>
+                  </a>
+                `).join('')}
+              </div>
+            </div>
           </nav>
 
-          <!-- Global 3D Shader Switcher + Live System Telemetry Pills -->
-          <div class="hidden xl:flex items-center gap-2 pr-1 shrink-0">
-            <div class="flex items-center gap-1 p-1 rounded-full bg-black/40 border border-white/[0.07]" title="Switch 3D GLSL Simplex Noise & Fresnel Spheres Theme">
-              <button type="button" data-theme="void" class="shader-theme-btn dock-shader-pill ${currentShader === 'void' ? 'bg-white text-[#070709] font-semibold' : 'text-zinc-400 hover:text-white'} px-2.5 py-1 rounded-full text-[10px] tracking-wide transition-all cursor-pointer">Indigo</button>
-              <button type="button" data-theme="aurora" class="shader-theme-btn dock-shader-pill ${currentShader === 'aurora' ? 'bg-white text-[#070709] font-semibold' : 'text-zinc-400 hover:text-white'} px-2.5 py-1 rounded-full text-[10px] tracking-wide transition-all cursor-pointer">Cyan</button>
-              <button type="button" data-theme="crimson" class="shader-theme-btn dock-shader-pill ${currentShader === 'crimson' ? 'bg-white text-[#070709] font-semibold' : 'text-zinc-400 hover:text-white'} px-2.5 py-1 rounded-full text-[10px] tracking-wide transition-all cursor-pointer">Coral</button>
-            </div>
-            <a href="/documents" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[11px] font-medium text-zinc-200 transition-colors" title="Indexed Enterprise Corpus">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              <span id="nav-corpus-badge">6 Docs · 42 Chunks</span>
+          <!-- POD 3: Hardware Vector Telemetry & Live Engine Switcher -->
+          <div class="hidden xl:flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#080914]/92 backdrop-blur-2xl border border-white/[0.09] shadow-[0_12px_32px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.06)] shrink-0">
+            <!-- Indexed Corpus Counter -->
+            <a href="/ingest" class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-[10px] font-mono text-emerald-300 transition-colors" title="Indexed Documents">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+              <span id="nav-corpus-badge">… DOCS</span>
             </a>
-            <a href="/settings" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-400/30 text-[11px] font-semibold text-indigo-200 transition-colors" title="Active Synthesizer Model">
-              <span id="nav-model-badge">${escapeHtml(byok.model || 'gemini-2.5-flash')}</span>
-            </a>
+
+            <!-- Live Engine Status & Connect Button -->
+            <button type="button" onclick="SynapseNav.openQuickKeyModal()" id="nav-key-status-btn" class="flex items-center gap-1.5 px-3 py-1 rounded-lg border border-amber-500/35 bg-amber-500/10 hover:bg-amber-500/20 text-[10px] font-mono text-amber-300 transition-all cursor-pointer shadow-sm group" title="Click to Connect AI Key">
+              <span id="nav-key-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+              <span id="nav-key-label" class="font-bold">NO AI KEY — ADD ONE</span>
+            </button>
           </div>
+
         </header>
       </div>
     `;
@@ -1024,18 +1495,19 @@ All Electronic Protected Health Information (ePHI) processed by the Document Int
 
   async function refreshTelemetryBadges() {
     try {
-      const [docsRes, cacheRes] = await Promise.all([
-        fetch('/api/v1/documents'),
-        fetch('/api/v1/cache/stats'),
+      const [docsRes, cacheRes, keyRes] = await Promise.all([
+        fetch('/api/v1/documents').catch(() => null),
+        fetch('/api/v1/cache/stats').catch(() => null),
+        checkBackendKeyStatus().catch(() => null),
       ]);
-      if (docsRes.ok) {
+      if (docsRes && docsRes.ok) {
         const docsData = await docsRes.json();
         const docs = Array.isArray(docsData) ? docsData : (docsData.documents || []);
         const totalChunks = docs.reduce((acc, d) => acc + (d.total_chunks || d.chunk_count || 0), 0);
         const el = document.getElementById('nav-corpus-badge');
-        if (el) el.textContent = `${docs.length} DOCS // ${totalChunks} CHUNKS`;
+        if (el) el.textContent = `${docs.length} DOCS · ${totalChunks} SECTIONS`;
       }
-      if (cacheRes.ok) {
+      if (cacheRes && cacheRes.ok) {
         const cacheData = await cacheRes.json();
         const ratio = cacheData.hit_ratio !== undefined ? cacheData.hit_ratio : (cacheData.hit_rate || 0);
         const hitRate = (ratio * 100).toFixed(0);
@@ -1043,16 +1515,55 @@ All Electronic Protected Health Information (ePHI) processed by the Document Int
         const el = document.getElementById('nav-cache-badge');
         if (el) el.textContent = `CACHE ${hitRate}% (${totalHits} HITS)`;
       }
+      if (keyRes) {
+        if (!keyRes.has_key) {
+          const byok = getByokSettings();
+          if (byok && byok.apiKey && byok.apiKey.trim()) {
+            syncBackendKey(byok.apiKey, byok.provider || 'auto', byok.model).then((updated) => {
+              if (updated) updateKeyUI(updated);
+            });
+            return;
+          }
+        }
+        updateKeyUI(keyRes);
+      }
     } catch (_) {}
+  }
+
+  function updateKeyUI(st) {
+    const btn = document.getElementById('nav-key-status-btn');
+    const dot = document.getElementById('nav-key-dot');
+    const lbl = document.getElementById('nav-key-label');
+    if (!btn || !dot || !lbl) return;
+
+    if (st && st.has_key) {
+      btn.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg border border-emerald-500/40 bg-emerald-500/15 hover:bg-emerald-500/25 text-[10px] font-mono text-emerald-300 transition-all cursor-pointer shadow-[0_0_12px_rgba(52,211,153,0.2)] group';
+      dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]';
+      const prov = (st.provider || 'AI').toUpperCase();
+      const mod = st.model ? ` (${st.model.replace(/^models\//, '').toUpperCase()})` : ' (LIVE AI)';
+      lbl.textContent = `⚡ ${prov}${mod}`;
+      btn.title = `Connected to ${st.provider || 'cloud'} (${st.model || 'live'}) - Click to manage`;
+    } else {
+      btn.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg border border-amber-500/35 bg-amber-500/10 hover:bg-amber-500/20 text-[10px] font-mono text-amber-300 transition-all cursor-pointer shadow-sm group';
+      dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+      lbl.textContent = 'NO AI KEY — ADD ONE';
+      btn.title = 'Offline free mode - Click to connect cloud API key';
+    }
   }
 
   return {
     STORAGE_KEYS,
     PAGES,
+    SECONDARY_PAGES,
     DOMAINS,
     SAMPLE_TEMPLATES,
     getState,
     setState,
+    getCustomDocuments,
+    addCustomDocument,
+    deleteCustomDocument,
+    resetAllCustomDocuments,
+    getAllDomains,
     getLastSearch,
     setLastSearch,
     getActiveDomainId,
@@ -1060,6 +1571,18 @@ All Electronic Protected Health Information (ePHI) processed by the Document Int
     getDomainById,
     getByokSettings,
     setByokSettings,
+    checkBackendKeyStatus,
+    syncBackendKey,
+    disconnectBackendKey,
+    detectProviderFromSyntax,
+    onKeyInputChanged,
+    onProviderSelectChange,
+    openQuickKeyModal,
+    closeQuickKeyModal,
+    toggleQuickKeyVisibility,
+    handleQuickKeySubmit,
+    handleQuickKeyDisconnect,
+    updateKeyUI,
     getShaderTheme,
     setShaderTheme,
     initUniversalVanguardBackground,

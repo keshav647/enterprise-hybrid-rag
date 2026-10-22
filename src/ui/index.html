@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Synapse // 02 Search — Hybrid RAG & Grounded Citations Workbench</title>
+  <title>Synapse — Ask your documents</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -15,434 +15,376 @@
 </head>
 <body class="min-h-screen bg-[#06080f] text-slate-100 selection:bg-sky-500/30 selection:text-sky-200 relative">
 
-  <!-- ThreeUI Diagnostics-Panel 3D Perspective Wave Lattice Canvas -->
-  <canvas id="bg-waves" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-65"></canvas>
+  <!-- Ambient 3D wave background (kept from the original design) -->
+  <canvas id="bg-waves" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-50"></canvas>
 
-  <!-- Shared 7-Page Navigation Dock -->
+  <!-- Shared Navigation Dock -->
   <div id="synapse-top-dock" class="relative z-50"></div>
 
-  <!-- Main Workbench Container -->
-  <main id="workbench-surface" class="flashlight-surface relative z-10 max-w-[1600px] mx-auto px-4 lg:px-6 pt-5 pb-16">
-
-    <!-- Animated Shooting Laser Lines (ThreeUI Diagnostics Signature) -->
+  <main id="workbench-surface" class="flashlight-surface relative z-10 max-w-5xl mx-auto px-4 lg:px-6 pt-8 pb-20">
     <div id="shoot-h" class="laser-line-h top-0 left-0"></div>
 
-    <!-- Step 1: 6-Domain Use-Case Ribbon ("What to Test Where") -->
-    <section class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-4 mb-4 relative">
-      <div class="corner-sq top-0 left-0"></div>
-      <div class="corner-sq top-0 right-0"></div>
-      <div class="corner-sq bottom-0 left-0"></div>
-      <div class="corner-sq bottom-0 right-0"></div>
-
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <div class="flex items-center gap-2">
-          <span class="px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono uppercase tracking-widest text-sky-300">
-            STEP 01 // SELECT ENTERPRISE USE-CASE DOMAIN
-          </span>
-          <span class="text-xs text-slate-400 hidden md:inline">
-            Clicking a domain loads its tailored verification questions &amp; syncs the right-hand Source Inspector
-          </span>
-        </div>
-        <div class="flex items-center gap-2">
-          <a href="/ingest" class="text-[11px] font-mono text-amber-300 hover:text-amber-200 px-2.5 py-1 rounded bg-amber-500/10 border border-amber-400/30 transition-all">
-            + Paste Custom Doc (Page 05)
-          </a>
-          <a href="/pipeline" class="text-[11px] font-mono text-sky-300 hover:text-sky-200 px-2.5 py-1 rounded bg-sky-500/10 border border-sky-400/30 transition-all">
-            3-Mode DAG Comparator (Page 03) -&gt;
-          </a>
-        </div>
+    <!-- 1. Title + one-line explanation -->
+    <header class="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">Ask your documents</h1>
+        <p class="text-sm text-slate-400 mt-1.5">
+          Type a question. You get an answer written from your documents, with the exact source passages listed under it.
+        </p>
       </div>
+      <button type="button" onclick="openQuickIngestModal()" class="px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/35 text-xs font-medium text-emerald-300 transition-all cursor-pointer">
+        + Upload document
+      </button>
+    </header>
 
-      <!-- 6 Domain Selector Pills -->
-      <div id="domain-selector-ribbon" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-3">
-        <!-- Rendered by JS -->
-      </div>
-
-      <!-- Tailored 1-Click Verification Queries for Active Domain -->
-      <div class="flex flex-wrap items-center gap-2 pt-2.5 border-t border-white/[0.08]">
-        <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 shrink-0">
-          1-CLICK DOMAIN QUERIES:
-        </span>
-        <div id="domain-query-chips" class="flex flex-wrap items-center gap-2 flex-1">
-          <!-- Rendered by JS -->
-        </div>
-      </div>
-    </section>
-
-    <!-- Step 2: Command Search Bar & Retrieval Mode Controls -->
-    <section class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-4 mb-5 relative">
+    <!-- 2. Ask box -->
+    <section class="mask-border rounded-2xl bg-[#080c16]/95 backdrop-blur-xl p-4 sm:p-5 relative border border-white/10 shadow-2xl">
       <form id="rag-search-form" class="space-y-3">
-        <div class="flex flex-col lg:flex-row gap-2.5">
-          <div class="relative flex-1">
-            <input
-              id="search-query-input"
-              type="text"
-              required
-              placeholder="Ask a technical, financial, architectural, legal, clinical, or incident question..."
-              class="w-full pl-4 pr-24 py-3.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-sm text-white font-mono outline-none shadow-inner transition-all"
-            />
-            <span id="active-mode-pill" class="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono uppercase text-sky-300">
-              HYBRID RRF
-            </span>
-          </div>
-
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <input
+            id="search-query-input"
+            type="text"
+            required
+            autocomplete="off"
+            placeholder="e.g. What is the liability cap in the MSA?"
+            class="flex-1 px-4 py-3.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-indigo-400 text-base text-white outline-none shadow-inner transition-all"
+          />
           <button
             type="submit"
             id="execute-search-btn"
-            class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-mono text-xs uppercase tracking-widest font-semibold shadow-[0_0_24px_rgba(56,189,248,0.3)] transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+            class="px-7 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 disabled:opacity-60 text-white text-sm font-semibold shadow-[0_0_24px_rgba(99,102,241,0.35)] transition-all shrink-0 cursor-pointer"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            <span id="execute-btn-label">Synthesize Grounded Answer</span>
-          </button>
-
-          <button
-            type="button"
-            id="repeat-cache-btn"
-            title="Re-run the active query to demonstrate <25ms Semantic Cache Hit"
-            class="px-4 py-3.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            <span>Test &lt;25ms Cache Hit</span>
+            <span id="execute-btn-label">Ask</span>
           </button>
         </div>
 
-        <!-- Retrieval Mode & Filter Controls -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/[0.07] text-xs">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400">RETRIEVAL ENGINE:</span>
-            <div class="inline-flex rounded-lg bg-[#050811] p-0.5 border border-white/10">
-              <button type="button" data-mode="hybrid" class="mode-switch-btn px-3 py-1 rounded-md text-[11px] font-mono bg-sky-500/20 text-sky-300 border border-sky-400/40 transition-all cursor-pointer">
-                Smart Hybrid (Dense + BM25 + RRF + Reranker)
-              </button>
-              <button type="button" data-mode="dense" class="mode-switch-btn px-3 py-1 rounded-md text-[11px] font-mono text-slate-400 hover:text-white transition-all cursor-pointer">
-                Dense Vector (768-d)
-              </button>
-              <button type="button" data-mode="bm25" class="mode-switch-btn px-3 py-1 rounded-md text-[11px] font-mono text-slate-400 hover:text-white transition-all cursor-pointer">
-                BM25 Okapi Lexical
-              </button>
+        <!-- Document scope + Try-it chips -->
+        <div class="flex flex-wrap items-center gap-2.5">
+          <label class="inline-flex items-center gap-2 text-xs text-slate-400">
+            <span class="font-medium text-slate-300">Document:</span>
+            <select id="scope-select" class="bg-[#050811] border border-white/15 hover:border-sky-400/40 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 outline-none max-w-[260px] cursor-pointer">
+              <option value="">All documents (starter + uploaded)</option>
+            </select>
+          </label>
+          <span class="text-xs text-slate-500 ml-1">Sample questions:</span>
+          <div id="domain-query-chips" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Status row: which engine will answer -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/[0.07]">
+          <button type="button" onclick="SynapseNav.openQuickKeyModal()" id="hero-engine-pill" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20" title="Click to add or change your AI key">
+            <span id="hero-engine-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span id="hero-engine-label">Checking…</span>
+            <span id="hero-engine-action" class="text-[11px] underline"></span>
+          </button>
+
+          <details class="text-xs text-slate-400 group">
+            <summary class="cursor-pointer select-none hover:text-white list-none flex items-center gap-1">
+              Search options <span class="group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <div class="mt-3 flex flex-wrap items-center gap-4 p-3 rounded-xl bg-black/30 border border-white/10">
+              <div class="inline-flex rounded-lg bg-[#050811] p-0.5 border border-white/10" role="group" aria-label="Search type">
+                <button type="button" data-mode="hybrid" class="mode-switch-btn px-2.5 py-1 rounded-md text-xs" title="Meaning + exact keywords (recommended)">Best match</button>
+                <button type="button" data-mode="dense" class="mode-switch-btn px-2.5 py-1 rounded-md text-xs" title="Finds passages with similar meaning">Meaning</button>
+                <button type="button" data-mode="bm25" class="mode-switch-btn px-2.5 py-1 rounded-md text-xs" title="Finds exact words">Keywords</button>
+              </div>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input id="bypass-cache-checkbox" type="checkbox" class="rounded bg-slate-900 border-white/20 text-sky-500 focus:ring-0" />
+                <span title="Skip saved answers and search again">Don't reuse saved answers</span>
+              </label>
             </div>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-4">
-            <label class="flex items-center gap-1.5 text-[11px] font-mono text-slate-300">
-              <span class="text-slate-400">CATEGORY:</span>
-              <select id="category-filter-select" class="bg-[#050811] border border-white/15 rounded px-2 py-1 text-[11px] font-mono text-white outline-none">
-                <option value="">All 6 Enterprise Domains</option>
-                <option value="security">security (CVE-2024-8192)</option>
-                <option value="financial">financial (Q3 10-Q)</option>
-                <option value="architecture">architecture (Raft RFC)</option>
-                <option value="compliance">compliance (MSA &amp; GDPR)</option>
-                <option value="biomedical">biomedical (FDA Phase III)</option>
-                <option value="incident">incident (SRE SEV-1)</option>
-              </select>
-            </label>
-
-            <label class="flex items-center gap-1.5 text-[11px] font-mono text-slate-300 cursor-pointer">
-              <input id="bypass-cache-checkbox" type="checkbox" class="rounded bg-slate-900 border-white/20 text-sky-500 focus:ring-0" />
-              <span>Bypass Semantic Cache</span>
-            </label>
-          </div>
+          </details>
         </div>
       </form>
     </section>
 
-    <!-- Step 3: Split-Screen Grounded Synthesis (Left) & Interactive Source Corpus Reader (Right) -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+    <!-- Hidden helper nodes kept so older helper code keeps working -->
+    <span id="active-mode-pill" class="hidden"></span>
+    <div id="domain-selector-ribbon" class="hidden"></div>
 
-      <!-- Left 7 Columns: Telemetry Strip + Synthesized Answer + Verified Citation Cards -->
-      <div class="lg:col-span-7 space-y-4">
+    <!-- 3. Results -->
+    <section id="result-area" class="hidden mt-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-        <!-- Live Execution Telemetry Strip -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-          <div class="mask-border rounded-xl bg-[#080c16]/90 p-3">
-            <div class="text-[9px] font-mono uppercase tracking-widest text-slate-400">END-TO-END LATENCY</div>
-            <div id="metric-latency" class="text-lg font-bold font-mono text-white mt-0.5 tabular-nums">-- ms</div>
-          </div>
-          <div class="mask-border rounded-xl bg-[#080c16]/90 p-3">
-            <div class="text-[9px] font-mono uppercase tracking-widest text-slate-400">SEMANTIC CACHE</div>
-            <div id="metric-cache-status" class="text-xs font-bold font-mono text-sky-300 mt-1 uppercase">READY</div>
-          </div>
-          <div class="mask-border rounded-xl bg-[#080c16]/90 p-3">
-            <div class="text-[9px] font-mono uppercase tracking-widest text-slate-400">FAITHFULNESS</div>
-            <div id="metric-faithfulness" class="text-lg font-bold font-mono text-emerald-400 mt-0.5 tabular-nums">--%</div>
-          </div>
-          <div class="mask-border rounded-xl bg-[#080c16]/90 p-3">
-            <div class="text-[9px] font-mono uppercase tracking-widest text-slate-400">CONTEXT RELEVANCE</div>
-            <div id="metric-relevance" class="text-lg font-bold font-mono text-sky-300 mt-0.5 tabular-nums">--%</div>
-          </div>
-          <div class="mask-border rounded-xl bg-[#080c16]/90 p-3 col-span-2 sm:col-span-1">
-            <div class="text-[9px] font-mono uppercase tracking-widest text-slate-400">EST. TOKEN COST</div>
-            <div id="metric-cost" class="text-lg font-bold font-mono text-purple-300 mt-0.5 tabular-nums">$0.0000</div>
-          </div>
-        </div>
+      <div id="result-main" class="lg:col-span-12 space-y-5">
 
-        <!-- Grounded Answer Synthesis Card -->
-        <div class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-5 lg:p-6 relative">
-          <div class="corner-sq top-0 left-0"></div>
-          <div class="corner-sq top-0 right-0"></div>
+        <!-- Notice (offline / failed key) -->
+        <div id="result-notice" class="hidden p-3.5 rounded-xl border text-sm leading-relaxed"></div>
 
+        <!-- Answer -->
+        <div class="mask-border rounded-2xl bg-[#080c16]/95 backdrop-blur-xl p-5 lg:p-6 relative">
           <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-white/10">
+            <h2 class="text-sm font-semibold text-white">Answer</h2>
             <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-              <h2 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
-                GROUNDED AI SYNTHESIS // CLICK INLINE [1] CITATIONS TO LOCK SOURCE CHUNK
-              </h2>
-            </div>
-            <div class="flex items-center gap-2">
-              <span id="answer-model-pill" class="px-2 py-0.5 rounded bg-white/[0.04] border border-white/10 text-[10px] font-mono text-slate-300">
-                gemini-2.5-flash
-              </span>
-              <a href="/pipeline" class="px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono text-sky-300 hover:bg-sky-500/25">
-                Inspect 4-Stage DAG -&gt;
-              </a>
+              <span id="answer-model-pill" class="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-xs text-slate-300"></span>
+              <button type="button" onclick="copySynthesizedAnswer()" class="px-2.5 py-1 rounded-md bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs text-slate-300 hover:text-white transition-all cursor-pointer" title="Copy answer">Copy</button>
             </div>
           </div>
-
-          <div id="synthesized-answer-body" class="prose prose-invert max-w-none text-slate-200 leading-relaxed min-h-[180px]">
-            <!-- Populated by JS -->
-          </div>
+          <div id="synthesized-answer-body" class="prose prose-invert max-w-none text-slate-200 text-[15px] leading-relaxed min-h-[100px]"></div>
+          <p id="result-meta" class="mt-4 pt-3 border-t border-white/[0.07] text-xs text-slate-500"></p>
         </div>
 
-        <!-- Verified Grounded Citations & Retrieval Ranking Cards -->
-        <div class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-5">
+        <!-- Sources -->
+        <div class="mask-border rounded-2xl bg-[#080c16]/95 backdrop-blur-xl p-5">
           <div class="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
             <div>
-              <h3 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
-                VERIFIED GROUNDING CHUNKS // RRF ($k=60$) &amp; CROSS-ENCODER SCORES
-              </h3>
-              <p class="text-[11px] text-slate-400 mt-0.5">
-                Click any citation card to highlight its exact paragraph/table in the Live Source Inspector on the right
-              </p>
+              <h3 class="text-sm font-semibold text-white">Sources <span id="citation-count-badge" class="ml-1 text-slate-400 font-normal"></span></h3>
+              <p class="text-xs text-slate-500 mt-0.5">The passages the answer is based on. Click one to read it in the document.</p>
             </div>
-            <span id="citation-count-badge" class="px-2.5 py-1 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono text-sky-300">
-              0 CITATIONS
-            </span>
           </div>
-
-          <div id="citations-list-container" class="space-y-3">
-            <!-- Populated by JS -->
-          </div>
+          <div id="citations-list-container" class="space-y-3"></div>
         </div>
+
+        <!-- Details (collapsed) -->
+        <details class="rounded-xl bg-white/[0.02] border border-white/10">
+          <summary class="cursor-pointer select-none p-3 text-xs text-slate-400 hover:text-white">Search details (timings and rankings)</summary>
+          <div id="diagnostics-internals-content" class="p-4 pt-1 text-xs text-slate-300 space-y-3"></div>
+        </details>
       </div>
 
-      <!-- Right 5 Columns: Live Interactive Source Document & Chunk Highlight Reader -->
-      <div class="lg:col-span-5 lg:sticky lg:top-20">
+      <!-- Source document reader (only shown when a source is opened) -->
+      <aside id="reader-panel" class="hidden lg:col-span-5 lg:sticky lg:top-20">
         <div class="hardware-chassis rounded-2xl border border-white/15 p-4 relative overflow-hidden">
-          <!-- Hardware Corner Rivets -->
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
-            <div class="flex items-center gap-2">
-              <div class="hardware-rivet"></div>
-              <div>
-                <div class="text-[10px] font-mono uppercase tracking-widest text-sky-400 font-semibold">
-                  LIVE SOURCE INSPECTOR &amp; CHUNK HIGHLIGHTER
-                </div>
-                <div id="reader-doc-title" class="text-xs font-semibold text-white truncate max-w-[300px]">
-                  Loading Enterprise Document...
-                </div>
-              </div>
+          <div class="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10">
+            <div class="min-w-0">
+              <div class="text-[11px] text-sky-400 font-semibold">Source document</div>
+              <div id="reader-doc-title" class="text-sm font-semibold text-white truncate">—</div>
             </div>
-            <div class="flex items-center gap-2">
-              <select id="reader-doc-switcher" class="bg-[#050811] border border-white/15 rounded-lg px-2.5 py-1 text-[11px] font-mono text-slate-200 outline-none max-w-[180px]">
-                <!-- Populated with all indexed documents -->
-              </select>
-              <a id="open-full-corpus-link" href="/documents" class="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-[10px] font-mono text-sky-300 shrink-0" title="Open Full-Screen Hardware Corpus Reader on Page 04">
-                Full Reader -&gt;
-              </a>
+            <div class="flex items-center gap-2 shrink-0">
+              <a id="open-full-corpus-link" href="/documents" class="text-xs text-sky-300 hover:underline">Open in library →</a>
+              <button type="button" onclick="hideReader()" class="px-2 py-1 rounded-md bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs text-slate-300 cursor-pointer" aria-label="Close source viewer">✕</button>
             </div>
           </div>
 
-          <!-- Active Citation Target Banner -->
           <div id="reader-target-banner" class="hidden mb-3 px-3 py-2 rounded-lg bg-sky-500/15 border border-sky-400/40 flex items-center justify-between gap-2">
-            <div class="text-[11px] font-mono text-sky-200 truncate">
-              <span class="font-bold text-sky-400">TARGET LOCKED:</span>
-              <span id="reader-target-section">Section</span>
-            </div>
-            <button type="button" onclick="clearReaderTargetLock()" class="text-[10px] font-mono text-slate-300 hover:text-white underline shrink-0">
-              Reset View
-            </button>
+            <div class="text-xs text-sky-200 truncate"><span class="font-semibold text-sky-400">Showing:</span> <span id="reader-target-section">Section</span></div>
+            <button type="button" onclick="clearReaderTargetLock()" class="text-xs text-slate-300 hover:text-white underline shrink-0 cursor-pointer">Clear</button>
           </div>
 
-          <!-- View Mode Toggle: Chunk Boundaries vs Rendered Full Document -->
           <div class="flex items-center justify-between gap-2 mb-2.5">
             <div class="inline-flex rounded-lg bg-[#04060c] p-0.5 border border-white/10">
-              <button type="button" id="reader-tab-chunks" class="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase bg-sky-500/20 text-sky-300 border border-sky-400/30 cursor-pointer">
-                Indexed Chunks (<span id="reader-chunk-total">0</span>)
-              </button>
-              <button type="button" id="reader-tab-full" class="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase text-slate-400 hover:text-white cursor-pointer">
-                Full Markdown Document
-              </button>
+              <button type="button" id="reader-tab-chunks" class="px-2.5 py-1 rounded-md text-xs bg-sky-500/20 text-sky-300 border border-sky-400/30 cursor-pointer">Sections (<span id="reader-chunk-total">0</span>)</button>
+              <button type="button" id="reader-tab-full" class="px-2.5 py-1 rounded-md text-xs text-slate-400 hover:text-white cursor-pointer">Full text</button>
             </div>
-            <span id="reader-category-badge" class="px-2 py-0.5 rounded bg-white/[0.04] border border-white/10 text-[10px] font-mono uppercase text-slate-300">
-              security
-            </span>
+            <span id="reader-category-badge" class="hidden"></span>
+            <select id="reader-doc-switcher" class="bg-[#050811] border border-white/15 rounded-lg px-2.5 py-1 text-xs text-slate-200 outline-none max-w-[170px]"></select>
           </div>
 
-          <!-- Corrugated Dot-Matrix Scrollable Document Viewport -->
-          <div id="reader-scroll-viewport" class="corrugated-screen rounded-xl border border-white/10 p-4 max-h-[680px] overflow-y-auto space-y-3">
-            <!-- Populated with indexed chunks or full markdown -->
-          </div>
+          <div id="reader-scroll-viewport" class="corrugated-screen rounded-xl border border-white/10 p-4 max-h-[620px] overflow-y-auto space-y-3"></div>
         </div>
-      </div>
+      </aside>
+    </section>
 
+    <!-- Empty state -->
+    <section id="empty-state" class="mt-8 text-center text-sm text-slate-500">
+      <p>Pick a sample question above, or type your own.</p>
+      <p class="mt-1">Want to use your own files? <a href="/ingest" class="text-sky-300 hover:underline">Add documents →</a></p>
     </section>
   </main>
 
   <script src="/static/js/nav.js"></script>
   <script>
     let currentRetrievalMode = 'hybrid';
-    let activeDomain = SynapseNav.DOMAINS[0];
+    let activeEngineMode = 'offline'; // 'offline' | 'ai'
+    let activeEngineInfo = null;
     let loadedDocumentsMap = {};
     let activeReaderDoc = null;
     let activeReaderView = 'chunks'; // 'chunks' | 'full'
     let activeHighlightChunkId = null;
+    let corpusDocs = [];
+
+    const MODE_ON = 'mode-switch-btn px-2.5 py-1 rounded-md text-xs bg-sky-500/20 text-sky-300 border border-sky-400/40 font-semibold cursor-pointer';
+    const MODE_OFF = 'mode-switch-btn px-2.5 py-1 rounded-md text-xs text-slate-400 hover:text-white cursor-pointer';
+    const MODE_NAMES = { hybrid: 'best-match search', dense: 'meaning search', bm25: 'keyword search' };
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (v) => SynapseNav.escapeHtml(String(v === undefined || v === null ? '' : v));
 
     document.addEventListener('DOMContentLoaded', async () => {
       SynapseNav.mountDock('search');
       initDiagnosticsWaveCanvas();
       initDiagnosticsLasersAndFlashlight();
 
-      // Check URL params or session state
       const params = new URLSearchParams(window.location.search);
-      const domainParam = params.get('domain') || SynapseNav.getActiveDomainId();
-      const queryParam = params.get('q') || SynapseNav.getState(SynapseNav.STORAGE_KEYS.ACTIVE_QUERY, '');
       const modeParam = params.get('mode');
+      setRetrievalMode(['hybrid', 'dense', 'bm25'].includes(modeParam) ? modeParam : 'hybrid');
 
-      if (modeParam && ['hybrid', 'dense', 'bm25'].includes(modeParam)) {
-        setRetrievalMode(modeParam);
-      }
+      window.addEventListener('synapse:key_status_changed', (e) => {
+        const st = e.detail;
+        if (st && st.has_key) setEngineMode('ai', st);
+        else setEngineMode('offline');
+      });
 
-      activeDomain = SynapseNav.getDomainById(domainParam);
-      SynapseNav.setActiveDomainId(activeDomain.id);
-
-      renderDomainRibbon();
+      await refreshEngineState();
       await loadAllCorpusDocuments();
 
-      // Select active domain's document in the right-hand reader
-      await selectReaderDocument(activeDomain.docId);
-
-      // Determine initial query and execute automatically so the workbench is alive with real data
-      const initialQuery = queryParam || activeDomain.queries[0].query;
-      document.getElementById('search-query-input').value = initialQuery;
-      await executeSearchQuery(initialQuery, false);
-
-      // Wire events
-      document.getElementById('rag-search-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const q = document.getElementById('search-query-input').value.trim();
-        if (q) executeSearchQuery(q, document.getElementById('bypass-cache-checkbox').checked);
-      });
-
-      document.getElementById('repeat-cache-btn').addEventListener('click', () => {
-        const q = document.getElementById('search-query-input').value.trim();
-        if (q) {
-          document.getElementById('bypass-cache-checkbox').checked = false;
-          executeSearchQuery(q, false);
+      // Pre-select document scope if linked via ?doc=... or ?domain=...
+      const requestedScope = params.get('doc') || params.get('domain');
+      if (requestedScope) {
+        const matchedDomain = SynapseNav.getDomainById ? SynapseNav.getDomainById(requestedScope) : null;
+        const targetDocId = matchedDomain ? matchedDomain.docId : requestedScope;
+        if (Array.from($('scope-select').options).some((o) => o.value === targetDocId)) {
+          $('scope-select').value = targetDocId;
         }
+      }
+      renderChips();
+
+      $('rag-search-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const q = $('search-query-input').value.trim();
+        if (q) executeSearchQuery(q, $('bypass-cache-checkbox').checked);
       });
+
+      $('scope-select').addEventListener('change', renderChips);
 
       document.querySelectorAll('.mode-switch-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
           setRetrievalMode(btn.dataset.mode);
-          const q = document.getElementById('search-query-input').value.trim();
-          if (q) executeSearchQuery(q, true);
+          const q = $('search-query-input').value.trim();
+          if (q && !$('result-area').classList.contains('hidden')) executeSearchQuery(q, true);
         });
       });
 
-      document.getElementById('reader-doc-switcher').addEventListener('change', (e) => {
-        selectReaderDocument(e.target.value);
-      });
+      $('reader-doc-switcher').addEventListener('change', (e) => selectReaderDocument(e.target.value));
+      $('reader-tab-chunks').addEventListener('click', () => { activeReaderView = 'chunks'; updateReaderTabsUI(); renderActiveReaderContent(); });
+      $('reader-tab-full').addEventListener('click', () => { activeReaderView = 'full'; updateReaderTabsUI(); renderActiveReaderContent(); });
 
-      document.getElementById('reader-tab-chunks').addEventListener('click', () => {
-        activeReaderView = 'chunks';
-        updateReaderTabsUI();
-        renderActiveReaderContent();
-      });
-
-      document.getElementById('reader-tab-full').addEventListener('click', () => {
-        activeReaderView = 'full';
-        updateReaderTabsUI();
-        renderActiveReaderContent();
-      });
+      const q = params.get('q');
+      if (q) {
+        $('search-query-input').value = q;
+        executeSearchQuery(q, false);
+      } else if (requestedScope) {
+        const firstChip = $('domain-query-chips').querySelector('[data-chip]');
+        if (firstChip) firstChip.click();
+      }
     });
+
+    // ---- Engine (which model answers) -------------------------------------------------
+    async function refreshEngineState() {
+      const keyStatus = await SynapseNav.checkBackendKeyStatus();
+      const byok = SynapseNav.getByokSettings();
+      if (keyStatus.has_key) {
+        setEngineMode('ai', keyStatus);
+      } else if (byok && byok.apiKey && byok.apiKey.trim()) {
+        const synced = await SynapseNav.syncBackendKey(byok.apiKey, byok.provider || 'auto', byok.model);
+        if (synced && synced.success) setEngineMode('ai', synced);
+        else setEngineMode('offline');
+      } else {
+        setEngineMode('offline');
+      }
+    }
+
+    function setEngineMode(mode, st = null) {
+      activeEngineMode = mode;
+      activeEngineInfo = st;
+      const pill = $('hero-engine-pill');
+      const dot = $('hero-engine-dot');
+      const label = $('hero-engine-label');
+      const action = $('hero-engine-action');
+      if (!pill || !dot || !label) return;
+      const base = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border ';
+      if (mode === 'offline') {
+        pill.className = base + 'border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20';
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        label.textContent = 'No AI key connected: answers are extracted from your documents';
+        if (action) action.textContent = 'Add key';
+      } else {
+        pill.className = base + 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25';
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        const prov = st && st.provider ? st.provider : 'AI';
+        const mod = st && st.model ? ' · ' + String(st.model).replace(/^models\//, '') : '';
+        label.textContent = 'AI answers on: ' + prov + mod;
+        if (action) action.textContent = 'Change';
+      }
+    }
 
     function setRetrievalMode(mode) {
       currentRetrievalMode = mode;
-      const labelMap = {
-        hybrid: 'HYBRID RRF',
-        dense: 'DENSE 768-D',
-        bm25: 'BM25 OKAPI',
-      };
-      document.getElementById('active-mode-pill').textContent = labelMap[mode] || 'HYBRID RRF';
       document.querySelectorAll('.mode-switch-btn').forEach((b) => {
-        if (b.dataset.mode === mode) {
-          b.className = 'mode-switch-btn px-3 py-1 rounded-md text-[11px] font-mono bg-sky-500/20 text-sky-300 border border-sky-400/40 transition-all cursor-pointer';
-        } else {
-          b.className = 'mode-switch-btn px-3 py-1 rounded-md text-[11px] font-mono text-slate-400 hover:text-white transition-all cursor-pointer';
-        }
+        b.className = b.dataset.mode === mode ? MODE_ON : MODE_OFF;
       });
     }
 
-    function renderDomainRibbon() {
-      const ribbon = document.getElementById('domain-selector-ribbon');
-      ribbon.innerHTML = SynapseNav.DOMAINS.map((d, idx) => {
-        const isCurrent = d.id === activeDomain.id;
-        return `
-          <button type="button"
-            onclick="selectDomainPreset('${d.id}')"
-            class="text-left p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
-              isCurrent
-                ? 'bg-sky-500/15 border-sky-400/50 shadow-[0_0_20px_rgba(56,189,248,0.18)]'
-                : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.08]'
-            }">
-            <div class="flex items-center justify-between gap-1 mb-1">
-              <span class="font-mono text-[9px] uppercase tracking-wider ${isCurrent ? 'text-sky-300 font-bold' : 'text-slate-400'}">
-                0${idx + 1} // ${d.category}
-              </span>
-              <span class="${isCurrent ? 'text-sky-300' : 'text-slate-500'}">${d.svg}</span>
-            </div>
-            <div class="text-xs font-semibold text-white truncate">${SynapseNav.escapeHtml(d.shortTitle)}</div>
-          </button>
-        `;
-      }).join('');
-
-      const chips = document.getElementById('domain-query-chips');
-      chips.innerHTML = activeDomain.queries.map((q) => `
-        <button type="button"
-          onclick="runPresetChipQuery('${SynapseNav.escapeHtml(q.query).replace(/'/g, "\\'")}')"
-          title="${SynapseNav.escapeHtml(q.modeHint)}"
-          class="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-sky-500/20 border border-white/10 hover:border-sky-400/40 text-xs font-mono text-slate-200 hover:text-white transition-all cursor-pointer flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
-          <span>${SynapseNav.escapeHtml(q.label)}</span>
-        </button>
-      `).join('');
-    }
-
-    async function selectDomainPreset(domainId) {
-      activeDomain = SynapseNav.getDomainById(domainId);
-      SynapseNav.setActiveDomainId(activeDomain.id);
-      renderDomainRibbon();
-      await selectReaderDocument(activeDomain.docId);
-      const q = activeDomain.queries[0].query;
-      document.getElementById('search-query-input').value = q;
-      await executeSearchQuery(q, false);
-    }
-
-    async function runPresetChipQuery(queryText) {
-      document.getElementById('search-query-input').value = queryText;
-      await executeSearchQuery(queryText, false);
-    }
-
+    // ---- Documents / sample questions -------------------------------------------------
     async function loadAllCorpusDocuments() {
       try {
         const res = await fetch('/api/v1/documents');
         if (!res.ok) return;
         const data = await res.json();
-        const docs = Array.isArray(data) ? data : (data.documents || []);
-        const switcher = document.getElementById('reader-doc-switcher');
-        switcher.innerHTML = docs.map((d) => `
-          <option value="${SynapseNav.escapeHtml(d.document_id)}">${SynapseNav.escapeHtml(d.title)}</option>
-        `).join('');
+        corpusDocs = Array.isArray(data) ? data : (data.documents || []);
+
+        const presetDocIds = new Set(SynapseNav.DOMAINS.map((d) => d.docId));
+        corpusDocs.forEach((d) => { if (!presetDocIds.has(d.document_id)) SynapseNav.addCustomDocument(d); });
+
+        const uploadedDocs = corpusDocs.filter((d) => !presetDocIds.has(d.document_id));
+        const starterDocs = corpusDocs.filter((d) => presetDocIds.has(d.document_id));
+
+        const scope = $('scope-select');
+        const prev = scope.value;
+        let optsHtml = '<option value="">All documents (starter + uploaded)</option>';
+        if (uploadedDocs.length) {
+          optsHtml += `<optgroup label="Your Uploaded Documents">` + uploadedDocs.map((d) =>
+            `<option value="${esc(d.document_id)}">📄 ${esc(d.title)}</option>`).join('') + `</optgroup>`;
+        }
+        if (starterDocs.length) {
+          optsHtml += `<optgroup label="Built-in Sample Documents (Demo Corpus)">` + starterDocs.map((d) =>
+            `<option value="${esc(d.document_id)}">${esc(d.title)}</option>`).join('') + `</optgroup>`;
+        }
+        scope.innerHTML = optsHtml;
+        scope.value = prev;
+
+        $('reader-doc-switcher').innerHTML = corpusDocs.map((d) =>
+          `<option value="${esc(d.document_id)}">${esc(d.title)}</option>`).join('');
       } catch (_) {}
+    }
+
+    function renderChips() {
+      const box = $('domain-query-chips');
+      const scope = $('scope-select').value;
+      const all = SynapseNav.getAllDomains ? SynapseNav.getAllDomains() : SynapseNav.DOMAINS;
+      const known = new Set(corpusDocs.map((d) => d.document_id));
+      const domains = all.filter((d) => !known.size || known.has(d.docId));
+      let queries = [];
+      if (scope) {
+        const d = domains.find((x) => x.docId === scope);
+        queries = d && d.queries ? d.queries.slice(0, 3) : [];
+        if (!queries.length) {
+          const meta = corpusDocs.find((x) => x.document_id === scope);
+          queries = ((meta && meta.suggested_queries) || []).slice(0, 3).map((q) => ({ label: q, query: q }));
+        }
+      } else {
+        const customFirst = [...domains.filter((d) => d.isCustom), ...domains.filter((d) => !d.isCustom)];
+        queries = customFirst.filter((d) => d.queries && d.queries.length).slice(0, 3).map((d) => d.queries[0]);
+      }
+      box.innerHTML = queries.map((q, i) => `
+        <button type="button" data-chip="${i}" class="px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-sky-500/20 border border-white/10 hover:border-sky-400/40 text-xs text-slate-200 hover:text-white transition-all cursor-pointer text-left">
+          ${esc(q.label || q.query)}
+        </button>`).join('') || '<span class="text-xs text-slate-500">No sample questions for this document yet.</span>';
+      box.querySelectorAll('[data-chip]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const q = queries[Number(btn.dataset.chip)].query;
+          $('search-query-input').value = q;
+          executeSearchQuery(q, false);
+        });
+      });
+    }
+
+    function copySynthesizedAnswer() {
+      const el = document.getElementById('synthesized-answer-body');
+      if (!el) return;
+      const text = el.innerText || el.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        SynapseNav.showToast('Copied to Clipboard', 'AI answer narrative copied successfully.', 'success');
+      }).catch(() => {});
+    }
+
+    function showReader() {
+      $('reader-panel').classList.remove('hidden');
+      $('result-main').classList.replace('lg:col-span-12', 'lg:col-span-7');
+    }
+
+    function hideReader() {
+      $('reader-panel').classList.add('hidden');
+      $('result-main').classList.replace('lg:col-span-7', 'lg:col-span-12');
     }
 
     async function selectReaderDocument(docId, highlightChunkId = null, sectionLabel = null) {
@@ -526,7 +468,7 @@
             <div class="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-white/[0.07]">
               <div class="flex items-center gap-2">
                 <span class="px-2 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono text-sky-300 font-semibold">
-                  CHUNK #${cIdx}
+                  SECTION #${cIdx}
                 </span>
                 <span class="text-xs font-mono font-semibold text-white truncate max-w-[210px]">
                   ${SynapseNav.escapeHtml(c.section_title)}
@@ -551,175 +493,179 @@
       }
     }
 
-    // Hook for inline [1], [2] citation clicks inside the synthesized answer
+    // Clicking a [1] badge or a source card opens that passage in the document viewer
     window.onPageCitationClick = async function (citationObj) {
       if (!citationObj) return;
+      showReader();
       activeReaderView = 'chunks';
       updateReaderTabsUI();
       const cIdx = citationObj.citation_id || citationObj.citation_index || 1;
       const docId = citationObj.document_id || citationObj.chunk_id?.replace(/_c\d+$/, '');
-      await selectReaderDocument(
-        docId,
-        citationObj.chunk_id,
-        `[${cIdx}] ${citationObj.section_title}`
-      );
-      SynapseNav.showToast(
-        `Citation [${cIdx}] Locked`,
-        `${citationObj.document_title} — ${citationObj.section_title}`,
-        'info'
-      );
+      await selectReaderDocument(docId, citationObj.chunk_id, `[${cIdx}] ${citationObj.section_title || ''}`);
+      $('reader-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     };
 
+    // ---- Searching --------------------------------------------------------------------
+    function showNotice(kind, html) {
+      const n = $('result-notice');
+      if (!html) { n.classList.add('hidden'); return; }
+      const tone = kind === 'error'
+        ? 'border-rose-500/40 bg-rose-500/10 text-rose-200'
+        : kind === 'warn'
+          ? 'border-amber-500/40 bg-amber-500/10 text-amber-200'
+          : 'border-sky-500/30 bg-sky-500/10 text-sky-100';
+      n.className = 'p-3.5 rounded-xl border text-sm leading-relaxed ' + tone;
+      n.innerHTML = html;
+    }
+
     async function executeSearchQuery(queryText, bypassCache = false) {
-      const btn = document.getElementById('execute-search-btn');
-      const label = document.getElementById('execute-btn-label');
-      const answerBox = document.getElementById('synthesized-answer-body');
+      const btn = $('execute-search-btn');
+      const label = $('execute-btn-label');
+      const answerBox = $('synthesized-answer-body');
       const byok = SynapseNav.getByokSettings();
 
+      // Decide what the backend should use. With no key we ask for the offline engine explicitly.
+      let provider = 'offline', model = null, customKey = null;
+      if (activeEngineMode === 'ai') {
+        if (byok.apiKey && byok.apiKey.trim()) {
+          provider = byok.provider || 'auto'; model = byok.model || null; customKey = byok.apiKey.trim();
+        } else {
+          provider = 'auto'; // backend already holds a key (environment / .env)
+        }
+      }
+
       btn.disabled = true;
-      label.textContent = 'Synthesizing...';
+      label.textContent = 'Searching…';
+      $('empty-state').classList.add('hidden');
+      $('result-area').classList.remove('hidden');
+      showNotice(null);
+      $('answer-model-pill').textContent = '';
+      $('result-meta').textContent = '';
+      $('citations-list-container').innerHTML = '';
+      $('citation-count-badge').textContent = '';
       answerBox.innerHTML = `
-        <div class="py-12 flex flex-col items-center justify-center text-center gap-3">
-          <div class="w-8 h-8 rounded-full border-2 border-sky-400 border-t-transparent animate-spin"></div>
-          <div class="text-xs font-mono uppercase tracking-widest text-sky-300">
-            Executing ${currentRetrievalMode.toUpperCase()} Pipeline // Dense 768-D + BM25 + RRF + Cross-Encoder...
-          </div>
-        </div>
-      `;
+        <div class="py-10 flex flex-col items-center justify-center text-center gap-3">
+          <div class="w-7 h-7 rounded-full border-2 border-sky-400 border-t-transparent animate-spin"></div>
+          <div class="text-sm text-slate-400">${activeEngineMode === 'ai' ? 'Finding passages and asking the AI model…' : 'Finding the best passages…'}</div>
+        </div>`;
 
       try {
-        const payload = {
-          query: queryText,
-          mode: currentRetrievalMode,
-          top_k: Number(byok.topK || 5),
-          use_cache: !Boolean(bypassCache),
-          provider: byok.provider || 'auto',
-          model: byok.model || 'gemini-2.5-flash',
-          custom_api_key: byok.apiKey || null,
-        };
-
         const res = await fetch('/api/v1/search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            query: queryText,
+            mode: currentRetrievalMode,
+            top_k: Number(byok.topK || 5),
+            use_cache: !bypassCache,
+            document_id: $('scope-select').value || null,
+            provider, model, custom_api_key: customKey,
+          }),
         });
-
-        if (!res.ok) {
-          throw new Error(`Search API returned HTTP ${res.status}`);
-        }
-
+        if (!res.ok) throw new Error(`The server answered with HTTP ${res.status}.`);
         const data = await res.json();
         SynapseNav.setLastSearch(data);
-        SynapseNav.setState(SynapseNav.STORAGE_KEYS.ACTIVE_QUERY, queryText, true);
         SynapseNav.refreshTelemetryBadges();
-
         renderSearchResponse(data);
       } catch (err) {
-        answerBox.innerHTML = `<div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs font-mono text-rose-300">Error executing search: ${SynapseNav.escapeHtml(err.message)}</div>`;
+        answerBox.innerHTML = '';
+        showNotice('error', `<strong>Search failed.</strong> ${esc(err.message)} Is the server still running?`);
       } finally {
         btn.disabled = false;
-        label.textContent = 'Synthesize Grounded Answer';
+        label.textContent = 'Ask';
       }
     }
 
     function renderSearchResponse(data) {
       const citations = data.citations || [];
+      const chunks = data.retrieved_chunks || [];
       const retrievedMap = {};
-      (data.retrieved_chunks || []).forEach((rc) => {
-        retrievedMap[rc.chunk_id] = rc;
-      });
+      chunks.forEach((rc) => { retrievedMap[rc.chunk_id] = rc; });
+      const usedAI = data.provider && data.provider !== 'offline';
 
-      const lat = data.latency_ms !== undefined ? data.latency_ms : (data.telemetry?.total_latency_ms || 0);
-      const isHit = Boolean(data.cache_hit || data.telemetry?.cache_hit);
-      const sim = data.cache_similarity || data.telemetry?.cache_similarity || 1.0;
-      const faith = data.faithfulness_score !== undefined ? data.faithfulness_score : (data.evaluation?.faithfulness || 0.96);
-      const conf = data.confidence_score !== undefined ? data.confidence_score : (data.evaluation?.context_relevance || 0.95);
-      const costSaved = data.estimated_cost_saved_usd !== undefined ? data.estimated_cost_saved_usd : 0.00042;
-
-      document.getElementById('metric-latency').textContent = `${Number(lat).toFixed(1)} ms`;
-      const cacheEl = document.getElementById('metric-cache-status');
-      if (isHit) {
-        cacheEl.textContent = `CACHE HIT (${Number(sim).toFixed(3)})`;
-        cacheEl.className = 'text-xs font-bold font-mono text-emerald-400 mt-1 uppercase';
+      // Notice: say plainly when no AI wrote the answer, and why
+      if (data.fallback_reason) {
+        showNotice('warn', `<strong>Your AI key was tried but the request failed</strong>, so this answer was extracted straight from your documents instead.<br><span class="opacity-90">Reason: ${esc(data.fallback_reason)}</span><br><a href="/settings" class="underline">Check your key and model in Settings →</a>`);
+      } else if (!usedAI && data.model !== 'none') {
+        showNotice('info', `This answer is assembled from the best-matching passages, not written by an AI model. <button type="button" class="underline" onclick="SynapseNav.openQuickKeyModal()">Add an AI key</button> for fuller answers.`);
       } else {
-        cacheEl.textContent = `MISS // LIVE PIPELINE`;
-        cacheEl.className = 'text-xs font-bold font-mono text-sky-300 mt-1 uppercase';
+        showNotice(null);
       }
 
-      document.getElementById('metric-faithfulness').textContent = `${(Number(faith) * 100).toFixed(1)}%`;
-      document.getElementById('metric-relevance').textContent = `${(Number(conf) * 100).toFixed(1)}%`;
-      document.getElementById('metric-cost').textContent = `$${Number(costSaved).toFixed(5)}`;
-      document.getElementById('answer-model-pill').textContent = `${data.provider || 'gemini'} // ${data.model || 'gemini-2.5-flash'}`;
+      // Answer
+      $('synthesized-answer-body').innerHTML = SynapseNav.renderMarkdown(data.answer);
+      const modelName = String(data.model || '').replace(/^models\//, '');
+      let pill = usedAI ? `Written by ${data.provider} · ${modelName}` : 'Extracted from your documents';
+      if (data.cache_hit) pill += ' · saved answer';
+      $('answer-model-pill').textContent = pill;
 
-      // Render Markdown Answer with clickable [1] citations
-      const answerBox = document.getElementById('synthesized-answer-body');
-      answerBox.innerHTML = SynapseNav.renderMarkdown(data.answer);
+      const lat = Number(data.latency_ms || 0);
+      const latText = lat >= 1000 ? `${(lat / 1000).toFixed(2)} s` : `${lat.toFixed(0)} ms`;
+      $('result-meta').textContent = data.cache_hit
+        ? `Reused a saved answer for a very similar question (${Number(data.cache_similarity || 1).toFixed(2)} match) · ${latText}`
+        : `Fresh search using ${MODE_NAMES[data.retrieval_mode] || 'search'} · ${latText}`;
 
-      // Render Verified Citations List
-      document.getElementById('citation-count-badge').textContent = `${citations.length} VERIFIED CITATIONS`;
-      const citContainer = document.getElementById('citations-list-container');
-
-      if (citations.length === 0) {
-        citContainer.innerHTML = `<div class="text-xs font-mono text-slate-400 py-4">No citations matched the filter criteria.</div>`;
-        return;
-      }
-
-      citContainer.innerHTML = citations.map((c, idx) => {
-        const rc = retrievedMap[c.chunk_id] || {};
-        const cIdx = c.citation_id || c.citation_index || idx + 1;
-        const docId = c.document_id || rc.document_id || c.chunk_id.replace(/_c\d+$/, '');
-        const denseRank = c.dense_rank || rc.dense_rank;
-        const bm25Rank = c.bm25_rank || rc.bm25_rank;
-        const rerankScore = c.relevance_score !== undefined ? c.relevance_score : (rc.rerank_score || rc.score || 0.92);
-        const quote = c.exact_quote || c.snippet || rc.content || '';
-        const clickPayload = {
-          citation_id: cIdx,
-          citation_index: cIdx,
-          chunk_id: c.chunk_id,
-          document_id: docId,
-          document_title: c.document_title,
-          section_title: c.section_title,
-        };
-        return `
-          <div onclick='window.onPageCitationClick(${JSON.stringify(clickPayload).replace(/'/g, "&#39;")})'
-               class="p-3.5 rounded-xl bg-white/[0.02] hover:bg-sky-500/[0.08] border border-white/10 hover:border-sky-400/40 transition-all cursor-pointer group">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/40 text-sky-300 font-mono text-xs font-bold">
-                  [${cIdx}]
-                </span>
-                <span class="text-xs font-semibold text-white group-hover:text-sky-300 transition-colors">
-                  ${SynapseNav.escapeHtml(c.document_title)}
-                </span>
-                <span class="text-[11px] font-mono text-slate-400">
-                  // ${SynapseNav.escapeHtml(c.section_title)}
-                </span>
+      // Sources
+      $('citation-count-badge').textContent = citations.length ? `(${citations.length})` : '';
+      const box = $('citations-list-container');
+      if (!citations.length) {
+        box.innerHTML = '<div class="text-sm text-slate-400 py-2">No source passages matched this question.</div>';
+      } else {
+        box.innerHTML = citations.map((c, idx) => {
+          const rc = retrievedMap[c.chunk_id] || {};
+          const cIdx = c.citation_id || idx + 1;
+          const quote = c.exact_quote || rc.content || '';
+          const match = Number(c.relevance_score !== undefined ? c.relevance_score : (rc.score || 0));
+          return `
+            <button type="button" data-cit="${idx}" class="w-full text-left p-3.5 rounded-xl bg-white/[0.02] hover:bg-sky-500/[0.08] border border-white/10 hover:border-sky-400/40 transition-all cursor-pointer">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/40 text-sky-300 text-xs font-bold">[${esc(cIdx)}]</span>
+                  <span class="text-sm font-semibold text-white truncate">${esc(c.document_title)}</span>
+                  <span class="text-xs text-slate-400 truncate">· ${esc(c.section_title)}</span>
+                </div>
+                <span class="text-xs text-emerald-300">${(match * 100).toFixed(0)}% match</span>
               </div>
-              <div class="flex items-center gap-1.5 text-[10px] font-mono">
-                ${denseRank ? `<span class="px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-400/30">Dense #${denseRank}</span>` : ''}
-                ${bm25Rank ? `<span class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-400/30">BM25 #${bm25Rank}</span>` : ''}
-                <span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
-                  Score ${Number(rerankScore).toFixed(3)}
-                </span>
-              </div>
-            </div>
-            <p class="text-xs text-slate-300 font-mono line-clamp-2 leading-relaxed">
-              ${SynapseNav.escapeHtml(quote)}
-            </p>
-          </div>
-        `;
-      }).join('');
-
-      // Automatically sync the top citation #1 into the right-hand reader
-      if (citations[0]) {
-        const firstRc = retrievedMap[citations[0].chunk_id] || {};
-        const firstDocId = citations[0].document_id || firstRc.document_id || citations[0].chunk_id.replace(/_c\d+$/, '');
-        selectReaderDocument(
-          firstDocId,
-          citations[0].chunk_id,
-          `[1] ${citations[0].section_title}`
-        );
+              <p class="text-sm text-slate-300 leading-relaxed line-clamp-3">${esc(quote)}</p>
+              <span class="mt-1.5 inline-block text-xs text-sky-300">Read in document →</span>
+            </button>`;
+        }).join('');
+        box.querySelectorAll('[data-cit]').forEach((el) => {
+          el.addEventListener('click', () => {
+            const c = citations[Number(el.dataset.cit)];
+            const rc = retrievedMap[c.chunk_id] || {};
+            window.onPageCitationClick({
+              citation_id: c.citation_id, chunk_id: c.chunk_id,
+              document_id: c.document_id || rc.document_id,
+              document_title: c.document_title, section_title: c.section_title,
+            });
+          });
+        });
       }
+
+      // Details (only real numbers; blanks stay blank)
+      const t = data.timings_ms || {};
+      const stage = (name, key) => (t[key] !== undefined && t[key] !== null)
+        ? `<div class="p-2 rounded bg-black/40 border border-white/5"><span class="text-[11px] text-slate-400">${name}</span><div class="font-mono font-semibold text-slate-100">${Number(t[key]).toFixed(1)} ms</div></div>` : '';
+      const num = (v, d) => (typeof v === 'number' ? v.toFixed(d) : '—');
+      $('diagnostics-internals-content').innerHTML = `
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          ${stage('Meaning search', 'dense')}${stage('Keyword search', 'bm25')}${stage('Merge results', 'rrf')}${stage('Re-rank', 'rerank')}${stage('Write answer', 'synthesis')}
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead><tr class="text-slate-500 border-b border-white/10"><th class="py-1 pr-3">Passage</th><th class="pr-3">Meaning rank</th><th class="pr-3">Keyword rank</th><th class="pr-3">Merged score</th><th>Final score</th></tr></thead>
+            <tbody class="divide-y divide-white/5">
+              ${chunks.map((c) => `<tr>
+                <td class="py-1 pr-3 text-sky-300 max-w-[200px] truncate">${esc(c.chunk_id)}</td>
+                <td class="pr-3">${c.dense_rank ? '#' + c.dense_rank : '—'}</td>
+                <td class="pr-3">${c.bm25_rank ? '#' + c.bm25_rank : '—'}</td>
+                <td class="pr-3">${num(c.rrf_score, 4)}</td>
+                <td class="font-semibold text-emerald-300">${num(typeof c.rerank_score === 'number' ? c.rerank_score : c.score, 3)}</td>
+              </tr>`).join('') || '<tr><td class="py-2 text-slate-500" colspan="5">No passages retrieved.</td></tr>'}
+            </tbody>
+          </table>
+        </div>`;
     }
 
     // ThreeUI Diagnostics-Panel 3D Wave Lattice Canvas
@@ -779,6 +725,316 @@
         );
       }
     }
+
+    // Quick Guide Toggle
+    function toggleGuideDetails() {
+      const body = document.getElementById('guide-details-body');
+      const text = document.getElementById('guide-toggle-text');
+      if (body.classList.contains('hidden')) {
+        body.classList.remove('hidden');
+        text.innerHTML = 'Hide Guide &uarr;';
+      } else {
+        body.classList.add('hidden');
+        text.innerHTML = 'Quick 3-Step Guide &darr;';
+      }
+    }
+
+    async function selectUploadedDocument(docMeta) {
+      if (!docMeta || !docMeta.document_id) return;
+      $('scope-select').value = docMeta.document_id;
+      renderChips();
+      const firstQ = (docMeta.suggested_queries && docMeta.suggested_queries[0]) || `Summarize the key points in ${docMeta.title || 'this document'}`;
+      $('search-query-input').value = firstQ;
+      await executeSearchQuery(firstQ, true);
+    }
+
+    // Quick Ingest Modal Controls
+    function openQuickIngestModal() {
+      const modal = document.getElementById('quick-ingest-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+      }
+    }
+
+    function closeQuickIngestModal() {
+      const modal = document.getElementById('quick-ingest-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    function loadQuickTemplate(templateId) {
+      const tpl = (SynapseNav.SAMPLE_TEMPLATES || []).find((t) => t.id === templateId);
+      if (!tpl) return;
+      document.getElementById('quick-doc-title').value = tpl.title;
+      document.getElementById('quick-doc-category').value = tpl.category || 'custom';
+      document.getElementById('quick-doc-content').value = tpl.content;
+      SynapseNav.showToast('Template Loaded', `Loaded "${tpl.title}" into the quick ingestion editor.`, 'info');
+    }
+
+    // File Drag-and-Drop for Quick Ingest
+    document.addEventListener('DOMContentLoaded', () => {
+      const dropZone = document.getElementById('quick-drop-zone');
+      const fileInput = document.getElementById('quick-file-input');
+
+      if (dropZone && fileInput) {
+        ['dragenter', 'dragover'].forEach((eventName) => {
+          dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-emerald-400', 'bg-emerald-500/10');
+          });
+        });
+
+        ['dragleave', 'drop'].forEach((eventName) => {
+          dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-emerald-400', 'bg-emerald-500/10');
+          });
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+          const files = e.dataTransfer?.files;
+          if (files && files.length > 0) handleQuickFile(files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+          if (fileInput.files && fileInput.files.length > 0) handleQuickFile(fileInput.files[0]);
+        });
+      }
+
+      async function handleQuickFile(file) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        const cleanName = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ');
+        document.getElementById('quick-doc-title').value = cleanName;
+
+        if (['pdf', 'docx', 'csv'].includes(ext)) {
+          const submitBtn = document.getElementById('quick-ingest-submit-btn');
+          submitBtn.disabled = true;
+          submitBtn.textContent = `Extracting & Indexing ${ext.toUpperCase()}...`;
+          try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('title', cleanName);
+            formData.append('domain', document.getElementById('quick-doc-category').value || 'custom');
+            const res = await fetch('/api/v1/documents/upload', {
+              method: 'POST',
+              body: formData,
+            });
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              throw new Error(err.detail || `Upload failed with HTTP ${res.status}`);
+            }
+            const docMeta = await res.json();
+            SynapseNav.addCustomDocument(docMeta);
+            await loadAllCorpusDocuments();
+            closeQuickIngestModal();
+            await selectUploadedDocument(docMeta);
+            SynapseNav.showToast('Document Indexed!', `"${cleanName}" (${docMeta.total_chunks || 1} chunks) is ready to query!`, 'success');
+          } catch (err) {
+            SynapseNav.showToast('Upload Error', err.message, 'error');
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Index Document & Query Now ->';
+          }
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          const text = String(reader.result || '');
+          document.getElementById('quick-doc-content').value = text;
+          SynapseNav.showToast('File Ready', `Read ${file.name} (${text.split(/\s+/).length} words).`, 'success');
+        };
+        reader.readAsText(file);
+      }
+
+      // Quick Ingest Form Submit
+      const form = document.getElementById('quick-ingest-form');
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const title = document.getElementById('quick-doc-title').value.trim();
+          const category = document.getElementById('quick-doc-category').value;
+          const content = document.getElementById('quick-doc-content').value.trim();
+          if (!title || !content) return;
+
+          const submitBtn = document.getElementById('quick-ingest-submit-btn');
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Indexing into Hybrid Engine...';
+
+          try {
+            const res = await fetch('/api/v1/documents/ingest', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                title: title,
+                content: content,
+                domain: category,
+                document_type: 'markdown',
+              }),
+            });
+
+            if (!res.ok) {
+              const err = await res.json();
+              throw new Error(err.detail || 'Failed to ingest document');
+            }
+
+            const docMeta = await res.json();
+            SynapseNav.addCustomDocument(docMeta);
+            await loadAllCorpusDocuments();
+            closeQuickIngestModal();
+
+            // Select newly created custom document and query it
+            await selectUploadedDocument(docMeta);
+            SynapseNav.showToast(
+              'Document Indexed!',
+              `"${title}" is now active in the Search Workbench. Ask any question!`,
+              'success'
+            );
+
+            // Clean up form
+            form.reset();
+          } catch (err) {
+            SynapseNav.showToast('Ingestion Error', err.message, 'error');
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Index Document & Query Now ->';
+          }
+        });
+      }
+    });
+
+    // Close on Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeQuickIngestModal();
+    });
   </script>
-</body>
-</html>
+
+  <!-- Quick Ingest Modal Component -->
+  <div id="quick-ingest-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div class="mask-border rounded-2xl bg-[#080c16] border border-white/20 max-w-3xl w-full p-6 relative max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-start justify-between pb-4 mb-4 border-b border-white/10">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-mono uppercase font-bold">
+              BRING YOUR OWN DATA
+            </span>
+            <span class="text-xs text-slate-400">Zero Setup Required</span>
+          </div>
+          <h2 class="text-lg font-bold text-white tracking-tight mt-1" style="font-family: 'Space Grotesk', sans-serif;">
+            Upload or Paste Your Document // Quick Search Preparation
+          </h2>
+          <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+            Add any document to Synapse. It will be divided into searchable sections, prepared for Semantic and Keyword search, and immediately ready to query with source citations.
+          </p>
+        </div>
+        <button type="button" onclick="closeQuickIngestModal()" class="w-8 h-8 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white flex items-center justify-center text-sm font-mono transition-all">
+          X
+        </button>
+      </div>
+
+      <!-- Quick 1-Click Templates Bar -->
+      <div class="mb-4 p-3 rounded-xl bg-white/[0.02] border border-white/10">
+        <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-2">
+          <span>DON'T HAVE A FILE HANDY? TRY ONE OF THESE ENTERPRISE TEMPLATES:</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button type="button" onclick="loadQuickTemplate('tpl-k8s-mesh')" class="p-2 rounded-lg bg-white/[0.03] hover:bg-sky-500/20 border border-white/10 hover:border-sky-400/40 text-left text-xs font-mono text-slate-200 transition-all cursor-pointer">
+            <div class="font-bold text-sky-300 text-[11px]">Istio mTLS Mesh</div>
+            <div class="text-[9px] text-slate-400 truncate">Security &amp; WASM</div>
+          </button>
+          <button type="button" onclick="loadQuickTemplate('tpl-saas-board')" class="p-2 rounded-lg bg-white/[0.03] hover:bg-emerald-500/20 border border-white/10 hover:border-emerald-400/40 text-left text-xs font-mono text-slate-200 transition-all cursor-pointer">
+            <div class="font-bold text-emerald-300 text-[11px]">Series C SaaS ARR</div>
+            <div class="text-[9px] text-slate-400 truncate">Finance Waterfall</div>
+          </button>
+          <button type="button" onclick="loadQuickTemplate('tpl-kafka-rfc')" class="p-2 rounded-lg bg-white/[0.03] hover:bg-indigo-500/20 border border-white/10 hover:border-indigo-400/40 text-left text-xs font-mono text-slate-200 transition-all cursor-pointer">
+            <div class="font-bold text-indigo-300 text-[11px]">Kafka Tiered S3</div>
+            <div class="text-[9px] text-slate-400 truncate">Architecture RFC</div>
+          </button>
+          <button type="button" onclick="loadQuickTemplate('tpl-hipaa-baa')" class="p-2 rounded-lg bg-white/[0.03] hover:bg-purple-500/20 border border-white/10 hover:border-purple-400/40 text-left text-xs font-mono text-slate-200 transition-all cursor-pointer">
+            <div class="font-bold text-purple-300 text-[11px]">HIPAA BAA 2025</div>
+            <div class="text-[9px] text-slate-400 truncate">Compliance &amp; PHI</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Drag-and-Drop Zone -->
+      <div id="quick-drop-zone" class="mb-4 border-2 border-dashed border-white/15 hover:border-emerald-400/60 rounded-xl p-4 text-center transition-all bg-white/[0.01]">
+        <label for="quick-file-input" class="cursor-pointer block">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-7 h-7 mx-auto text-emerald-400 mb-1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span class="text-xs font-semibold text-white">Drop a <code class="text-rose-300">.pdf</code>, <code class="text-sky-300">.docx</code>, <code class="text-amber-300">.csv</code>, <code class="text-purple-300">.json</code>, or <code class="text-emerald-300">.md</code> file here, or <span class="text-emerald-400 underline">Browse Local Files</span></span>
+          <span class="block text-[10px] font-mono text-slate-400 mt-0.5">PDFs, Word &amp; CSV files extract and prepare automatically for smart search</span>
+          <input id="quick-file-input" type="file" accept=".pdf,.docx,.csv,.json,.md,.txt,.log" class="hidden" />
+        </label>
+      </div>
+
+      <form id="quick-ingest-form" class="space-y-3.5">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label for="quick-doc-title" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+              DOCUMENT TITLE (REQUIRED)
+            </label>
+            <input
+              id="quick-doc-title"
+              type="text"
+              required
+              placeholder="e.g. My Company Infrastructure Spec (2025)"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs sm:text-sm font-mono text-white outline-none"
+            />
+          </div>
+          <div>
+            <label for="quick-doc-category" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+              CATEGORY
+            </label>
+            <select
+              id="quick-doc-category"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs sm:text-sm font-mono text-white outline-none"
+            >
+              <option value="custom">custom</option>
+              <option value="security">security</option>
+              <option value="financial">financial</option>
+              <option value="architecture">architecture</option>
+              <option value="compliance">compliance</option>
+              <option value="biomedical">biomedical</option>
+              <option value="incident">incident</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="quick-doc-content" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+            MARKDOWN OR PLAIN TEXT CONTENT (USE <code class="text-sky-300">## HEADINGS</code> TO DIVIDE INTO SEARCHABLE SECTIONS)
+          </label>
+          <textarea
+            id="quick-doc-content"
+            rows="10"
+            required
+            placeholder="Paste your notes, report, documentation, policy, or meeting minutes here..."
+            class="w-full p-3.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs font-mono text-slate-200 leading-relaxed outline-none resize-y"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-white/10">
+          <div class="text-[10px] font-mono text-slate-400">
+            Prepares in <span class="text-emerald-400">&lt;2 seconds</span> for AI Meaning &amp; Keyword Search
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closeQuickIngestModal()" class="px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-mono text-slate-300 transition-all">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              id="quick-ingest-submit-btn"
+              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white font-mono text-xs uppercase tracking-wider font-bold shadow-[0_0_20px_rgba(52,211,153,0.3)] transition-all cursor-pointer"
+            >
+              Save Document &amp; Search Now -&gt;
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>

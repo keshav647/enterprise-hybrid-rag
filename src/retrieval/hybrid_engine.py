@@ -42,6 +42,22 @@ class HybridRetrievalEngine:
         self.vector_store.add_chunks(chunks)
         self.bm25.index_chunks(chunks)
 
+    def remove_document(self, document_id: str) -> int:
+        """Removes all chunks for a document from vector store, chunks_by_id, and rebuilds BM25."""
+        to_delete = [
+            cid for cid, chunk in self.chunks_by_id.items()
+            if chunk.document_id == document_id
+        ]
+        for cid in to_delete:
+            self.chunks_by_id.pop(cid, None)
+
+        if hasattr(self.vector_store, "delete_by_document_id"):
+            self.vector_store.delete_by_document_id(document_id)
+
+        # Rebuild BM25 index with all remaining chunks
+        self.bm25.index_chunks(list(self.chunks_by_id.values()))
+        return len(to_delete)
+
     def retrieve(
         self,
         query: str,

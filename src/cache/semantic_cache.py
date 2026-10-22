@@ -16,6 +16,7 @@ class SemanticCacheEntry:
         mode: str = "hybrid",
         document_id: Optional[str] = None,
         hit_count: int = 0,
+        engine: str = "offline",
     ):
         self.query = query
         self.embedding = embedding
@@ -24,6 +25,7 @@ class SemanticCacheEntry:
         self.mode = mode
         self.document_id = document_id
         self.hit_count = hit_count
+        self.engine = engine
 
 
 class SemanticCache:
@@ -58,6 +60,7 @@ class SemanticCache:
         threshold: Optional[float] = None,
         mode: str = "hybrid",
         document_id: Optional[str] = None,
+        engine: str = "offline",
     ) -> Optional[Tuple[GroundedResponse, float]]:
         """Checks if a semantically equivalent query exists in the cache.
 
@@ -77,7 +80,7 @@ class SemanticCache:
         best_entry: Optional[SemanticCacheEntry] = None
 
         for entry in self.entries:
-            if entry.mode != mode or entry.document_id != document_id:
+            if entry.mode != mode or entry.document_id != document_id or entry.engine != engine:
                 continue
             sim = self.embedder.cosine_similarity(query_emb, entry.embedding)
             if sim > best_sim:
@@ -122,6 +125,7 @@ class SemanticCache:
         response: GroundedResponse,
         mode: str = "hybrid",
         document_id: Optional[str] = None,
+        engine: str = "offline",
     ) -> None:
         """Stores a newly synthesized response and its vector embedding."""
         query_emb = self.embedder.embed_text(query)
@@ -132,6 +136,7 @@ class SemanticCache:
             timestamp=time.time(),
             mode=mode,
             document_id=document_id,
+            engine=engine,
         )
         self.entries.append(entry)
         self.total_live_latency_ms += response.latency_ms
@@ -144,10 +149,10 @@ class SemanticCache:
         """Returns aggregated telemetry metrics."""
         hit_ratio = (self.cache_hits / self.total_queries) if self.total_queries > 0 else 0.0
         avg_cache_lat = (
-            (self.total_cache_latency_ms / self.cache_hits) if self.cache_hits > 0 else 1.8
+            (self.total_cache_latency_ms / self.cache_hits) if self.cache_hits > 0 else 0.0
         )
         avg_live_lat = (
-            (self.total_live_latency_ms / self.cache_misses) if self.cache_misses > 0 else 18.4
+            (self.total_live_latency_ms / self.cache_misses) if self.cache_misses > 0 else 0.0
         )
 
         return CacheStats(
@@ -159,6 +164,10 @@ class SemanticCache:
             avg_cache_latency_ms=round(avg_cache_lat, 2),
             avg_live_latency_ms=round(avg_live_lat, 2),
         )
+
+    def invalidate(self) -> None:
+        """Drops cached answers (e.g. after the document set changes) but keeps telemetry counters."""
+        self.entries.clear()
 
     def clear(self) -> None:
         """Clears all cached entries and resets metrics."""

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Synapse // 04 Corpus — 6-Domain Hardware Document Reader & Chunk Inspector</title>
+  <title>Synapse // Corpus — Knowledge Base &amp; Contextual Chunk Inspector</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -27,18 +27,22 @@
     <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-6 border-b border-white/10">
       <div>
         <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-purple-500/15 border border-purple-400/30 text-[10px] font-mono uppercase tracking-widest text-purple-300 mb-2">
-          PAGE 04 // THREEUI VOID-PROTOCOL HARDWARE CHASSIS &amp; CONTEXTUAL CHUNK INSPECTOR
+          KNOWLEDGE BASE // DOCUMENT &amp; SECTION VIEWER
         </div>
         <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">
-          Enterprise Knowledge Corpus &amp; Contextual Chunk Boundary Inspector
+          Document Knowledge Base &amp; Section Viewer
         </h1>
       </div>
       <div class="flex items-center gap-2.5">
-        <a href="/ingest" class="px-4 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all">
-          + Ingest New Custom Doc (Page 05)
+        <button type="button" onclick="SynapseNav.resetAllCustomDocuments()" class="px-3.5 py-2.5 rounded-xl bg-white/[0.04] hover:bg-rose-500/15 border border-white/10 hover:border-rose-400/40 text-slate-400 hover:text-rose-300 font-mono text-xs uppercase tracking-wider transition-all cursor-pointer" title="Removes all custom uploaded files and resets to default 6 starter documents">
+          Reset to Defaults
+        </button>
+        <a href="/ingest" class="px-4 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all flex items-center gap-1.5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          <span>+ Upload Document</span>
         </a>
         <button type="button" id="query-this-doc-btn" class="px-4 py-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/40 text-sky-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer">
-          Query Active Doc in Workbench -&gt;
+          Search in This Document -&gt;
         </button>
       </div>
     </div>
@@ -54,7 +58,7 @@
             <div class="flex items-center gap-2">
               <div class="hardware-rivet"></div>
               <span class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
-                INDEXED CORPUS REGISTRY
+                DOCUMENT LIBRARY
               </span>
             </div>
             <span id="corpus-total-badge" class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 text-[10px] font-mono">
@@ -78,7 +82,7 @@
         <div class="hardware-chassis rounded-2xl border border-white/15 p-4">
           <div class="flex items-center justify-between pb-2.5 mb-3 border-b border-white/10">
             <span class="text-xs font-mono uppercase tracking-widest text-sky-300 font-semibold">
-              SECTION &amp; CHUNK JUMP OUTLINE
+              TABLE OF CONTENTS
             </span>
             <span id="outline-chunk-count" class="text-[10px] font-mono text-slate-400">0 SECTIONS</span>
           </div>
@@ -116,10 +120,10 @@
             <!-- View Switcher: Contextual Chunks vs Full Markdown -->
             <div class="inline-flex rounded-xl bg-[#04060c] p-1 border border-white/10">
               <button type="button" id="mode-btn-chunks" class="px-3.5 py-1.5 rounded-lg text-xs font-mono bg-sky-500/20 text-sky-300 border border-sky-400/40 cursor-pointer">
-                Contextual Chunks View
+                Document Sections View
               </button>
               <button type="button" id="mode-btn-markdown" class="px-3.5 py-1.5 rounded-lg text-xs font-mono text-slate-400 hover:text-white cursor-pointer">
-                Full Document Reader
+                Full Text View
               </button>
             </div>
           </div>
@@ -127,15 +131,15 @@
           <!-- Metadata Telemetry Bar -->
           <div class="grid grid-cols-3 gap-3 mb-4 px-2">
             <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.07]">
-              <div class="text-[9px] font-mono uppercase text-slate-400">INDEXED CHUNKS</div>
+              <div class="text-[9px] font-mono uppercase text-slate-400">SEARCHABLE SECTIONS</div>
               <div id="meta-chunks" class="text-sm font-bold font-mono text-white mt-0.5">--</div>
             </div>
             <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.07]">
-              <div class="text-[9px] font-mono uppercase text-slate-400">TOTAL WORD COUNT</div>
+              <div class="text-[9px] font-mono uppercase text-slate-400">DOCUMENT LENGTH</div>
               <div id="meta-words" class="text-sm font-bold font-mono text-sky-300 mt-0.5">--</div>
             </div>
             <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.07]">
-              <div class="text-[9px] font-mono uppercase text-slate-400">EMBEDDING PREFIX</div>
+              <div class="text-[9px] font-mono uppercase text-slate-400">SEARCH CONTEXT</div>
               <div class="text-xs font-mono text-emerald-300 mt-0.5 truncate">[Document | Section]</div>
             </div>
           </div>
@@ -218,28 +222,67 @@
         );
       });
 
-      listEl.innerHTML = filtered.map((d) => {
+      const userDocs = filtered.filter(d => Boolean(d.tags && d.tags.includes('user-ingested')) || (SynapseNav.getCustomDocuments && SynapseNav.getCustomDocuments().some(cd => cd.id === d.document_id || cd.docId === d.document_id)));
+      const presetDocs = filtered.filter(d => !userDocs.includes(d));
+
+      function renderDocCard(d, isUserDoc) {
         const isCurrent = currentDocDetail && currentDocDetail.metadata.document_id === d.document_id;
         const cat = d.domain || d.category || 'enterprise';
         const chunkCnt = d.total_chunks !== undefined ? d.total_chunks : (d.chunk_count || 0);
         return `
-          <button type="button"
-            onclick="loadDocumentDetail('${SynapseNav.escapeHtml(d.document_id)}', null)"
-            class="w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${
-              isCurrent
-                ? 'bg-sky-500/15 border-sky-400/50 shadow-[0_0_16px_rgba(56,189,248,0.15)]'
-                : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.08]'
-            }">
-            <div class="flex items-center justify-between gap-2 mb-1">
-              <span class="px-2 py-0.5 rounded bg-white/[0.05] text-[10px] font-mono uppercase text-sky-300 truncate max-w-[160px]">
-                ${SynapseNav.escapeHtml(cat)}
-              </span>
-              <span class="text-[10px] font-mono text-slate-400 shrink-0">${chunkCnt} Chunks</span>
-            </div>
-            <div class="text-xs font-semibold text-white leading-snug">${SynapseNav.escapeHtml(d.title)}</div>
-          </button>
+          <div class="relative group">
+            <button type="button"
+              onclick="loadDocumentDetail('${SynapseNav.escapeHtml(d.document_id)}', null)"
+              class="w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${
+                isCurrent
+                  ? (isUserDoc ? 'bg-emerald-500/15 border-emerald-400/50 shadow-[0_0_16px_rgba(52,211,153,0.18)]' : 'bg-sky-500/15 border-sky-400/50 shadow-[0_0_16px_rgba(56,189,248,0.15)]')
+                  : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.08]'
+              }">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded ${isUserDoc ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold' : 'bg-white/[0.05] text-sky-300'} text-[10px] font-mono uppercase truncate max-w-[160px]">
+                  ${isUserDoc ? 'YOUR DATA' : SynapseNav.escapeHtml(cat)}
+                </span>
+                <span class="text-[10px] font-mono text-slate-400 shrink-0">${chunkCnt} Sections</span>
+              </div>
+              <div class="text-xs font-semibold text-white leading-snug pr-7">${SynapseNav.escapeHtml(d.title)}</div>
+            </button>
+            ${isUserDoc ? `
+              <button type="button"
+                onclick="handleDeleteFromCorpus('${SynapseNav.escapeHtml(d.document_id)}', '${SynapseNav.escapeHtml(d.title).replace(/'/g, "\\'")}', event)"
+                title="Delete this document from search index"
+                class="absolute right-2.5 bottom-2.5 p-1 rounded-md text-rose-400 hover:text-rose-200 hover:bg-rose-500/25 border border-transparent hover:border-rose-500/30 transition-all cursor-pointer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            ` : ''}
+          </div>
         `;
-      }).join('');
+      }
+
+      let html = '';
+      if (userDocs.length > 0) {
+        html += `
+          <div class="text-[10px] font-mono uppercase tracking-wider text-emerald-300 font-semibold px-1 pt-1 pb-1 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span>YOUR UPLOADED DOCUMENTS (${userDocs.length})</span>
+          </div>
+          ${userDocs.map(d => renderDocCard(d, true)).join('')}
+          <div class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold px-1 pt-3 pb-1 flex items-center gap-1.5 border-t border-white/[0.08] mt-2">
+            <span>SAMPLE DOCUMENTS (${presetDocs.length})</span>
+          </div>
+        `;
+      }
+      html += presetDocs.map(d => renderDocCard(d, false)).join('');
+      listEl.innerHTML = html;
+    }
+
+    async function handleDeleteFromCorpus(docId, title, event) {
+      if (event) event.stopPropagation();
+      if (!confirm(`Delete custom document "${title}" from the hybrid engine?`)) return;
+      await SynapseNav.deleteCustomDocument(docId);
+      await fetchCorpusList();
+      if (currentDocDetail && currentDocDetail.metadata.document_id === docId) {
+        loadDocumentDetail('cve_2024_8192_kernel_security_advisory');
+      }
     }
 
     async function loadDocumentDetail(docId, highlightChunk = null) {
@@ -257,8 +300,8 @@
       document.getElementById('active-doc-cat').textContent = m.domain || m.category || 'ENTERPRISE';
       document.getElementById('active-doc-id-pill').textContent = `ID: ${m.document_id}`;
       document.getElementById('active-doc-heading').textContent = m.title;
-      document.getElementById('meta-chunks').textContent = `${chunkCnt} Contextual Chunks`;
-      document.getElementById('meta-words').textContent = `${totalTokens} Tokens Indexed`;
+      document.getElementById('meta-chunks').textContent = `${chunkCnt} Sections`;
+      document.getElementById('meta-words').textContent = `${totalTokens} Tokens`;
 
       renderCorpusList(document.getElementById('corpus-filter-input').value.trim().toLowerCase());
       renderSectionOutline();
@@ -267,7 +310,7 @@
 
     function renderSectionOutline() {
       const chunks = currentDocDetail?.chunks || [];
-      document.getElementById('outline-chunk-count').textContent = `${chunks.length} CHUNKS`;
+      document.getElementById('outline-chunk-count').textContent = `${chunks.length} SECTIONS`;
       const outlineEl = document.getElementById('doc-section-outline');
       outlineEl.innerHTML = chunks.map((c, idx) => {
         const cNum = c.chunk_index !== undefined ? c.chunk_index + 1 : idx + 1;
@@ -332,7 +375,7 @@
             <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-white/10">
               <div class="flex items-center gap-2">
                 <span class="px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/40 text-sky-300 font-mono text-[10px] font-bold">
-                  CHUNK #${cNum}
+                  SECTION #${cNum}
                 </span>
                 <span class="text-xs font-mono font-semibold text-white">
                   ${SynapseNav.escapeHtml(c.section_title)}
@@ -347,7 +390,7 @@
 
             <!-- Contextual Prefix Injected for Dense + BM25 Indexing -->
             <div class="mb-2.5 px-2.5 py-1.5 rounded bg-indigo-500/10 border border-indigo-400/25 text-[10px] font-mono text-indigo-300">
-              CONTEXTUAL HEADER: [Document: ${SynapseNav.escapeHtml(c.document_title)} | Section: ${SynapseNav.escapeHtml(c.section_title)}]
+              SEARCH CONTEXT: [Document: ${SynapseNav.escapeHtml(c.document_title)} | Section: ${SynapseNav.escapeHtml(c.section_title)}]
             </div>
 
             <div class="text-xs text-slate-200 leading-relaxed">

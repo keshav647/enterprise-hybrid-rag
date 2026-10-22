@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Synapse // 05 Ingest — "What to Paste Where" Custom Document & Chunking Studio</title>
+  <title>Synapse // Ingest — Multi-Format Document Ingestion & Chunking Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -18,7 +18,7 @@
   <!-- ThreeUI Matrix-Field Interactive WebGL Lightning & Plasma Shader Canvas -->
   <canvas id="glcanvas-matrix" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-60"></canvas>
 
-  <!-- Shared 7-Page Navigation Dock -->
+  <!-- Shared Navigation Dock -->
   <div id="synapse-top-dock" class="relative z-50"></div>
 
   <main class="relative z-10 max-w-[1600px] mx-auto px-4 lg:px-6 pt-6 pb-20">
@@ -27,56 +27,193 @@
     <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-6 border-b border-white/10">
       <div>
         <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-amber-500/15 border border-amber-400/30 text-[10px] font-mono uppercase tracking-widest text-amber-300 mb-2">
-          PAGE 05 // THREEUI MATRIX-FIELD WEBGL LIGHTNING SHADER &amp; CONTEXTUAL INGESTION STUDIO
+          DOCUMENT UPLOAD // AUTOMATIC TEXT EXTRACTION &amp; SEARCH INDEXING
         </div>
         <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">
-          "What to Paste Where" — Custom Document Ingestion &amp; Live Chunking Studio
+          Upload &amp; Manage Documents — Custom Document Studio
         </h1>
         <p class="text-xs sm:text-sm text-slate-300 mt-1">
-          Load a 1-click enterprise sample template, upload a <code class="text-sky-300">.md / .txt</code> file, or paste your own Markdown to index into the live 768-D Dense + BM25 Hybrid Engine.
+          Upload <strong class="text-white">PDF</strong>, <strong class="text-white">Word (.docx)</strong>, <strong class="text-white">CSV</strong>, <strong class="text-white">JSON</strong>, <strong class="text-white">Markdown</strong>, or <strong class="text-white">Text</strong> files to make them instantly searchable.
         </p>
       </div>
-      <a href="/documents" class="px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-xs font-mono text-sky-300">
-        Inspect Indexed Corpus (Page 04) -&gt;
-      </a>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="SynapseNav.resetAllCustomDocuments()" class="px-3.5 py-2.5 rounded-xl bg-white/[0.04] hover:bg-rose-500/15 border border-white/10 hover:border-rose-400/40 text-slate-400 hover:text-rose-300 font-mono text-xs uppercase tracking-wider transition-all cursor-pointer" title="Removes all custom uploaded files and resets to default 6 starter documents">
+          Reset to Defaults
+        </button>
+        <a href="/documents" class="px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-xs font-mono text-sky-300">
+          View All Documents -&gt;
+        </a>
+      </div>
     </div>
 
-    <!-- Step 1: 4 Ready-to-Paste Sample Enterprise Templates -->
-    <section class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-5 mb-6 relative">
+    <!-- HERO SECTION: Primary Multi-Format File Upload Studio (Hero Focus) -->
+    <section class="mask-border rounded-2xl bg-[#080c16]/95 backdrop-blur-xl p-6 sm:p-7 mb-7 border border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.12)] relative">
       <div class="corner-sq top-0 left-0"></div>
       <div class="corner-sq top-0 right-0"></div>
 
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <div>
-          <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300 font-bold">
-            STEP 01 // CLICK A SAMPLE TEMPLATE TO AUTO-FILL THE EDITOR (OR UPLOAD A FILE)
-          </span>
-          <p class="text-xs text-slate-400 mt-0.5">
-            Don't have a document handy? Click any of these 4 enterprise templates to populate the Title, Category, Markdown Body, and Suggested Verification Queries.
-          </p>
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399] animate-pulse"></span>
+          <div>
+            <h2 class="text-sm font-mono uppercase tracking-widest text-white font-bold">
+              UPLOAD DOCUMENTS (PDF, WORD, CSV, JSON, MARKDOWN, TXT)
+            </h2>
+            <p class="text-xs text-slate-300 mt-0.5">
+              Drag and drop any document. Synapse automatically extracts text, splits it into searchable sections, and prepares it for search in real time.
+            </p>
+          </div>
         </div>
-
-        <label class="px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/40 text-sky-300 font-mono text-xs uppercase tracking-wider font-semibold cursor-pointer transition-all">
-          <span>Upload .MD / .TXT File</span>
-          <input id="file-upload-input" type="file" accept=".md,.txt,.json,.log" class="hidden" />
-        </label>
+        <div class="flex flex-wrap items-center gap-1.5 text-[10px] font-mono">
+          <span class="px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-400/30">.PDF</span>
+          <span class="px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-400/30">.DOCX</span>
+          <span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-400/30">.CSV</span>
+          <span class="px-2 py-0.5 rounded bg-purple-500/15 text-purple-300 border border-purple-400/30">.JSON</span>
+          <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">.MD / .TXT</span>
+        </div>
       </div>
 
-      <div id="sample-templates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <!-- Populated by JS from SynapseNav.SAMPLE_TEMPLATES -->
+      <!-- Drag & Drop Zone -->
+      <div
+        id="multi-drop-zone"
+        class="border-2 border-dashed border-emerald-500/35 hover:border-emerald-400 bg-emerald-950/10 hover:bg-emerald-950/25 rounded-2xl p-6 sm:p-8 text-center transition-all cursor-pointer relative overflow-hidden group"
+      >
+        <input
+          id="multi-file-input"
+          type="file"
+          accept=".pdf,.docx,.csv,.json,.md,.txt,.log"
+          class="hidden"
+        />
+
+        <div class="max-w-lg mx-auto flex flex-col items-center justify-center pointer-events-none">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-400/40 flex items-center justify-center text-emerald-300 mb-3 shadow-[0_0_20px_rgba(52,211,153,0.3)] group-hover:scale-110 transition-transform">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-7 h-7"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <h3 class="text-base sm:text-lg font-bold text-white tracking-tight mb-1">
+            Drop your document here, or <span class="text-emerald-400 underline cursor-pointer">browse local files</span>
+          </h3>
+          <p class="text-xs text-slate-300 mb-4 max-w-md">
+            Full native extraction: Multi-page PDFs (with page tracking), Word tables &amp; headings, tabular CSV rows, structured JSON, and Markdown files.
+          </p>
+
+          <!-- Selected File Details Banner -->
+          <div id="selected-file-banner" class="hidden w-full p-3 rounded-xl bg-[#04070e] border border-emerald-400/50 flex items-center justify-between gap-3 text-left mb-3">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span id="selected-file-ext-badge" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold uppercase shrink-0">
+                PDF
+              </span>
+              <div class="truncate">
+                <div id="selected-file-name" class="text-xs font-semibold text-white truncate">document.pdf</div>
+                <div id="selected-file-size" class="text-[10px] font-mono text-slate-400">0 KB</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              id="clear-selected-file-btn"
+              onclick="clearSelectedFile(event)"
+              class="text-xs font-mono text-slate-400 hover:text-rose-300 p-1 pointer-events-auto"
+              title="Remove file"
+            >
+              Cancel
+            </button>
+          </div>
+
+          <!-- Upload Metadata Controls -->
+          <div class="w-full grid grid-cols-1 sm:grid-cols-3 gap-3 pointer-events-auto text-left">
+            <div class="sm:col-span-2">
+              <label for="upload-doc-title" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+                DOCUMENT TITLE (OPTIONAL, AUTO-DETECTS FILENAME)
+              </label>
+              <input
+                id="upload-doc-title"
+                type="text"
+                placeholder="e.g. Q4 Cloud Security & Zero-Trust Architecture Review"
+                class="w-full px-3.5 py-2 rounded-xl bg-[#04070e] border border-white/15 focus:border-emerald-400 text-xs font-mono text-white outline-none"
+              />
+            </div>
+            <div>
+              <label for="upload-doc-category" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+                DOMAIN CATEGORY
+              </label>
+              <select
+                id="upload-doc-category"
+                class="w-full px-3.5 py-2 rounded-xl bg-[#04070e] border border-white/15 focus:border-emerald-400 text-xs font-mono text-white outline-none"
+              >
+                <option value="custom">custom (Your Data)</option>
+                <option value="security">security</option>
+                <option value="financial">financial</option>
+                <option value="architecture">architecture</option>
+                <option value="compliance">compliance</option>
+                <option value="biomedical">biomedical</option>
+                <option value="incident">incident</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="w-full flex items-center justify-between gap-3 mt-4 pointer-events-auto">
+            <span class="text-[11px] font-mono text-slate-400 hidden sm:inline">
+              Semantic Search + Exact Keyword Matching
+            </span>
+            <button
+              type="button"
+              id="start-upload-btn"
+              onclick="triggerMultiFileUpload(event)"
+              class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white font-mono text-xs uppercase tracking-widest font-bold shadow-[0_0_25px_rgba(52,211,153,0.35)] transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span id="start-upload-btn-label">Upload &amp; Search Document -&gt;</span>
+            </button>
+          </div>
+
+          <!-- Upload Progress Bar -->
+          <div id="upload-progress-container" class="hidden w-full mt-4 pt-3 border-t border-white/10 text-left">
+            <div class="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-1.5">
+              <span id="upload-progress-status">Processing document &amp; preparing search index...</span>
+              <span id="upload-progress-percent" class="text-emerald-300 font-bold">In Progress</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-900 overflow-hidden border border-white/10">
+              <div id="upload-progress-bar" class="h-full bg-gradient-to-r from-emerald-500 to-sky-500 rounded-full w-2/3 animate-pulse"></div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </section>
 
-    <!-- Step 2: Split-Screen Paste Editor (Left) & Live Contextual Chunk Preview + Verification Launcher (Right) -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Post-Ingestion Success Card (Appears after upload or text paste) -->
+    <div id="ingest-success-card" class="hidden mask-border rounded-2xl bg-emerald-950/40 border border-emerald-400/60 p-6 mb-7 shadow-[0_0_30px_rgba(52,211,153,0.2)]">
+      <div class="flex items-center justify-between mb-2">
+        <span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-mono text-xs font-bold uppercase">
+          DOCUMENT READY FOR SEARCH
+        </span>
+        <span id="ingested-doc-stats" class="text-xs font-mono text-emerald-200"></span>
+      </div>
+      <h3 id="ingested-doc-title" class="text-base font-bold text-white mb-2"></h3>
+      <p class="text-xs text-slate-300 mb-3">
+        Your document is indexed with semantic and keyword search. Click a question below to test:
+      </p>
+      <div id="ingested-query-buttons" class="space-y-2 mb-3"></div>
+      <div class="flex items-center gap-3 pt-2 border-t border-white/10">
+        <a id="ingested-open-reader-link" href="/documents" class="text-xs font-mono text-sky-300 hover:underline">
+          View in Document Reader -&gt;
+        </a>
+      </div>
+    </div>
+
+    <!-- SECTION: Split-Screen Direct Text / Markdown Editor (Left) & Live Chunk Preview (Right) -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-8">
 
       <!-- Left 7 Columns: Paste Form -->
       <div class="lg:col-span-7 mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-5 sm:p-6">
         <div class="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
-          <span class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
-            STEP 02 // PASTE DOCUMENT TITLE, DOMAIN CATEGORY &amp; MARKDOWN CONTENT
-          </span>
-          <span class="text-[10px] font-mono text-emerald-300">REAL-TIME CHUNKER ACTIVE</span>
+          <div>
+            <span class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
+              OR PASTE TEXT DIRECTLY
+            </span>
+            <p class="text-[11px] text-slate-400 mt-0.5">
+              Paste articles, policies, meeting notes, or text to index
+            </p>
+          </div>
+          <span class="text-[10px] font-mono text-emerald-300">LIVE SECTION PREVIEW ACTIVE</span>
         </div>
 
         <form id="ingest-doc-form" class="space-y-4">
@@ -102,13 +239,13 @@
                 id="ingest-category"
                 class="w-full px-3.5 py-2.5 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs sm:text-sm font-mono text-white outline-none"
               >
+                <option value="custom">custom (Your Data)</option>
                 <option value="security">security</option>
                 <option value="financial">financial</option>
                 <option value="architecture">architecture</option>
                 <option value="compliance">compliance</option>
                 <option value="biomedical">biomedical</option>
                 <option value="incident">incident</option>
-                <option value="custom">custom</option>
               </select>
             </div>
           </div>
@@ -116,13 +253,13 @@
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <label for="ingest-content" class="text-[10px] font-mono uppercase tracking-wider text-slate-400">
-                MARKDOWN CONTENT (USE <code class="text-sky-300">## HEADINGS</code> FOR SEMANTIC SECTION CHUNKING)
+                CONTENT (USE <code class="text-sky-300">## HEADINGS</code> TO ORGANIZE INTO SECTIONS)
               </label>
               <span id="editor-word-count" class="text-[10px] font-mono text-sky-300">0 words</span>
             </div>
             <textarea
               id="ingest-content"
-              rows="16"
+              rows="14"
               required
               placeholder="Paste your Markdown document, RFC, security advisory, financial report, or SLA here..."
               class="w-full p-4 rounded-xl bg-[#04070e] border border-white/15 focus:border-sky-400 text-xs font-mono text-slate-200 leading-relaxed outline-none resize-y"
@@ -131,63 +268,84 @@
 
           <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
             <div class="text-[11px] font-mono text-slate-400">
-              Indexes into: <span class="text-white">768-D Dense Vector Store</span> + <span class="text-white">BM25 Okapi Index</span>
+              Prepared with: <span class="text-white">AI Semantic Search</span> + <span class="text-white">Exact Keyword Matching</span>
             </div>
             <button
               type="submit"
               id="ingest-submit-btn"
               class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white font-mono text-xs uppercase tracking-widest font-bold shadow-[0_0_25px_rgba(52,211,153,0.3)] transition-all cursor-pointer"
             >
-              Ingest &amp; Index into Hybrid Engine -&gt;
+              Save &amp; Index Text -&gt;
             </button>
           </div>
         </form>
       </div>
 
-      <!-- Right 5 Columns: Post-Ingest Verification Box + Live Contextual Chunk Preview -->
+      <!-- Right 5 Columns: Live Contextual Chunk Preview -->
       <div class="lg:col-span-5 space-y-5">
-
-        <!-- Post-Ingestion Success & 1-Click Query Verification Card -->
-        <div id="ingest-success-card" class="hidden mask-border rounded-2xl bg-emerald-950/30 border border-emerald-400/50 p-5">
-          <div class="flex items-center justify-between mb-2">
-            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold uppercase">
-              INDEXED LIVE IN ENGINE
-            </span>
-            <span id="ingested-doc-stats" class="text-[11px] font-mono text-emerald-200"></span>
-          </div>
-          <h3 id="ingested-doc-title" class="text-sm font-bold text-white mb-2"></h3>
-          <p class="text-xs text-slate-300 mb-3">
-            STEP 03 // Click a tailored verification question below to query your newly ingested document in the Page 02 Hybrid Search Workbench:
-          </p>
-          <div id="ingested-query-buttons" class="space-y-2 mb-3"></div>
-          <div class="flex items-center gap-2 pt-2 border-t border-white/10">
-            <a id="ingested-open-reader-link" href="/documents" class="text-xs font-mono text-sky-300 hover:underline">
-              Open in Page 04 Corpus Reader -&gt;
-            </a>
-          </div>
-        </div>
-
-        <!-- Live Contextual Chunk Boundary Preview -->
         <div class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-5">
           <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
             <div>
               <h3 class="text-xs font-mono uppercase tracking-widest text-sky-300 font-semibold">
-                LIVE CONTEXTUAL CHUNK PREVIEW
+                LIVE DOCUMENT SECTIONS PREVIEW
               </h3>
               <p class="text-[11px] text-slate-400 mt-0.5">
-                Shows how ContextualChunker splits your pasted text and prepends headers
+                Shows how your document is automatically divided into searchable sections
               </p>
             </div>
             <span id="preview-chunk-badge" class="px-2.5 py-1 rounded bg-sky-500/15 border border-sky-400/30 text-[10px] font-mono text-sky-300">
-              0 CHUNKS
+              0 SECTIONS
             </span>
           </div>
 
-          <div id="live-chunk-preview-list" class="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+          <div id="live-chunk-preview-list" class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
             <!-- Populated live as user types or selects template -->
           </div>
         </div>
+      </div>
+    </section>
 
+    <!-- SECTION: My Ingested Custom Documents Ledger (Clear Document Management & Deletion) -->
+    <section class="mask-border rounded-2xl bg-[#080c16]/90 backdrop-blur-xl p-5 mb-8">
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+          <div>
+            <h3 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
+              YOUR UPLOADED DOCUMENTS
+            </h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">
+              Manage your uploaded documents: search them directly or remove them anytime
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="custom-docs-count-badge" class="px-2.5 py-1 rounded bg-white/[0.04] border border-white/10 text-[10px] font-mono text-emerald-300">
+            0 CUSTOM DOCS
+          </span>
+        </div>
+      </div>
+
+      <div id="custom-docs-ledger-list" class="space-y-2.5">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- OPTIONAL / SECONDARY SECTION: Pre-Packaged Sample Enterprise Templates (Demoted to subtle secondary) -->
+    <section class="mask-border rounded-2xl bg-[#080c16]/70 backdrop-blur-xl p-5 mb-6 border border-white/10">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">
+            SAMPLE DOCUMENTS // TRY PRE-LOADED TEMPLATES
+          </span>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Need quick sample data? Click any template below to load it into the editor.
+          </p>
+        </div>
+      </div>
+
+      <div id="sample-templates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- Populated by JS from SynapseNav.SAMPLE_TEMPLATES -->
       </div>
     </section>
 
@@ -196,57 +354,37 @@
   <script src="/static/js/nav.js"></script>
   <script>
     let activeTemplateQueries = [];
+    let pendingFileToUpload = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       SynapseNav.mountDock('ingest');
       initMatrixFieldLightningShader();
+      renderCustomDocsLedger();
+      initMultiFormatDropzone();
 
-      // Render 4 sample templates
+      // Render 4 subtle sample templates
       const grid = document.getElementById('sample-templates-grid');
       grid.innerHTML = SynapseNav.SAMPLE_TEMPLATES.map((t, i) => `
         <button type="button"
           onclick="loadSampleTemplate('${t.id}')"
-          class="text-left p-3.5 rounded-xl bg-white/[0.03] hover:bg-sky-500/15 border border-white/10 hover:border-sky-400/40 transition-all cursor-pointer flex flex-col justify-between">
+          class="text-left p-3 rounded-xl bg-white/[0.02] hover:bg-sky-500/10 border border-white/[0.08] hover:border-sky-400/30 transition-all cursor-pointer flex flex-col justify-between">
           <div>
-            <div class="flex items-center justify-between gap-2 mb-1.5">
-              <span class="px-2 py-0.5 rounded bg-amber-500/15 border border-amber-400/30 text-[10px] font-mono uppercase text-amber-300">
-                TEMPLATE 0${i + 1} // ${t.category}
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="px-2 py-0.5 rounded bg-white/[0.04] border border-white/10 text-[9px] font-mono uppercase text-slate-300">
+                ${t.category}
               </span>
               <span class="text-[10px] font-mono text-sky-400">Load -&gt;</span>
             </div>
-            <div class="text-xs font-semibold text-white mb-1 leading-snug">${SynapseNav.escapeHtml(t.title)}</div>
-            <p class="text-[11px] text-slate-400 line-clamp-2">${SynapseNav.escapeHtml(t.summary)}</p>
+            <div class="text-xs font-semibold text-white mb-0.5 leading-snug">${SynapseNav.escapeHtml(t.title)}</div>
+            <p class="text-[10px] text-slate-400 line-clamp-2">${SynapseNav.escapeHtml(t.summary)}</p>
           </div>
         </button>
       `).join('');
 
-      // Pre-load Template 01 by default so the studio is immediately ready to test
-      loadSampleTemplate(SynapseNav.SAMPLE_TEMPLATES[0].id);
-
       document.getElementById('ingest-title').addEventListener('input', updateLiveChunkPreview);
       document.getElementById('ingest-content').addEventListener('input', updateLiveChunkPreview);
 
-      // File upload handler
-      document.getElementById('file-upload-input').addEventListener('change', (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          const text = String(reader.result || '');
-          const cleanName = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ');
-          document.getElementById('ingest-title').value = cleanName;
-          document.getElementById('ingest-content').value = text;
-          activeTemplateQueries = [
-            `What are the key findings and requirements in ${cleanName}?`,
-            `Summarize the technical metrics and action items in ${cleanName}.`,
-          ];
-          updateLiveChunkPreview();
-          SynapseNav.showToast('File Loaded', `Loaded ${file.name} into the Ingestion Editor.`, 'success');
-        };
-        reader.readAsText(file);
-      });
-
-      // Form Submit -> POST /api/v1/documents/ingest
+      // Text Form Submit -> POST /api/v1/documents/ingest
       document.getElementById('ingest-doc-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const title = document.getElementById('ingest-title').value.trim();
@@ -256,7 +394,7 @@
 
         const btn = document.getElementById('ingest-submit-btn');
         btn.disabled = true;
-        btn.textContent = 'Indexing into Dense + BM25 Engine...';
+        btn.textContent = 'Indexing Document for Search...';
 
         try {
           const res = await fetch('/api/v1/documents/ingest', {
@@ -268,53 +406,195 @@
             const errJson = await res.json().catch(() => ({}));
             throw new Error(errJson.detail || `HTTP ${res.status}`);
           }
-          const data = await res.json();
-          const doc = data.document || data;
-          const chunkCnt = doc.total_chunks !== undefined ? doc.total_chunks : (doc.chunk_count || 0);
-
-          SynapseNav.refreshTelemetryBadges();
-          SynapseNav.showToast(
-            'Document Indexed Live',
-            `${doc.title} (${chunkCnt} chunks) added to Hybrid RAG Engine.`,
-            'success'
-          );
-
-          // Show verification card with 1-click query links
-          const card = document.getElementById('ingest-success-card');
-          card.classList.remove('hidden');
-          document.getElementById('ingested-doc-title').textContent = doc.title;
-          document.getElementById('ingested-doc-stats').textContent = `${chunkCnt} Contextual Chunks Indexed`;
-          document.getElementById('ingested-open-reader-link').href = `/documents?doc=${encodeURIComponent(doc.document_id)}`;
-
-          const queriesToOffer =
-            (doc.suggested_queries && doc.suggested_queries.length > 0)
-              ? doc.suggested_queries
-              : (activeTemplateQueries.length > 0
-                  ? activeTemplateQueries
-                  : [
-                      `What are the key specifications and metrics in ${doc.title}?`,
-                      `What remediation or compliance rules are defined in ${doc.title}?`,
-                    ]);
-
-          document.getElementById('ingested-query-buttons').innerHTML = queriesToOffer
-            .map(
-              (q) => `
-              <a href="/search?q=${encodeURIComponent(q)}"
-                 class="block px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-xs font-mono text-white transition-all flex items-center justify-between gap-2">
-                <span class="truncate">Ask: "${SynapseNav.escapeHtml(q)}"</span>
-                <span class="text-emerald-300 shrink-0">Test in Workbench -&gt;</span>
-              </a>
-            `
-            )
-            .join('');
+          const doc = await res.json();
+          handleIngestionSuccess(doc, activeTemplateQueries);
         } catch (err) {
-          SynapseNav.showToast('Ingestion Error', err.message, 'error');
+          SynapseNav.showToast('Upload Error', err.message, 'error');
         } finally {
           btn.disabled = false;
-          btn.textContent = 'Ingest & Index into Hybrid Engine ->';
+          btn.textContent = 'Save & Index Text ->';
         }
       });
     });
+
+    // Multi-Format Drag & Drop Dropzone Initializer
+    function initMultiFormatDropzone() {
+      const dropZone = document.getElementById('multi-drop-zone');
+      const fileInput = document.getElementById('multi-file-input');
+
+      ['dragenter', 'dragover'].forEach((evt) => {
+        dropZone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          dropZone.classList.add('border-emerald-400', 'bg-emerald-950/30', 'scale-[1.01]');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach((evt) => {
+        dropZone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('border-emerald-400', 'bg-emerald-950/30', 'scale-[1.01]');
+        });
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer?.files;
+        if (files && files.length > 0) handleSelectedFile(files[0]);
+      });
+
+      dropZone.addEventListener('click', (e) => {
+        if (e.target.closest('#clear-selected-file-btn') || e.target.closest('#start-upload-btn') || e.target.closest('input') || e.target.closest('select')) {
+          return;
+        }
+        fileInput.click();
+      });
+
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files.length > 0) {
+          handleSelectedFile(fileInput.files[0]);
+        }
+      });
+    }
+
+    function handleSelectedFile(file) {
+      pendingFileToUpload = file;
+      const banner = document.getElementById('selected-file-banner');
+      banner.classList.remove('hidden');
+
+      const ext = file.name.split('.').pop().toUpperCase();
+      document.getElementById('selected-file-ext-badge').textContent = ext;
+      document.getElementById('selected-file-name').textContent = file.name;
+      const kb = (file.size / 1024).toFixed(1);
+      document.getElementById('selected-file-size').textContent = `${kb} KB`;
+
+      // Pre-fill Title input if empty
+      const titleInput = document.getElementById('upload-doc-title');
+      if (!titleInput.value.trim()) {
+        const cleanName = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ');
+        titleInput.value = cleanName;
+      }
+    }
+
+    function clearSelectedFile(e) {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+      pendingFileToUpload = null;
+      document.getElementById('multi-file-input').value = '';
+      document.getElementById('selected-file-banner').classList.add('hidden');
+    }
+
+    async function triggerMultiFileUpload(e) {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+
+      if (!pendingFileToUpload) {
+        // Trigger file picker
+        document.getElementById('multi-file-input').click();
+        return;
+      }
+
+      const file = pendingFileToUpload;
+      const title = document.getElementById('upload-doc-title').value.trim() || file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ');
+      const category = document.getElementById('upload-doc-category').value || 'custom';
+
+      const btn = document.getElementById('start-upload-btn');
+      const label = document.getElementById('start-upload-btn-label');
+      const prog = document.getElementById('upload-progress-container');
+      const progStatus = document.getElementById('upload-progress-status');
+      const progBar = document.getElementById('upload-progress-bar');
+
+      btn.disabled = true;
+      label.textContent = 'Uploading & Indexing...';
+      prog.classList.remove('hidden');
+      progStatus.textContent = `Extracting ${file.name} (${file.name.split('.').pop().toUpperCase()})...`;
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('title', title);
+      formData.append('domain', category);
+
+      try {
+        const res = await fetch('/api/v1/documents/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `Upload failed with HTTP ${res.status}`);
+        }
+
+        const docMeta = await res.json();
+        clearSelectedFile();
+        prog.classList.add('hidden');
+        handleIngestionSuccess(docMeta, [
+          `What are the key points in ${title}?`,
+          `Summarize the technical details in ${title}.`,
+        ]);
+      } catch (err) {
+        SynapseNav.showToast('Upload Error', err.message, 'error');
+        progStatus.textContent = `Error: ${err.message}`;
+        progBar.classList.add('bg-rose-500');
+      } finally {
+        btn.disabled = false;
+        label.textContent = 'Upload & Index Document ->';
+      }
+    }
+
+    function handleIngestionSuccess(doc, suggestedQueries = []) {
+      const chunkCnt = doc.total_chunks !== undefined ? doc.total_chunks : (doc.chunk_count || 0);
+
+      if (SynapseNav.addCustomDocument) {
+        SynapseNav.addCustomDocument(doc);
+        renderCustomDocsLedger();
+      }
+
+      SynapseNav.refreshTelemetryBadges();
+      SynapseNav.showToast(
+        'Document Ready',
+        `"${doc.title}" (${chunkCnt} sections) indexed. Ready to search!`,
+        'success'
+      );
+
+      // Show verification card with 1-click query links
+      const card = document.getElementById('ingest-success-card');
+      card.classList.remove('hidden');
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      document.getElementById('ingested-doc-title').textContent = doc.title;
+      document.getElementById('ingested-doc-stats').textContent = `${chunkCnt} Searchable Sections`;
+      document.getElementById('ingested-open-reader-link').href = `/documents?doc=${encodeURIComponent(doc.document_id)}`;
+
+      const queriesToOffer =
+        (doc.suggested_queries && doc.suggested_queries.length > 0)
+          ? doc.suggested_queries
+          : (suggestedQueries.length > 0
+              ? suggestedQueries
+              : [
+                  `What are the key specifications and metrics in ${doc.title}?`,
+                  `What findings or rules are defined in ${doc.title}?`,
+                ]);
+
+      document.getElementById('ingested-query-buttons').innerHTML = `
+        <a href="/search?domain=${encodeURIComponent(doc.document_id)}"
+           class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white font-mono text-xs uppercase tracking-wider font-bold shadow-lg transition-all flex items-center justify-center gap-2 mb-2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Search in "${SynapseNav.escapeHtml(doc.title)}" -&gt;</span>
+        </a>
+      ` + queriesToOffer
+        .map(
+          (q) => `
+          <a href="/search?domain=${encodeURIComponent(doc.document_id)}&q=${encodeURIComponent(q)}"
+             class="block px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-xs font-mono text-white transition-all flex items-center justify-between gap-2">
+            <span class="truncate">Ask: "${SynapseNav.escapeHtml(q)}"</span>
+            <span class="text-emerald-300 shrink-0">Ask -&gt;</span>
+          </a>
+        `
+        )
+        .join('');
+    }
 
     function loadSampleTemplate(tplId) {
       const tpl = SynapseNav.SAMPLE_TEMPLATES.find((t) => t.id === tplId);
@@ -324,6 +604,8 @@
       document.getElementById('ingest-content').value = tpl.content;
       activeTemplateQueries = tpl.suggestedQueries || [];
       updateLiveChunkPreview();
+      SynapseNav.showToast('Template Loaded', `Loaded "${tpl.title}" into the text editor.`, 'info');
+      document.getElementById('ingest-doc-form').scrollIntoView({ behavior: 'smooth' });
     }
 
     function updateLiveChunkPreview() {
@@ -355,6 +637,16 @@
 
       document.getElementById('preview-chunk-badge').textContent = `${sections.length} CHUNKS`;
       const container = document.getElementById('live-chunk-preview-list');
+      if (sections.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 rounded-xl border border-dashed border-white/10 text-center">
+            <p class="text-xs text-slate-400 font-mono">No chunks to preview yet.</p>
+            <p class="text-[11px] text-slate-500 mt-1">Type or paste text into the editor to see real-time chunk boundaries.</p>
+          </div>
+        `;
+        return;
+      }
+
       container.innerHTML = sections
         .map((s, idx) => {
           const tokCount = s.body.split(/\s+/).filter(Boolean).length;
@@ -376,6 +668,55 @@
           `;
         })
         .join('');
+    }
+
+    function renderCustomDocsLedger() {
+      const listEl = document.getElementById('custom-docs-ledger-list');
+      const badgeEl = document.getElementById('custom-docs-count-badge');
+      if (!listEl) return;
+      const docs = SynapseNav.getCustomDocuments ? SynapseNav.getCustomDocuments() : [];
+      if (badgeEl) badgeEl.textContent = `${docs.length} CUSTOM DOCS`;
+
+      if (!docs.length) {
+        listEl.innerHTML = `
+          <div class="p-6 rounded-xl border border-dashed border-white/10 bg-white/[0.01] text-center">
+            <p class="text-xs text-slate-400 font-mono">No custom documents indexed yet.</p>
+            <p class="text-[11px] text-slate-500 mt-1">Upload a PDF, Word, CSV, JSON, Markdown, or Text file above to index your private data.</p>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = docs.map((d) => `
+        <div class="p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.08] hover:border-white/15 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 font-semibold">
+                ${SynapseNav.escapeHtml(d.category || 'CUSTOM')}
+              </span>
+              <span class="text-[10px] font-mono text-slate-400">${d.metrics || `${d.total_chunks || 1} Chunks`}</span>
+              <span class="text-[10px] font-mono text-slate-500">ID: ${SynapseNav.escapeHtml(d.id)}</span>
+            </div>
+            <h4 class="text-xs font-semibold text-white truncate">${SynapseNav.escapeHtml(d.title)}</h4>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <a href="/search?domain=${encodeURIComponent(d.id)}" class="px-3 py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-300 text-[11px] font-mono uppercase tracking-wider transition-all flex items-center gap-1">
+              <span>Query in Search</span>
+              <span>-&gt;</span>
+            </a>
+            <button type="button" onclick="handleDeleteCustomDoc('${d.id}', '${SynapseNav.escapeHtml(d.title).replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 hover:border-rose-500/60 text-rose-300 text-[11px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              <span>Delete</span>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function handleDeleteCustomDoc(docId, title) {
+      if (!confirm(`Delete custom document "${title}" from the hybrid engine?`)) return;
+      await SynapseNav.deleteCustomDocument(docId);
+      renderCustomDocsLedger();
     }
 
     // Authentic ThreeUI Matrix-Field Interactive WebGL Lightning Shader
@@ -442,7 +783,6 @@
           vec2 p = uv * 2.5;
           float n = fbm(p + u_time * 0.15);
 
-          // Subtle plasma beam toward mouse cursor
           vec2 dVec = mouseUV - vec2(0.0, 0.35);
           float len = length(dVec);
           vec2 dir = dVec / max(len, 0.001);

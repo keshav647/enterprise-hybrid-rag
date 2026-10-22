@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Synapse // 06 Benchmarks — ThreeUI Brushed-Metal Hardware Gauges & Ragas Suite</title>
+  <title>Synapse // Benchmarks — Retrieval Evaluation Suite &amp; Performance Gauges</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -15,7 +15,7 @@
 </head>
 <body class="min-h-screen bg-[#06080f] text-slate-100 selection:bg-sky-500/30 selection:text-sky-200 relative">
 
-  <!-- Shared 7-Page Navigation Dock -->
+  <!-- Shared Navigation Dock -->
   <div id="synapse-top-dock" class="relative z-50"></div>
 
   <main class="relative z-10 max-w-[1600px] mx-auto px-4 lg:px-6 pt-6 pb-20">
@@ -24,24 +24,27 @@
     <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-7 border-b border-white/10">
       <div>
         <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-rose-500/15 border border-rose-400/30 text-[10px] font-mono uppercase tracking-widest text-rose-300 mb-2">
-          PAGE 06 // THREEUI PERFORMANCE-GAUGES BRUSHED METAL DIALS &amp; RAGAS ABLATION MATRIX
+          SEARCH ACCURACY &amp; BENCHMARKS // EVALUATION METRICS
         </div>
         <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">
-          Ragas Retrieval Evaluation Suite &amp; Physical Telemetry Gauges
+          Search Accuracy Evaluation Suite &amp; Performance Gauges
         </h1>
         <p class="text-xs sm:text-sm text-slate-400 mt-1">
-          Live evaluation across 13 enterprise benchmark queries spanning all 6 domains: Precision@5, Recall@10, MRR, NDCG, and Faithfulness.
+          Live evaluation across 13 test queries across all 6 topics: Precision, Search Recall, Rank Accuracy (MRR), and Relevance Order (NDCG).
         </p>
       </div>
 
       <div class="flex items-center gap-2.5">
+        <a href="/pipeline" class="px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-xs font-mono text-indigo-300 flex items-center gap-1.5 transition-all">
+          <span>Search Pipeline &rarr;</span>
+        </a>
         <button
           type="button"
           id="recompute-benchmarks-btn"
           class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-emerald-600 hover:from-sky-400 hover:to-emerald-500 text-white font-mono text-xs uppercase tracking-widest font-semibold shadow-[0_0_24px_rgba(56,189,248,0.3)] transition-all cursor-pointer flex items-center gap-2"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-          <span>Run Live 13-Query Benchmark Suite</span>
+          <span>Run Live 13-Query Benchmark Test</span>
         </button>
       </div>
     </div>
@@ -55,7 +58,7 @@
         <div class="hardware-rivet absolute bottom-3 left-3"></div>
         <div class="hardware-rivet absolute bottom-3 right-3"></div>
 
-        <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-3">GAUGE 01 // PRECISION@5</div>
+        <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-3">GAUGE 01 // TOP-5 PRECISION</div>
         <div class="gauge-bezel w-40 h-40 flex items-center justify-center">
           <div class="gauge-dial-face w-full h-full flex flex-col items-center justify-center relative">
             <svg viewBox="0 0 120 120" class="w-36 h-36 -rotate-90">
@@ -64,11 +67,11 @@
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
               <span id="dial-val-p5" class="text-2xl font-bold font-mono text-white tabular-nums">--%</span>
-              <span class="text-[9px] font-mono uppercase text-indigo-400 mt-0.5">HYBRID + RERANK</span>
+              <span class="text-[9px] font-mono uppercase text-indigo-400 mt-0.5">HYBRID + RE-RANK</span>
             </div>
           </div>
         </div>
-        <div id="dial-sub-p5" class="text-[11px] font-mono text-emerald-400 mt-3">+24.1% vs BM25 Only</div>
+        <div id="dial-sub-p5" class="text-[11px] font-mono text-emerald-400 mt-3">+24.1% vs Keyword Only</div>
       </div>
 
       <!-- Dial 2: Recall@10 -->
@@ -78,7 +81,7 @@
         <div class="hardware-rivet absolute bottom-3 left-3"></div>
         <div class="hardware-rivet absolute bottom-3 right-3"></div>
 
-        <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-3">GAUGE 02 // RECALL@10</div>
+        <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-3">GAUGE 02 // SEARCH RECALL</div>
         <div class="gauge-bezel w-40 h-40 flex items-center justify-center">
           <div class="gauge-dial-face w-full h-full flex flex-col items-center justify-center relative">
             <svg viewBox="0 0 120 120" class="w-36 h-36 -rotate-90">
@@ -87,11 +90,11 @@
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
               <span id="dial-val-r10" class="text-2xl font-bold font-mono text-white tabular-nums">--%</span>
-              <span class="text-[9px] font-mono uppercase text-cyan-400 mt-0.5">DUAL RECALL</span>
+              <span class="text-[9px] font-mono uppercase text-cyan-400 mt-0.5">KEYWORDS + MEANING</span>
             </div>
           </div>
         </div>
-        <div class="text-[11px] font-mono text-slate-400 mt-3">Top-30 RRF Pool ($k=60$)</div>
+        <div class="text-[11px] font-mono text-slate-400 mt-3">Top-30 Combined Candidates</div>
       </div>
 
       <!-- Dial 3: Mean Reciprocal Rank (MRR) -->
@@ -101,7 +104,7 @@
         <div class="hardware-rivet absolute bottom-3 left-3"></div>
         <div class="hardware-rivet absolute bottom-3 right-3"></div>
 
-        <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-3">GAUGE 03 // MRR SCORE</div>
+        <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-3">GAUGE 03 // RANK ACCURACY (MRR)</div>
         <div class="gauge-bezel w-40 h-40 flex items-center justify-center">
           <div class="gauge-dial-face w-full h-full flex flex-col items-center justify-center relative">
             <svg viewBox="0 0 120 120" class="w-36 h-36 -rotate-90">
@@ -110,11 +113,11 @@
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
               <span id="dial-val-mrr" class="text-2xl font-bold font-mono text-white tabular-nums">--%</span>
-              <span class="text-[9px] font-mono uppercase text-purple-400 mt-0.5">RANK #1 LOCK</span>
+              <span class="text-[9px] font-mono uppercase text-purple-400 mt-0.5">EXACT #1 MATCH</span>
             </div>
           </div>
         </div>
-        <div class="text-[11px] font-mono text-purple-300 mt-3">Cross-Encoder Top-1 Hit</div>
+        <div class="text-[11px] font-mono text-purple-300 mt-3">AI Re-ranking Top-1 Hit</div>
       </div>
 
       <!-- Dial 4: NDCG@5 -->
@@ -124,7 +127,7 @@
         <div class="hardware-rivet absolute bottom-3 left-3"></div>
         <div class="hardware-rivet absolute bottom-3 right-3"></div>
 
-        <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-3">GAUGE 04 // NDCG@5</div>
+        <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-3">GAUGE 04 // RELEVANCE ORDER (NDCG)</div>
         <div class="gauge-bezel w-40 h-40 flex items-center justify-center">
           <div class="gauge-dial-face w-full h-full flex flex-col items-center justify-center relative">
             <svg viewBox="0 0 120 120" class="w-36 h-36 -rotate-90">
@@ -133,11 +136,11 @@
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
               <span id="dial-val-ndcg" class="text-2xl font-bold font-mono text-white tabular-nums">--%</span>
-              <span class="text-[9px] font-mono uppercase text-amber-400 mt-0.5">GRADED ORDER</span>
+              <span class="text-[9px] font-mono uppercase text-amber-400 mt-0.5">IDEAL ORDER</span>
             </div>
           </div>
         </div>
-        <div class="text-[11px] font-mono text-amber-300 mt-3">Zero Uncited Claims</div>
+        <div class="text-[11px] font-mono text-amber-300 mt-3">High Grounding Quality</div>
       </div>
     </section>
 
@@ -146,14 +149,14 @@
       <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-white/10">
         <div>
           <h2 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
-            RETRIEVAL ARCHITECTURE ABLATION MATRIX // BM25 VS DENSE VS HYBRID RRF VS RERANKER
+            SEARCH METHOD COMPARISON // KEYWORDS VS MEANING VS COMBINED VS AI RE-RANKED
           </h2>
           <p class="text-[11px] text-slate-400 mt-0.5">
-            Computed dynamically by <code class="text-sky-300">GET /api/v1/benchmarks</code> against the 6-domain ground-truth corpus
+            Computed live by <code class="text-sky-300">GET /api/v1/benchmarks</code> across all 6 document topics
           </p>
         </div>
         <span id="eval-corpus-summary" class="px-2.5 py-1 rounded bg-emerald-500/15 border border-emerald-400/30 text-[10px] font-mono text-emerald-300">
-          13 BENCHMARK QUERIES // 6 DOMAINS
+          13 TEST QUESTIONS // 6 TOPICS
         </span>
       </div>
 
@@ -161,12 +164,12 @@
         <table class="w-full text-left border-collapse text-xs font-mono">
           <thead>
             <tr class="border-b border-white/10 text-[10px] uppercase tracking-wider text-slate-400 bg-white/[0.02]">
-              <th class="py-3 px-4">Retrieval Pipeline Architecture</th>
-              <th class="py-3 px-4 text-right">Precision@5</th>
-              <th class="py-3 px-4 text-right">Recall@10</th>
-              <th class="py-3 px-4 text-right">MRR</th>
-              <th class="py-3 px-4 text-right">NDCG@5</th>
-              <th class="py-3 px-4 text-right">Mean Latency</th>
+              <th class="py-3 px-4">Search Method</th>
+              <th class="py-3 px-4 text-right">Top-5 Precision</th>
+              <th class="py-3 px-4 text-right">Search Recall</th>
+              <th class="py-3 px-4 text-right">Rank Accuracy (MRR)</th>
+              <th class="py-3 px-4 text-right">Relevance Order (NDCG)</th>
+              <th class="py-3 px-4 text-right">Response Time</th>
             </tr>
           </thead>
           <tbody id="ablation-matrix-tbody" class="divide-y divide-white/[0.06] text-slate-200">
@@ -181,10 +184,10 @@
       <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-white/10">
         <div>
           <h2 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
-            PER-QUERY GROUND-TRUTH VERIFICATION SUITE across ALL 6 ENTERPRISE DOMAINS
+            QUERY-BY-QUERY ACCURACY VERIFICATION ACROSS ALL 6 TOPICS
           </h2>
           <p class="text-[11px] text-slate-400 mt-0.5">
-            Click "Verify Live" on any query or click "Run Live 13-Query Benchmark Suite" above to verify retrieval accuracy
+            Click "Test Search" on any question to test search accuracy and response time in real time
           </p>
         </div>
       </div>
@@ -247,10 +250,10 @@
         const data = await res.json();
         const pm = data.performance_matrix || {};
         const order = [
-          { key: 'bm25_only', label: 'BM25 Keyword Only (Okapi TF-IDF)' },
-          { key: 'dense_only', label: 'Dense Vector Only (768-D Cosine)' },
-          { key: 'hybrid_rrf', label: 'Hybrid RRF (Dense + BM25, k=60)' },
-          { key: 'hybrid_reranked', label: 'Smart Hybrid + Cross-Encoder Reranker' },
+          { key: 'bm25_only', label: 'Exact Keyword Only (BM25)' },
+          { key: 'dense_only', label: 'Semantic Meaning Only (AI Vector)' },
+          { key: 'hybrid_rrf', label: 'Combined Search (Keywords + Meaning)' },
+          { key: 'hybrid_reranked', label: 'Smart Hybrid + AI Re-ranking' },
         ];
 
         const modes = order
@@ -275,7 +278,7 @@
               <td class="py-3 px-4 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full ${isBest ? 'bg-emerald-400' : 'bg-slate-500'}"></span>
                 <span>${SynapseNav.escapeHtml(m.mode)}</span>
-                ${isBest ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[9px] uppercase">PRODUCTION</span>' : ''}
+                ${isBest ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[9px] uppercase">RECOMMENDED</span>' : ''}
               </td>
               <td class="py-3 px-4 text-right ${isBest ? 'text-sky-300 font-bold' : ''}">${((m.precision_at_5 || 0) * 100).toFixed(1)}%</td>
               <td class="py-3 px-4 text-right ${isBest ? 'text-emerald-300 font-bold' : ''}">${((m.recall_at_10 || 0) * 100).toFixed(1)}%</td>
@@ -318,10 +321,10 @@
             <span class="text-[10px] font-mono text-slate-400 truncate">Target: ${c.expectedDocId}</span>
             <div class="flex items-center gap-2 shrink-0">
               <button type="button" onclick="verifySingleCase('${c.id}')" class="px-2.5 py-1 rounded bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-[10px] font-mono text-sky-300 cursor-pointer">
-                Verify Live
+                Test Search
               </button>
               <a href="/search?domain=${encodeURIComponent(c.domainId)}&q=${encodeURIComponent(c.query)}" class="px-2.5 py-1 rounded bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-[10px] font-mono text-sky-300">
-                Open in Workbench -&gt;
+                Search &amp; Answer -&gt;
               </a>
             </div>
           </div>
@@ -333,7 +336,7 @@
       const item = BENCHMARK_CASES.find((x) => x.id === caseId);
       if (!item) return;
       const statusEl = document.getElementById(`bench-status-${item.id}`);
-      statusEl.textContent = 'RUNNING...';
+      statusEl.textContent = 'TESTING...';
       statusEl.className = 'text-[10px] font-mono text-sky-300';
 
       try {
@@ -352,7 +355,7 @@
         const lat = Number(data.timings_ms?.total || data.telemetry?.total_latency_ms || 1.5).toFixed(1);
 
         if (matched) {
-          statusEl.textContent = `PASS // RANK #1 (${lat}ms)`;
+          statusEl.textContent = `PASS // TOP MATCH (${lat}ms)`;
           statusEl.className = 'text-[10px] font-mono text-emerald-400 font-bold';
         } else {
           statusEl.textContent = `CHECKED (${lat}ms)`;
@@ -367,14 +370,14 @@
     async function runLiveSuiteVerification() {
       const btn = document.getElementById('recompute-benchmarks-btn');
       btn.disabled = true;
-      btn.innerHTML = '<span>Executing All Benchmark Queries...</span>';
+      btn.innerHTML = '<span>Testing All 13 Questions...</span>';
       await fetchAndRenderBenchmarks();
       for (const c of BENCHMARK_CASES) {
         await verifySingleCase(c.id);
       }
       btn.disabled = false;
-      btn.innerHTML = '<span>Re-Run Live 13-Query Benchmark Suite</span>';
-      SynapseNav.showToast('Benchmark Suite Complete', 'All 6 enterprise domain benchmarks verified live against Hybrid RAG.', 'success');
+      btn.innerHTML = '<span>Re-Run 13-Query Benchmark Test</span>';
+      SynapseNav.showToast('Benchmark Complete', 'All 13 test questions verified live across all 6 topics.', 'success');
     }
   </script>
 </body>

@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -67,6 +67,8 @@ class AppState:
         self.gateway = LLMGateway(default_api_key=settings.gemini_api_key)
         self.synthesizer = GroundedSynthesizer(self.gateway)
         self.documents: Dict[str, DocumentMetadata] = {}
+        self.active_provider: Optional[str] = "gemini" if settings.gemini_api_key else None
+        self.active_model: Optional[str] = "gemini-2.0-flash" if settings.gemini_api_key else None
 
     def bootstrap_default_documents(self):
         """Loads and indexes the pre-packaged enterprise benchmark documents."""

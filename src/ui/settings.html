@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Synapse // 07 Gateway — ThreeUI Bezier Particle Stream, BYOK AI Vault & Semantic Cache</title>
+  <title>Synapse // Gateway &amp; BYOK Vault — Model Credentials &amp; Cache Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -18,7 +18,7 @@
   <!-- ThreeUI Gateway-Flow Interactive Bezier Particle Stream & Click Shockwave Canvas -->
   <canvas id="flow-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-75"></canvas>
 
-  <!-- Shared 7-Page Navigation Dock -->
+  <!-- Shared Navigation Dock -->
   <div id="synapse-top-dock" class="relative z-50"></div>
 
   <main class="relative z-10 max-w-[1600px] mx-auto px-4 lg:px-6 pt-6 pb-20">
@@ -27,17 +27,17 @@
     <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-7 border-b border-white/10">
       <div>
         <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-indigo-500/15 border border-indigo-400/30 text-[10px] font-mono uppercase tracking-widest text-indigo-300 mb-2">
-          PAGE 07 // THREEUI GATEWAY-FLOW BEZIER STREAM (CLICK ANYWHERE FOR RADIAL SHOCKWAVE)
+          AI SETTINGS // CLOUD MODEL KEYS &amp; SMART CACHE
         </div>
         <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">
-          Nexus AI Model Gateway (BYOK Vault) &amp; Semantic Cache Control Console
+          AI Model Settings &amp; Smart Cache Management
         </h1>
         <p class="text-xs sm:text-sm text-slate-400 mt-1">
-          Configure Gemini, OpenAI, Anthropic, or Groq synthesis credentials, tune retrieval hyperparameters, and manage the Cosine $\ge 0.95$ Semantic Cache.
+          Connect your API key for Google Gemini, OpenAI, Anthropic Claude, or Groq, adjust search parameters, and manage the smart instant cache.
         </p>
       </div>
       <a href="/search" class="px-4 py-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/40 text-xs font-mono text-sky-300 font-semibold">
-        Return to Search Workbench (Page 02) -&gt;
+        Return to Search Workbench -&gt;
       </a>
     </div>
 
@@ -51,14 +51,14 @@
         <div class="flex items-center justify-between pb-3 mb-5 border-b border-white/10">
           <div>
             <h2 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
-              MULTI-PROVIDER LLM GATEWAY &amp; BYOK API VAULT
+              AI MODEL PROVIDER &amp; API KEYS
             </h2>
             <p class="text-[11px] text-slate-400 mt-0.5">
-              Zero-lockout architecture: works out-of-the-box with deterministic grounded synthesis, or connect your live API key
+              Works out-of-the-box with the free built-in engine, or connect your cloud API key for live AI answers.
             </p>
           </div>
-          <span id="provider-detected-badge" class="px-2.5 py-1 rounded bg-emerald-500/15 border border-emerald-400/30 text-[10px] font-mono text-emerald-300 uppercase">
-            GEMINI ACTIVE
+          <span id="provider-detected-badge" class="px-2.5 py-1 rounded bg-amber-500/15 border border-amber-400/30 text-[10px] font-mono text-amber-300 uppercase">
+            CHECKING STATUS...
           </span>
         </div>
 
@@ -76,12 +76,13 @@
                 <option value="openai">OpenAI</option>
                 <option value="anthropic">Anthropic Claude</option>
                 <option value="groq">Groq LPU Inference</option>
+                <option value="openrouter">OpenRouter Gateway</option>
               </select>
             </div>
 
             <div>
               <label for="vault-model" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1.5">
-                FOUNDATION MODEL ID
+                AI MODEL
               </label>
               <select
                 id="vault-model"
@@ -95,9 +96,9 @@
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <label for="vault-api-key" class="text-[10px] font-mono uppercase tracking-wider text-slate-400">
-                API KEY (AUTO-DETECTS <code class="text-sky-300">AIza...</code> / <code class="text-sky-300">sk-ant-...</code> / <code class="text-sky-300">gsk_...</code> / <code class="text-sky-300">sk-...</code>)
+                API KEY (AUTO-DETECTS ANY CLOUD PROVIDER)
               </label>
-              <span id="key-detect-hint" class="text-[10px] font-mono text-sky-300">Optional (Deterministic Grounded Fallback Enabled)</span>
+              <span id="key-detect-hint" class="text-[10px] font-mono text-sky-300">Optional (Free Built-In Engine Enabled)</span>
             </div>
             <div class="flex gap-2">
               <input
@@ -111,7 +112,7 @@
                 id="test-api-key-btn"
                 class="px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-xs font-mono text-sky-300 shrink-0 cursor-pointer"
               >
-                Verify Key
+                Verify &amp; Connect Key
               </button>
             </div>
           </div>
@@ -120,7 +121,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <div>
               <label for="vault-topk" class="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1.5">
-                DEFAULT TOP-K GROUNDING CHUNKS: <span id="topk-val-label" class="text-sky-300 font-bold">5</span>
+                SOURCES PER ANSWER (TOP RESULTS): <span id="topk-val-label" class="text-sky-300 font-bold">5</span>
               </label>
               <input
                 id="vault-topk"
@@ -132,12 +133,20 @@
               />
             </div>
 
-            <div class="flex items-end">
+            <div class="flex items-end gap-2">
               <button
                 type="submit"
-                class="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-mono text-xs uppercase tracking-widest font-semibold shadow-[0_0_24px_rgba(56,189,248,0.3)] transition-all cursor-pointer"
+                class="flex-1 py-3 px-5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-mono text-xs uppercase tracking-widest font-semibold shadow-[0_0_24px_rgba(56,189,248,0.3)] transition-all cursor-pointer"
               >
-                Save Gateway Configuration
+                Save AI Settings
+              </button>
+              <button
+                type="button"
+                id="disconnect-api-key-btn"
+                class="py-3 px-4 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/40 text-rose-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer"
+                title="Disconnect API key and use offline mode"
+              >
+                Disconnect Key
               </button>
             </div>
           </div>
@@ -154,14 +163,14 @@
         <div class="flex items-center justify-between pb-3 mb-5 border-b border-white/10">
           <div>
             <h2 class="text-xs font-mono uppercase tracking-widest text-white font-semibold">
-              SEMANTIC CACHE CONTROL CONSOLE
+              SMART CACHE CONTROLS
             </h2>
             <p class="text-[11px] text-slate-400 mt-0.5">
-              Cosine Similarity $\ge 0.95$ Vector Cache + SHA-256 Exact Hash
+              Instant similarity cache (&lt;25ms response time)
             </p>
           </div>
           <span class="px-2 py-0.5 rounded bg-purple-500/15 border border-purple-400/30 text-[10px] font-mono text-purple-300">
-            SUB-25MS SLA
+            SUB-25MS SPEED
           </span>
         </div>
 
@@ -175,7 +184,7 @@
             <div id="cache-stat-entries" class="text-2xl font-bold font-mono text-white mt-1 tabular-nums">0</div>
           </div>
           <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10">
-            <div class="text-[9px] font-mono uppercase text-slate-400">EXACT / SEMANTIC HITS</div>
+            <div class="text-[9px] font-mono uppercase text-slate-400">EXACT / SIMILAR HITS</div>
             <div id="cache-stat-hits" class="text-lg font-bold font-mono text-sky-300 mt-1 tabular-nums">0 / 0</div>
           </div>
           <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10">
@@ -190,14 +199,14 @@
             id="warm-cache-btn"
             class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer"
           >
-            Warm Cache + Test Paraphrase Hit
+            Pre-load Cache with Sample Questions
           </button>
           <button
             type="button"
             id="purge-cache-btn"
             class="py-2.5 px-4 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/40 text-rose-300 font-mono text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer"
           >
-            Purge Cache
+            Clear Cache
           </button>
         </div>
       </div>
@@ -208,13 +217,26 @@
   <script src="/static/js/nav.js"></script>
   <script>
     const PROVIDER_MODELS = {
-      gemini: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash'],
-      openai: ['gpt-4o', 'gpt-4o-mini', 'o3-mini'],
-      anthropic: ['claude-3-7-sonnet-latest', 'claude-3-5-haiku-latest'],
+      gemini: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'],
+      openai: ['gpt-4o-mini', 'gpt-4o', 'o3-mini'],
+      anthropic: ['claude-sonnet-4-5', 'claude-3-7-sonnet-latest', 'claude-3-5-haiku-latest'],
       groq: ['llama-3.3-70b-versatile', 'mixtral-8x7b-32768'],
+      openrouter: ['google/gemini-2.0-flash-001', 'anthropic/claude-3.5-sonnet', 'openai/gpt-4o-mini'],
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
+    function updateProviderStatusBadge(hasKey, providerName) {
+      const badge = document.getElementById('provider-detected-badge');
+      if (!badge) return;
+      if (hasKey && providerName && providerName !== 'offline') {
+        badge.className = 'px-2.5 py-1 rounded bg-emerald-500/15 border border-emerald-400/30 text-[10px] font-mono text-emerald-300 uppercase';
+        badge.textContent = `${String(providerName).toUpperCase()} ACTIVE`;
+      } else {
+        badge.className = 'px-2.5 py-1 rounded bg-amber-500/15 border border-amber-400/30 text-[10px] font-mono text-amber-300 uppercase';
+        badge.textContent = 'NO AI KEY (OFFLINE MODE)';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
       SynapseNav.mountDock('settings');
       initGatewayFlowBezierCanvas();
 
@@ -224,11 +246,22 @@
       const keyInput = document.getElementById('vault-api-key');
       const topkInput = document.getElementById('vault-topk');
 
-      provSelect.value = cfg.provider || 'gemini';
+      provSelect.value = PROVIDER_MODELS[cfg.provider] ? cfg.provider : 'gemini';
       populateModelsForProvider(provSelect.value, cfg.model);
       keyInput.value = cfg.apiKey || '';
       topkInput.value = String(cfg.topK || 5);
       document.getElementById('topk-val-label').textContent = String(cfg.topK || 5);
+
+      const liveStatus = await SynapseNav.checkBackendKeyStatus();
+      if (liveStatus && liveStatus.has_key) {
+        updateProviderStatusBadge(true, liveStatus.provider);
+        if (PROVIDER_MODELS[liveStatus.provider]) {
+          provSelect.value = liveStatus.provider;
+          populateModelsForProvider(liveStatus.provider, liveStatus.model || cfg.model);
+        }
+      } else {
+        updateProviderStatusBadge(Boolean(cfg.apiKey && cfg.apiKey.trim()), cfg.provider);
+      }
 
       provSelect.addEventListener('change', () => {
         populateModelsForProvider(provSelect.value);
@@ -238,15 +271,16 @@
         document.getElementById('topk-val-label').textContent = topkInput.value;
       });
 
-      // Auto-detect API key prefix & check /api/v1/auth/detect
+      // Auto-detect API key prefix
       keyInput.addEventListener('input', () => {
         const raw = keyInput.value.trim();
         if (!raw) {
-          document.getElementById('key-detect-hint').textContent = 'Optional (Deterministic Grounded Fallback Enabled)';
+          document.getElementById('key-detect-hint').textContent = 'Optional (Free Built-In Engine Enabled)';
           return;
         }
         let detected = null;
         if (raw.startsWith('AIza')) detected = 'gemini';
+        else if (raw.startsWith('sk-or-')) detected = 'openrouter';
         else if (raw.startsWith('sk-ant-')) detected = 'anthropic';
         else if (raw.startsWith('gsk_')) detected = 'groq';
         else if (raw.startsWith('sk-')) detected = 'openai';
@@ -271,6 +305,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               provider: provSelect.value,
+              model: modelSelect.value,
               api_key: keyInput.value.trim(),
             }),
           });
@@ -278,9 +313,30 @@
           if (data.success || data.valid) {
             banner.className = 'p-3.5 rounded-xl border border-emerald-400/40 bg-emerald-500/15 text-xs font-mono text-emerald-200';
             banner.textContent = `VALIDATED // ${(data.provider || provSelect.value).toUpperCase()} — ${data.message}`;
+
+            if (data.model) {
+              if (!Array.from(modelSelect.options).some(o => o.value === data.model)) {
+                const opt = document.createElement('option');
+                opt.value = data.model;
+                opt.textContent = data.model;
+                modelSelect.appendChild(opt);
+              }
+              modelSelect.value = data.model;
+            }
+
+            // Persist in backend session + local storage
+            await SynapseNav.syncBackendKey(keyInput.value.trim(), data.provider || provSelect.value, modelSelect.value);
+            SynapseNav.setByokSettings({
+              provider: data.provider || provSelect.value,
+              model: modelSelect.value,
+              apiKey: keyInput.value.trim(),
+              topK: Number(topkInput.value),
+            });
+            updateProviderStatusBadge(true, data.provider || provSelect.value);
+            SynapseNav.mountDock('settings');
           } else {
             banner.className = 'p-3.5 rounded-xl border border-amber-400/40 bg-amber-500/15 text-xs font-mono text-amber-200';
-            banner.textContent = `NOTICE // ${data.message || 'Key validation failed; deterministic grounded fallback remains active.'}`;
+            banner.textContent = `NOTICE // ${data.message || 'Key validation failed; offline mode remains active.'}`;
           }
         } catch (err) {
           banner.textContent = `Error: ${err.message}`;
@@ -288,17 +344,36 @@
       });
 
       // Save BYOK form
-      document.getElementById('byok-vault-form').addEventListener('submit', (e) => {
+      document.getElementById('byok-vault-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const rawKey = keyInput.value.trim();
         const updated = SynapseNav.setByokSettings({
           provider: provSelect.value,
           model: modelSelect.value,
-          apiKey: keyInput.value.trim(),
+          apiKey: rawKey,
           topK: Number(topkInput.value),
         });
-        document.getElementById('provider-detected-badge').textContent = `${updated.provider.toUpperCase()} ACTIVE`;
+        if (rawKey) {
+          await SynapseNav.syncBackendKey(rawKey, updated.provider, updated.model);
+          updateProviderStatusBadge(true, updated.provider);
+          SynapseNav.showToast('AI Key Saved & Connected', `Active Model: ${updated.provider} // ${updated.model} (Top-K=${updated.topK})`, 'success');
+        } else {
+          await SynapseNav.disconnectBackendKey();
+          updateProviderStatusBadge(false, null);
+          SynapseNav.showToast('Offline Mode Saved', `Saved Top-K=${updated.topK} with offline document extraction.`, 'info');
+        }
         SynapseNav.mountDock('settings');
-        SynapseNav.showToast('Gateway Configuration Saved', `Active Model: ${updated.provider} // ${updated.model} (Top-K=${updated.topK})`, 'success');
+      });
+
+      // Disconnect Key button
+      document.getElementById('disconnect-api-key-btn').addEventListener('click', async () => {
+        keyInput.value = '';
+        await SynapseNav.disconnectBackendKey();
+        updateProviderStatusBadge(false, null);
+        const banner = document.getElementById('key-test-result-banner');
+        if (banner) banner.classList.add('hidden');
+        SynapseNav.mountDock('settings');
+        SynapseNav.showToast('Key Disconnected', 'Switched back to free offline document extraction.', 'info');
       });
 
       // Cache controls
@@ -312,19 +387,30 @@
 
       document.getElementById('warm-cache-btn').addEventListener('click', async () => {
         const q1 = 'What is the memory offset and vulnerable function in CVE-2024-8192?';
+        const cur = SynapseNav.getByokSettings();
+        const hasKey = Boolean(cur.apiKey && cur.apiKey.trim());
+        const payload = {
+          query: q1,
+          mode: 'hybrid',
+          top_k: Number(cur.topK || 5),
+          use_cache: true,
+          provider: hasKey ? (cur.provider || 'auto') : 'offline',
+          model: hasKey ? (cur.model || null) : null,
+          custom_api_key: hasKey ? cur.apiKey.trim() : null,
+        };
         await fetch('/api/v1/search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: q1, mode: 'hybrid', top_k: 5, use_cache: true }),
+          body: JSON.stringify(payload),
         });
         await fetch('/api/v1/search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: q1, mode: 'hybrid', top_k: 5, use_cache: true }),
+          body: JSON.stringify(payload),
         });
         await loadCacheStats();
         SynapseNav.refreshTelemetryBadges();
-        SynapseNav.showToast('Cache Warmed & Hit Verified', 'Executed CVE-2024-8192 query + sub-25ms cache hit.', 'success');
+        SynapseNav.showToast('Cache Warmed & Hit Verified', 'Executed sample query + verified instant cache hit.', 'success');
       });
     });
 

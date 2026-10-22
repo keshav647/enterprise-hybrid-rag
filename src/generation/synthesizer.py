@@ -17,7 +17,7 @@ class GroundedSynthesizer:
         query: str,
         retrieved_chunks: List[SearchResultItem],
         provider: str = "auto",
-        model: str = "claude-3-5-sonnet-20241022",
+        model: Optional[str] = None,
         custom_api_key: Optional[str] = None,
         retrieval_mode: str = "hybrid",
     ) -> GroundedResponse:
@@ -95,4 +95,5 @@ class GroundedSynthesizer:
             estimated_cost_saved_usd=0.0,
             provider=raw_output.get("provider", provider),
             model=raw_output.get("model", model),
+            fallback_reason=raw_output.get("fallback_reason"),
         )

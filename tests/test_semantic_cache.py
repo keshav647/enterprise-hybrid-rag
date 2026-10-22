@@ -51,3 +51,12 @@ def test_semantic_cache_hit_and_miss():
     assert stats.cache_hits == 1
     assert stats.cache_misses == 1
     assert stats.estimated_cost_saved_usd > 0.0
+
+
+def test_cache_is_partitioned_by_engine():
+    cache = SemanticCache()
+    resp = GroundedResponse(query="q", answer="a", latency_ms=1.0)
+    cache.store("what is the refund window", resp, engine="offline")
+    assert cache.check("what is the refund window", engine="offline") is not None
+    assert cache.check("what is the refund window", engine="openai:gpt-4o-mini") is None
+

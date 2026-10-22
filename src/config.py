@@ -7,6 +7,14 @@ from pydantic import BaseModel, Field
 
 # Base directories
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load API keys / settings from <project>/.env if python-dotenv is installed.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(BASE_DIR / ".env")
+except ImportError:  # pragma: no cover
+    pass
 DATA_DIR = BASE_DIR / "data"
 DOCUMENTS_DIR = DATA_DIR / "documents"
 STATIC_DIR = BASE_DIR / "src" / "ui" / "static"
@@ -37,9 +45,10 @@ class Settings(BaseModel):
     openai_api_key: Optional[str] = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
     anthropic_api_key: Optional[str] = Field(default_factory=lambda: os.getenv("ANTHROPIC_API_KEY"))
     groq_api_key: Optional[str] = Field(default_factory=lambda: os.getenv("GROQ_API_KEY"))
+    openrouter_api_key: Optional[str] = Field(default_factory=lambda: os.getenv("OPENROUTER_API_KEY"))
 
     default_provider: str = Field(default_factory=lambda: os.getenv("DEFAULT_PROVIDER", "gemini"))
-    default_llm_model: str = Field(default_factory=lambda: os.getenv("DEFAULT_LLM_MODEL", "gemini-2.5-flash"))
+    default_llm_model: str = Field(default_factory=lambda: os.getenv("DEFAULT_LLM_MODEL", "gemini-2.0-flash"))
     default_embedding_model: str = Field(
         default_factory=lambda: os.getenv("DEFAULT_EMBEDDING_MODEL", "text-embedding-004")
     )

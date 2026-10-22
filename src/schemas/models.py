@@ -81,6 +81,7 @@ class GroundedResponse(BaseModel):
     provider: str = Field("gemini", description="LLM provider name")
     model: str = Field("gemini-2.5-flash", description="Model identifier")
     timings_ms: Dict[str, float] = Field(default_factory=dict, description="Stage-by-stage pipeline latency breakdown")
+    fallback_reason: Optional[str] = Field(None, description="Set when a live LLM call failed and the offline extractive engine answered instead")
 
 
 class SearchRequest(BaseModel):

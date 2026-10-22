@@ -51,6 +51,17 @@ class InMemoryVectorStore:
     def total_count(self) -> int:
         return len(self.chunks)
 
+    def delete_by_document_id(self, document_id: str) -> int:
+        """Removes all chunks and vectors associated with a document_id."""
+        to_delete = [
+            cid for cid, chunk in self.chunks.items()
+            if chunk.document_id == document_id
+        ]
+        for cid in to_delete:
+            self.chunks.pop(cid, None)
+            self.vectors.pop(cid, None)
+        return len(to_delete)
+
     def save_to_disk(self, file_path: Path) -> None:
         """Serializes chunks and embeddings to disk."""
         data = [chunk.model_dump() for chunk in self.chunks.values()]
