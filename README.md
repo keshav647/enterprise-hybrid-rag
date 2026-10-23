@@ -9,7 +9,7 @@
   [![pgvector](https://img.shields.io/badge/pgvector-HNSW%20768D-336791.svg)](https://github.com/pgvector/pgvector)
   [![Redis](https://img.shields.io/badge/Redis-Semantic%20Cache%20(%3C25ms)-DC382D.svg)](https://redis.io/)
   [![Ragas Evaluated](https://img.shields.io/badge/Ragas-13--Query%20Recall%20100%25-green.svg)](https://github.com/explodinggradients/ragas)
-  [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
+  [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
   [![Loom Walkthrough](https://img.shields.io/badge/Loom_Walkthrough-1080p_HD-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/0fb293b4fb314d2aa3f7c1bc6f9215e3)
   [![Author](https://img.shields.io/badge/Author-Keshav_Budhiraja-0EA5E9?style=for-the-badge&logo=github)](https://github.com/keshav647)
 </div>
@@ -212,3 +212,5 @@ Spins up:
 ## License
 
 This project is licensed under the [Apache 2.0 License](LICENSE).
+
+Copyright (c) 2026 Keshav Budhiraja.
