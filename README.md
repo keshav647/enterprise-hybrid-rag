@@ -10,9 +10,20 @@
   [![Redis](https://img.shields.io/badge/Redis-Semantic%20Cache%20(%3C25ms)-DC382D.svg)](https://redis.io/)
   [![Ragas Evaluated](https://img.shields.io/badge/Ragas-13--Query%20Recall%20100%25-green.svg)](https://github.com/explodinggradients/ragas)
   [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
+  [![Loom Walkthrough](https://img.shields.io/badge/Loom_Walkthrough-1080p_HD-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/0fb293b4fb314d2aa3f7c1bc6f9215e3)
+  [![Author](https://img.shields.io/badge/Author-Keshav_Budhiraja-0EA5E9?style=for-the-badge&logo=github)](https://github.com/keshav647)
 </div>
 
 > A production-grade Retrieval-Augmented Generation (RAG) platform engineered for high-stakes enterprise documents across **6 domains (42 contextual chunks)**: Linux Kernel Security Advisories (`CVE-2024-8192`), SEC Q3 10-Q Financial Statements, Distributed Raft Consensus RFCs, Legal GDPR & MSA SLAs, FDA Phase III Oncology Clinical Trial Protocols (`NCT-09482110`), and SRE SEV-1 Incident Post-Mortems (`INC-2024-1004`). Replaces naive vector search with **768-D Dense + BM25 Okapi Hybrid Retrieval**, **Reciprocal Rank Fusion (RRF, $k=60$)**, **Cross-Encoder Re-Ranking**, **Redis Semantic Caching ($\text{Cosine} \ge 0.95$, $<25\text{ms}$)**, **Live Custom Document Ingestion**, and **Exact Citation Grounding (`[1]`, `[2]`)** across a **7-Page Three.js WebGL & Double-Bezel UI Architecture**.
+
+---
+
+## 🎬 Architecture Tour & Live Video Walkthrough
+
+> **Watch the full 1080p architecture tour and live 7-page system demonstration on Loom:**  
+> [![Watch Synapse Architecture & Live Walkthrough on Loom](https://img.shields.io/badge/Watch_Full_Walkthrough-Loom_HD-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/0fb293b4fb314d2aa3f7c1bc6f9215e3)  
+> *Direct Link:* [https://www.loom.com/share/0fb293b4fb314d2aa3f7c1bc6f9215e3](https://www.loom.com/share/0fb293b4fb314d2aa3f7c1bc6f9215e3)  
+> *For the step-by-step evaluation guide and reviewer checklist, see [Technical Walkthrough & Evaluation Guide](docs/WALKTHROUGH.md).*
 
 ---
 
@@ -188,5 +199,16 @@ Spins up:
 
 ---
 
+## Author & Maintainer
+
+**Keshav Budhiraja**
+* Systems & AI Engineer
+* **GitHub:** [@keshav647](https://github.com/keshav647)
+* **Portfolio:** [keshavbudhiraja.com](https://keshavbudhiraja.com)
+* **Email:** [keshavbudhiraja4321@gmail.com](mailto:keshavbudhiraja4321@gmail.com)
+
+---
+
 ## License
-Apache-2.0. Built by Keshav Budhiraja.
+
+Apache-2.0 © [Keshav Budhiraja](https://github.com/keshav647). All rights reserved.
