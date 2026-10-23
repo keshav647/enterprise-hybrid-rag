@@ -211,4 +211,4 @@ Spins up:
 
 ## License
 
-Apache-2.0 © [Keshav Budhiraja](https://github.com/keshav647). All rights reserved.
+This project is licensed under the [Apache 2.0 License](LICENSE).
